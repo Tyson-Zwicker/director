@@ -3,7 +3,7 @@ import Boundry from './boundry.js';
 export default class Quadtree {
   constructor(bounds, capacity, minimumSize = 1) {
     if (!bounds.isBoundry()) throw (`Quadtree boundry was not a boundry: ${bounds}`);
-    this.bounds = bounds; // { x, y, width, height }
+    this.bounds = bounds; // { x1, y1, x2, y2 }
     this.capacity = capacity; // Maximum objects before subdivision
     this.minimumSize = minimumSize; // Minimum size (the side of the square, defined in world coordinates) before subdivision
     this.actors = [];
