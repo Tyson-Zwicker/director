@@ -1,3 +1,6 @@
+//The whole point of this class is eleminating garbage collection when using vectors,
+//which is all the time.  The "persistent" object doesn't get thrown away, and never needs to be re-created.
+//It makes the math look a little wierd, but it elimantes a lot of stuttering.
 export default class Point {
   x = 0;
   y = 0;
@@ -24,6 +27,7 @@ export default class Point {
   static equal (p1,p2){
     return p1.x ===p2.x && p1.y === p2.y;
   }
+  ///Anything with an X and a Y is getting light copied to a new object.
   static from(obj) {
     if (this.isPointy(obj)) {
       return new Point(obj.x, obj.y);
