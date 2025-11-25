@@ -31,7 +31,7 @@ export default class Actor {
       if (this.polygon?.radius === undefined || this.polygon.radius === null|| isNaN(this.polygon.radius)) {
         throw new Error(`Actor ${this.name} has no radius/mass defined.`);
       }else{
-        return Math.PI  * this.polygon.radius**3;
+        return Math.PI  * Math.pow (this.polygon.radius,3);
       }
     }
     return this._mass;
