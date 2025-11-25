@@ -1,8 +1,9 @@
 import View from './view.js';
 import Quadtree from './quadtree.js';
 import Collisions from './collisions.js';
-import Boundry from './boundry.js';
-import Field from './fields.js';
+import Boundry from './boundry.js';//<--TODO: move to quadtree. We could just pass the numbers.
+import ActorField from './actorfields.js';
+import Actor from './actor.js';
 export default class Director {
   static initialize() {
     Director.MILLISECONDS = 1000;
@@ -32,13 +33,14 @@ export default class Director {
   }
   static removeActor(actor) {
     Director.actors.delete(actor.name);
-    if (Director.actorFields.has(actor.name)) Director.actorFields.delete(actor.actorName);
+    if (Director.actorFields.has(actor.name)) Director.actorFields.delete(actor.name);
   }
   static addFieldToActor(actor, strength) {
-    Director.actorFields.set(actor.name, strength);
+    if (!(actor instanceof Actor)) throw error (`Director.addFieldToActor: actor is not an actor. [${actor}]`);
+    Director.actorFields.set(actor.name, new ActorField (actor, strength));
   }
   static removeFieldFromActor(actor) {
-    if (Director.actorFields.has(actor.name)) Director.actorFields.delete(actor.actorName);
+    if (Director.actorFields.has(actor.name)) Director.actorFields.delete(actor.name);
   }
   static kinematics(delta) {
     for (let actor of Director.actors.values()) {
@@ -76,36 +78,28 @@ export default class Director {
     }
     Director.view.handleCameraDrag(actorMouseInteraction);
   }
-  static applyActorFields(delta) {
+  static applyActorField(delta) {
     //TODO: I need a filter on this so it isn't iterating through EVERYTHING.
-    //Basically how far away to do have to get where the force you exert hits a minimal threshold 
-    //so it becomes irrelevent then then use the quadtree...
-    for (let actorName of Director.actors.keys()){
-      let field = Director.actorFields.get (actorName);
-      let actor = Director.actors.get (actorName);
-      for (otherActor in Director.actors.values()){
-        let distance  = Point.distance (actor.position, otherActor.position);
-        // a = F/m, F = strength/d^2
-        // This is one sided. The other object may or may not also excert a force on this actor
-        //THEY DO both get pulled though: Newton's 3rd law of motion.
-      let force = field.strength/distance**2;
-        let accleration = force/otherActor.mass;
-        //You are here: you need to do this with components, without using trig if at all possible...
-        
+    //Basically how far away do you have to get where the force you exert hits a minimal threshold 
+    //so it becomes irrelevent.  Then use the quadtree to get just whats inside that radius.
+    for (let actorField of Director.actorFields.values()) {      
+      for (let otherActor of Director.actors.values()) {
+        actorField.enactForce (otherActor);
       }
     }
   }
   static loop(currentTime) {
     const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
+    console.log(`${delta}`);
     Director.lastFrameTime = currentTime;
-  
+
     Director.kinematics(delta); //This redraws the entire quadtree.
     Director.draw(delta);
     Director.collisions(delta);
     if (Director.creatorFn) {
       Director.creatorFn(delta);
     }
-    //Director.applyActorFields(delta);  <-- not ready.
+    Director.applyActorField(delta);
     Director.checkUserActorInteraction();
     Director.quadtree.clear();      //QuadTree is cleared (will be recreated begining next loop)
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
