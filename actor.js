@@ -3,7 +3,7 @@ import Point from './point.js';
 export default class Actor {
   position = new Point(0, 0); // world coordinates, defined in pixels.
   moves = true;
-  velocity = new Point(0, 0); // Point used as a vector. They are the same thing.
+  velocity = new Point(0, 0); // Point used as a component vector because they are the same thing.
   rotation = 0; // Defined in degrees
   spin = 0; // Defined in degrees per second.
   collides = true;
@@ -31,7 +31,7 @@ export default class Actor {
       if (this.polygon?.radius === undefined || this.polygon.radius === null|| isNaN(this.polygon.radius)) {
         throw new Error(`Actor ${this.name} has no radius/mass defined.`);
       }else{
-        return Math.PI  * this.polygon.radius**2; //Area of a circle..
+        return Math.PI  * this.polygon.radius**3;
       }
     }
     return this._mass;

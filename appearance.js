@@ -14,6 +14,5 @@ export default class Appearance {
     } else {
       return this[kind];
     }
-
   }
 }

@@ -41,7 +41,6 @@ export default class Collisions {
     return collisions;
   }
 
-
   static handleCollisionPhysics(collision) {
     let m1 = collision.actor.mass();
     let m2 = collision.otherActor.mass();
@@ -72,10 +71,10 @@ export default class Collisions {
     let v2t = Point.dot(collision.otherActor.velocity, tangentAxis);
     let v1nF = (v1n * (m1 - m2) + 2 * m2 * v2n) / (totalMass);           //1-d tranfer of momentum but only on normal axis..
     let v2nF = (v2n * (m2 - m1) + 2 * m1 * v1n) / (totalMass);
-    let v1nFV = Point.scale(Point.from(normalAxis), v1nF);
-    let v2nFV = Point.scale(Point.from(normalAxis), v2nF);
-    let v1tFV = Point.scale(Point.from(tangentAxis), v1t);
-    let v2tFV = Point.scale(Point.from(tangentAxis), v2t);
+    let v1nFV = Point.scale(Point.from(normalAxis), v1nF * collision.actor.bounceCoefficient);
+    let v2nFV = Point.scale(Point.from(normalAxis), v2nF *  collision.otherActor.bounceCoefficient);
+    let v1tFV = Point.scale(Point.from(tangentAxis), v1t *  collision.actor.bounceCoefficient);
+    let v2tFV = Point.scale(Point.from(tangentAxis), v2t*  collision.otherActor.bounceCoefficient);
     collision.actor.velocity = Point.add(v1nFV, v1tFV);              //final velocity is normal and tangent added back together.
     collision.otherActor.velocity = Point.add(v2nFV, v2tFV);
   }

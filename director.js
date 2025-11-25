@@ -90,7 +90,7 @@ export default class Director {
   }
   static loop(currentTime) {
     const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
-    console.log(`${delta}`);
+    
     Director.lastFrameTime = currentTime;
 
     Director.kinematics(delta); //This redraws the entire quadtree.
