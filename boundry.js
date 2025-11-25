@@ -16,10 +16,7 @@ export default class Boundry {
     }
 
     touches(otherBoundry) {
-        //Horizontal boundry violation (left OR right) AND vertical boundry violation (top OR bottom) = touching.
-        //basically, its just checking all four corners of the boundry.  This should include cases where it is entirely inside
-        //of ther other bounrdry to.
-        return (
+       return (
             ((otherBoundry.x2 > this.x1 && otherBoundry.x2 < this.x2) ||
                 (otherBoundry.x1 > this.x1 && otherBoundry.x1 < this.x2)) ||
             ((otherBoundry.y2 > this.y1 && otherBoundry.y2 < this.y2) ||
