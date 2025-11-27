@@ -6,7 +6,7 @@ export default function init() {
   console.log ('init..');
   let canvas = document.getElementById('canvas');
   let context = canvas.getContext ('2d');
-  context.setFillStyle = '#036';
+  context.fillStyle = '#223';
   context.fillRect (0,0,canvas.width, canvas.height);
   let draw = new Draw (context);
   console.log ('draw instantiated.');

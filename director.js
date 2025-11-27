@@ -36,7 +36,7 @@ export default class Director {
     if (Director.actorFields.has(actor.name)) Director.actorFields.delete(actor.name);
   }
   static addFieldToActor(actor, strength) {
-    if (!(actor instanceof Actor)) throw error (`Director.addFieldToActor: actor is not an actor. [${actor}]`);
+    if (!(actor instanceof Actor)) throw Error (`Director.addFieldToActor: actor is not an actor. [${actor}]`);
     Director.actorFields.set(actor.name, new ActorField (actor, strength));
   }
   static removeFieldFromActor(actor) {
