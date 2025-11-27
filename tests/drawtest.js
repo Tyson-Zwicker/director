@@ -1,17 +1,18 @@
-import Polygon from '../polygon.js';
-import Director from '../director.js';
-import Appearance from '../appearance.js';
-import Draw from './drawtest.js';
-
+import Draw from '../draw.js';
+import Color from '../color.js';
 // ----------> PRIME MOVER <-------------
-document.addEventListener('DOMContentLoaded', () => {
-  Director.initialize();
-  init();
-});
-
-export default function init() {
-
-  //let draw = new Draw (Director.view.context);
-
-  Director.run();
+init();
+export default function init() { 
+  console.log ('init..');
+  let canvas = document.getElementById('canvas');
+  let context = canvas.getContext ('2d');
+  context.setFillStyle = '#036';
+  context.fillRect (0,0,canvas.width, canvas.height);
+  let draw = new Draw (context);
+  console.log ('draw instantiated.');
+  let red = new Color (15,0,0);
+  console.log (red.toString());
+  draw.line (50,50, 100,100, 10,red);
+    
 }
+

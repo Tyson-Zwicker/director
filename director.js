@@ -16,10 +16,10 @@ export default class Director {
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(
       new Boundry(
-        -Number.MAX_SAFE_INTEGER,
-        -Number.MAX_SAFE_INTEGER,
-        2 * Number.MAX_SAFE_INTEGER,
-        2 * Number.MAX_SAFE_INTEGER
+        -Number.MAX_SAFE_INTEGER/2,
+        -Number.MAX_SAFE_INTEGER/2,
+        Number.MAX_SAFE_INTEGER,
+        Number.MAX_SAFE_INTEGER
       ),
       1, 10  // Default capacity and minimum size for the quadtree
     );
@@ -62,6 +62,7 @@ export default class Director {
         actor.draw(Director.view);
       }
     }
+    
   }
   static checkUserActorInteraction() {
     let actorMouseInteraction = false;
