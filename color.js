@@ -1,37 +1,56 @@
-export class Color {
+export default class Color {
+    //We are going to store the values, internally, as decimal between 1 and 0.
+    //Well give them back either as #RBGA Strings.
     constructor(r, g, b, a) {
         this.r = r;
         this.g = g;
         this.b = b;
         this.a = a;
-        this.color = '';
-        if (r === undefined || g === undefined && b === undefined) throw new error(`line.draw: bad color ${r},${g},${b}`);
+        if (r === undefined || g === undefined || b === undefined) throw new Error(`line.draw: bad color ${r},${g},${b}`);
         if (a !== undefined) {
-            if (!(a >= 0 && a <= 1)) throw new error(`draw.line: transarency out of range. 0=transparent, 1=opaque ${a}`);
+            if (!(a >= 0 && a <= 1)) throw new Error(`draw.line: transarency out of range. 0=transparent, 1=opaque ${a}`);
             if (r + g + b + a >= 0) {
-                color = `rgba(${r},${g},${b},${a}}`;
+                this.color = `rgba(#${r},${g},${b},${a}}`;
             }
         }
-        color = `rgb(${r},${g},${b})`;
     }
-    getLinearGradient(x1,y1,x2,y2, stopPoint1, color1, stopPoint2, color2, stopPoint3, color3, stopPoint4,color4) {
-        if (NaN(x1) || NaN(x2) || Nan(x3) || Nan(x4)) throw new error(`line.draw bad coordinates (${x1},${y1}) (${x2},${y2})`)
+
+    getLinearGradient(x1, y1, x2, y2, stopPoint1, color1, stopPoint2, color2, stopPoint3, color3, stopPoint4, color4) {
+        if (isNaN(x1) || isNaN(x2) || isNaN(x3) || isNaN(x4)) throw new Error(`line.draw bad coordinates (${x1},${y1}) (${x2},${y2})`)
         let gradient = g.createLinearGradient(x1, y1, x2, y2);
-        if (stopPoint1 && color1){
-            if (isNaN(stopPoint1)) throw error (`draw.setLinearGradient: ${stopPoint1} is not a number between 0 and 1`)
-            gradient.addColorStop (stopPoint1, color1.color);        
+        if (stopPoint1 && color1) {
+            if (isNaN(stopPoint1)) throw Error(`draw.setLinearGradient: ${stopPoint1} is not a number between 0 and 1`)
+            gradient.addColorStop(stopPoint1, color1.color);
         }
-        if (stopPoint2 && color2){
-            if (isNaN(stopPoint2)) throw error (`draw.setLinearGradient: ${stopPoint2} is not a number between 0 and 1`)
-            gradient.addColorStop (stopPoint2, color2.color);        
+        if (stopPoint2 && color2) {
+            if (isNaN(stopPoint2)) throw Error(`draw.setLinearGradient: ${stopPoint2} is not a number between 0 and 1`)
+            gradient.addColorStop(stopPoint2, color2.color);
         }
-        if (stopPoint3 && color3){
-            if (isNaN(stopPoint3)) throw error (`draw.setLinearGradient: ${stopPoint3} is not a number between 0 and 1`)
-            gradient.addColorStop (stopPoint3, color3.color);        
+        if (stopPoint3 && color3) {
+            if (isNaN(stopPoint3)) throw Error(`draw.setLinearGradient: ${stopPoint3} is not a number between 0 and 1`)
+            gradient.addColorStop(stopPoint3, color3.color);
         }
-        if (stopPoint4 && color4){
-            if (isNaN(stopPoint4)) throw error (`draw.setLinearGradient: ${stopPoint4} is not a number between 0 and 1`)
-            gradient.addColorStop (stopPoint4, color4.color);        
+        if (stopPoint4 && color4) {
+            if (isNaN(stopPoint4)) throw Error(`draw.setLinearGradient: ${stopPoint4} is not a number between 0 and 1`)
+            gradient.addColorStop(stopPoint4, color4.color);
         }
+    }
+    asHex() {
+        return `#${this.#intToHex(this.r)}${this.#intToHex(this.g)}${this.#intToHex(this.b)}${this.#floatToHex(this.a)}`;
+    }
+    asLongHex() {
+        return `#${this.#pad(this.#intToHex(this.r))}${this.#pad(this.#intToHex(this.g))}${this.#pad(this.#intToHex(this.b))}`;
+    }
+
+    #intToHex(value) {
+        if (value < 0 || value > 15) throw new Error(`color.#intToHex: value out of bounds ${value}. Must be (0,15) inclusive`);
+        return value.toString(16).toUpperCase();
+    }
+    #pad(value) {
+        if (value.length === 1) return '0' + value;
+    }
+    #floatToHex(value) {
+        if (value < 0 || value > 1) throw new Error(`color.floatToHex: value of of bounds ${value}. Must be between (0 and 1) inclusive`);
+
     }
 }

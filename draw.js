@@ -4,11 +4,11 @@ export default class Draw {
         this.g = context2d;
     }
     line(x1, y1, x2, y2, w = 1, colorOrGradient) {
-        let color = '';
-        if (NaN(x1) || NaN(x2) || Nan(x3) || Nan(x4)) throw new error(`line.draw bad coordinates (${x1},${y1}) (${x2},${y2})`)
-        g.setStrokeStyle = colorOrGradient;
-        g.lineWidth = w;
-        g.moveTo(x1, y1);
-        g.LineTo(x2, y2);
+        let color = '#fff';
+        if (isNaN(x1) || isNaN(x2) || isNaN(y1) || isNaN(y2)) throw new error(`line.draw bad coordinates (${x1},${y1}) (${x2},${y2})`)
+        this.g.setStrokeStyle = colorOrGradient;
+        this.g.lineWidth = w;
+        this.g.moveTo(x1, y1);
+        this.g.lineTo(x2, y2);
     }
 }
