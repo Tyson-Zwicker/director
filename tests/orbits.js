@@ -35,7 +35,6 @@ export default function init() {
   planet3.bounceCoefficient = 0.1;
   Director.addActor(planet3);
   Director.addFieldToActor(planet3, planet3.mass()*-1);
-  Director.run();
 
   let planet2 = new Actor('Planet2', Polygon.makeRegular(20, 50), new Appearance('rgba(93, 44, 61, 1)', '#FFF', 3));
   planet2.position = new Point(2800, 0);
