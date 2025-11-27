@@ -9,7 +9,6 @@ export default class Color {
         if (r === undefined || g === undefined || b === undefined) throw new Error(`line.draw: bad color ${r},${g},${b}`);
         if (!opacity) this.opacity = 1;
         if (opacity < 0 || opacity > 1) throw new Error('transparency must be a number between 0 and 1');
-        this.color = `rgba(#${r},${g},${b},${opacity}}`;
     }
     toString() {
         let r = `r:${this.r} g:${this.g} b:${this.b} a:${this.opacity} hex:${this.asHex()}`;
