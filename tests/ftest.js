@@ -18,8 +18,8 @@ export default function init() {
 
   // Create a bunch of actors in a grid with random velocities
 
-  const spacing = 200;
-  const startX = -400, startY = -400;
+  const spacing = 500;
+  const startX = -1400, startY = -1400;
   let count = 0;
   for (let i = 0; i < 16; i++) {
     for (let j = 0; j < 16; j++) {
@@ -37,7 +37,7 @@ export default function init() {
       let angle = Math.random() * Math.PI * 2;
       let speed = 0// + Math.random() * 15;
       a.velocity = Point.zero();
-      a.bounceCoefficient = Math.ceil(1, Math.random()*2);
+      a.bounceCoefficient = Math.random();
       a.setLabel(name, new Point(0, 0), 1);
       Director.addActor(a);
       Director.addFieldToActor(a, -a.mass() * 10);
