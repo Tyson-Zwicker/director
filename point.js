@@ -139,6 +139,7 @@ export default class Point {
     }
     throw new Error(`Point.dot: p1 or p2 is not a point`);
   }
+   
   toString() {
     return `Point(${this.x},${this.y})`;
   }

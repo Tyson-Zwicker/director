@@ -76,7 +76,7 @@ export default class Polygon {
       var minY = this.drawnPoints[0].y, maxY = this.drawnPoints[0].y;
       for (var n = 1; n < this.drawnPoints.length; n++) {
         var q = this.drawnPoints[n];
-        minX = Math.min(q.x, minX); //TODO:  There is a quadrant bug here.. it doesn't work in the 2nd one..
+        minX = Math.min(q.x, minX); 
         maxX = Math.max(q.x, maxX);
         minY = Math.min(q.y, minY);
         maxY = Math.max(q.y, maxY);
