@@ -10,14 +10,17 @@ export default class Director {
     Director.continueAnimationLoop = false;
     Director.actors = new Map();
     Director.actorFields = new Map();
+    Director.backgroundEffects = [];
+    Director.foregroundEffects = [];
+    
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
     Director.view = new View();
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(
-      new Boundry(
-        -Number.MAX_SAFE_INTEGER/2,
-        -Number.MAX_SAFE_INTEGER/2,
+      new Boundry(0
+        -Number.MAX_SAFE_INTEGER / 2,
+        -Number.MAX_SAFE_INTEGER / 2,
         Number.MAX_SAFE_INTEGER,
         Number.MAX_SAFE_INTEGER
       ),
@@ -36,11 +39,17 @@ export default class Director {
     if (Director.actorFields.has(actor.name)) Director.actorFields.delete(actor.name);
   }
   static addFieldToActor(actor, strength) {
-    if (!(actor instanceof Actor)) throw Error (`Director.addFieldToActor: actor is not an actor. [${actor}]`);
-    Director.actorFields.set(actor.name, new ActorField (actor, strength));
+    if (!(actor instanceof Actor)) throw Error(`Director.addFieldToActor: actor is not an actor. [${actor}]`);
+    Director.actorFields.set(actor.name, new ActorField(actor, strength));
   }
   static removeFieldFromActor(actor) {
     if (Director.actorFields.has(actor.name)) Director.actorFields.delete(actor.name);
+  }
+  static addBackgroundEffect(effect) {
+    Director.backgroundEffects.push(effect);
+  }
+  static addForegroundEffect(effect) {
+    Director.foregroundEffects.push(effect);
   }
   static kinematics(delta) {
     for (let actor of Director.actors.values()) {
@@ -53,16 +62,40 @@ export default class Director {
     for (let collision of collisions.values()) {
       Collisions.callActorCollisionEvents(collision);
       Collisions.handleCollisionPhysics(collision);
-    }
+    }0
   }
   static draw(delta) {
+
+
+    /*      HOW ARE WE SCALING/TRANSLATING THESE FORE/AFT GROUND IMAGES TO THE VIEW THAT HAS 
+      BEEN PANNED AND ZOOMED?
+      
+      ALSO MAYBE A GOOD TIME TO CONSIDER "LAYERS" FOR ACTORS.
+      */
+
     Director.view.clear();
+    //Draw background..
+    let survivingBackgroundEffects = [];
+    for (let i = 0; i < Director.backgroundEffects.length;i++) {
+      let effect = Director.backgroundEffects[i];
+      if (!effect.draw(Director.view.context,delta)) survivingBackgroundEffects.push(i);
+    }
+
+    //Draw actors..
     for (let actor of Director.actors.values()) {
       if (Director.view.canSee(actor.position)) {
         actor.draw(Director.view);
       }
     }
+    //Draw foreground
+    let survivingForegroundEffects = [];
+    for (let i=0 ; i< Director.foregroundEffects.length;i++){
+      let effect = Director.foregroundEffects[i];
+      if (!effect.draw(Director.view.context,delta)) survivingForegroundEffects.push(i);
+    }
     
+    this.backgroundEffects = survivingBackgroundEffects;
+    this.foregroundEffects = survivingForegroundEffects;
   }
   static checkUserActorInteraction() {
     let actorMouseInteraction = false;
@@ -83,15 +116,15 @@ export default class Director {
     //TODO: I need a filter on this so it isn't iterating through EVERYTHING.
     //Basically how far away do you have to get where the force you exert hits a minimal threshold 
     //so it becomes irrelevent.  Then use the quadtree to get just whats inside that radius.
-    for (let actorField of Director.actorFields.values()) {      
+    for (let actorField of Director.actorFields.values()) {
       for (let otherActor of Director.actors.values()) {
-        actorField.enactForce (otherActor);
+        actorField.enactForce(otherActor);
       }
     }
   }
   static loop(currentTime) {
     const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
-    
+
     Director.lastFrameTime = currentTime;
 
     Director.kinematics(delta); //This redraws the entire quadtree.
