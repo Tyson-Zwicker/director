@@ -1,7 +1,7 @@
 export default class Color {
     //We are going to store the values, internally, as decimal between 1 and 0.
     //Well give them back either as #RBGA Strings.
-    #isColor = false;
+
     constructor(r, g, b, opacity = 1) {
         if (isNaN(r) || isNaN(g) || isNaN(b)) throw new Error(`color.constructor: Color component undefined R${r} G${g} B${b}`);
         if (r < 0 || r > 15 || g < 0 || g > 15 || b < 0 || b > 15) throw new Error(`color.constructor: rgb must be 0>=value<=15 R${r} G${g} B${b}`)
@@ -11,47 +11,40 @@ export default class Color {
         this.g = g;
         this.b = b;
         this.opacity = opacity;
-        this.#isColor = true;
     }
     toString() {
         let r = `r:${this.r} g:${this.g} b:${this.b} a:${this.opacity} hex:${this.asHex()}`;
         return r;
     }
-    isColor() {
-        return this.#isColor;
+    //negative number makes it brighter or dimmer. Range is 0to 1. 0 makes it black,1 changes nothing.
+    changeBrightness(c) {
+        if (isNaN(c) || c < 0 || c > 1) throw new Error(`color.changeBrightness: change should be a value between 0 and 1 ${c}`);
+        let dr = Math.ceil(this.r * c);
+        let dg = Math.ceil(this.g * c);
+        let db = Math.ceil(this.b * c);
+        dr = Math.min(15, dr); dr = Math.max(0, dr);
+        dg = Math.min(15, dg); dg = Math.max(0, dg);
+        db = Math.min(15, db); db = Math.max(0, db);
+        return new Color(dr, dg, db, this.opacity)
     }
-    //negative number makes it brighter or dimmer. Range is -1 to 1, by a percetage of the existing value.
-    changeBrightness (c){
-        if (isNaN(c) || c<0 || c>1) throw new Error(`color.changeBrightness: change should be a value between 0 and 1 ${c}`);        
-        let dr = this.r * c;
-        let dg = this.g * c;
-        let db = this.b * c;
-        let nr = this.r + dr;
-        let ng = this.g + dg;
-        let nb = this.b + db;
-        nr = Math.max (0,nr); nr = Math.min (15,nr);
-        ng = Math.max (0,ng); ng = Math.min (15,ng);
-        nb = Math.max (0,nb); nb = Math.min (15,nb);
-        return new Color (nr,ng,nb,this.a)
-    }
-    getLinearGradient(context,x1, y1, x2, y2, stopPoint1, color1, stopPoint2, color2, stopPoint3, color3, stopPoint4, color4) {
+    getLinearGradient(context, x1, y1, x2, y2, stopPoint1, color1, stopPoint2, color2, stopPoint3, color3, stopPoint4, color4) {
         if (isNaN(x1) || isNaN(x2)) throw new Error(`line.draw bad coordinates (${x1},${y1}) (${x2},${y2})`)
         let gradient = context.createLinearGradient(x1, y1, x2, y2);
-        if (stopPoint1 && color1) {
+        if (stopPoint1 !== undefined && color1) {
             if (isNaN(stopPoint1)) throw Error(`draw.setLinearGradient: ${stopPoint1} is not a number between 0 and 1`)
-            gradient.addColorStop(stopPoint1, color1.color);
+            gradient.addColorStop(stopPoint1, color1.asHex());
         }
-        if (stopPoint2 && color2) {
+        if (stopPoint2 !== undefined && color2) {
             if (isNaN(stopPoint2)) throw Error(`draw.setLinearGradient: ${stopPoint2} is not a number between 0 and 1`)
-            gradient.addColorStop(stopPoint2, color2.color);
+            gradient.addColorStop(stopPoint2, color2.asHex());
         }
-        if (stopPoint3 && color3) {
+        if (stopPoint3 !== undefined && color3) {
             if (isNaN(stopPoint3)) throw Error(`draw.setLinearGradient: ${stopPoint3} is not a number between 0 and 1`)
-            gradient.addColorStop(stopPoint3, color3.color);
+            gradient.addColorStop(stopPoint3, color3.asHex());
         }
-        if (stopPoint4 && color4) {
+        if (stopPoint4 !== undefined && color4) {
             if (isNaN(stopPoint4)) throw Error(`draw.setLinearGradient: ${stopPoint4} is not a number between 0 and 1`)
-            gradient.addColorStop(stopPoint4, color4.color);
+            gradient.addColorStop(stopPoint4, color4.asHex());
         }
         return gradient;
     }
