@@ -10,7 +10,7 @@ import LineEffect from '../lineeffect.js';
 
 // PRIME MOVER
 document.addEventListener('DOMContentLoaded', () => {
-  Director.initialize();  
+  Director.initialize();
   init();
 });
 
@@ -27,7 +27,7 @@ export default function init() {
     let hoveredAppearance = new Appearance('#ff0', '#f00');
     let pressedAppearance = new Appearance('#0ff', '#00f');
     let button = new Button(hoveredAppearance, pressedAppearance);
-    button.clickFn = function () {   
+    button.clickFn = function () {
       let newlabel = `${this.actor.name} (${this.actor.position.x},${this.actor.position.y})`;
       this.actor.setLabel(newlabel, new Point(0, 0), 1);
       this.actor.velocity = new Point(rnd(-10, 10), rnd(-10, 10));
@@ -73,12 +73,22 @@ export default function init() {
   Director.addActor(d);
   //Add toggle button function to part test (triangle)
 
-  function doMyThing(delta) { 
+  function doMyThing(delta) {
     part1.rotation += 1;
     part2.rotation -= 3;
-    if (delta%100===0){
-      Director.addBackgroundEffect (
-        new LineEffect (Math.random ()*900,Math.random ()*900,Math.random ()*900,Math.random ()*900,40,new Color (15,0,15),1)
+    let spread = 400;
+    if (delta % 100 === 0) {
+
+      Director.addBackgroundEffect(
+        //p1, p2, w, colorOrGradient, durationInSeconds
+        new LineEffect(
+          new Point(
+            -spread / 2 + Math.random() * spread,
+            -spread / 2 + Math.random() * spread,
+            spread / 2 + Math.random() * spread,
+            spread / 2 + Math.random() * spread),
+          40, new Color(15, 0, 15), 1
+        )
       );
     }
   }
