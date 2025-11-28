@@ -20,14 +20,16 @@ export default class Sensor {
         const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
 
         if (t > 0 && t < 1 && u > 0) {
-            p = new Point(x1 + t * (x2 - 1),y1 + t * (y2 - 1));
-            d = Point.distance (originPoint, p);
+            const p = new Point(x1 + t * (x2 - x1),y1 + t * (y2 - y1));
+            const d = Point.distance (originPoint, p);
             return {
                 position: p,
                 distance: d
             };
         };
-        return false; //They don't every hit.
+        return false; //They don't ever hit.
     }
-    draw(appearance) { }
+    draw() { 
+
+    }
 }
