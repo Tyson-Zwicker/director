@@ -11,8 +11,9 @@ export default class LineEffect {
         this.colorOrGradient = colorOrGradient;
     }
     //returns true if it should be removed from the director's list because duration.
-    draw(context,delta) {      
-        if (!context || isNan (delta)) throw (`LineEffect.draw: bad params context ${context}, delta ${delta}`);  
+    draw(context, delta) {
+        console.log(`LineEffect.drawing...start')`);
+        if (!context || isNan(delta)) throw (`LineEffect.draw: bad params context ${context}, delta ${delta}`);
         if (this.colorOrGradient instanceof Color) {
             context.strokeStyle = this.colorOrGradient.asHex();
         } else {
@@ -23,7 +24,8 @@ export default class LineEffect {
         context.moveTo(this.p1.x, this.p1.y);
         context.lineTo(this.p2.x, this.p2.y);
         context.stroke();
-        this.life-=delta;
-        return (this.life<0);
+        this.life -= delta;
+        console.log(`LineEffect.drawing...done')`);
+        return (this.life < 0);
     }
 }

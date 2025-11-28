@@ -78,6 +78,7 @@ export default class Director {
     let survivingBackgroundEffects = [];
     for (let i = 0; i < Director.backgroundEffects.length;i++) {
       let effect = Director.backgroundEffects[i];
+      console.log (`Director.draw: effect ${effect}`)
       if (!effect.draw(Director.view.context,delta)) survivingBackgroundEffects.push(i);
     }
 
@@ -90,6 +91,7 @@ export default class Director {
     //Draw foreground
     let survivingForegroundEffects = [];
     for (let i=0 ; i< Director.foregroundEffects.length;i++){
+      console.log (`Director.draw: effect ${effect}`)
       let effect = Director.foregroundEffects[i];
       if (!effect.draw(Director.view.context,delta)) survivingForegroundEffects.push(i);
     }
