@@ -1,4 +1,5 @@
 import Point from './point.js';
+import Color from './color.js';
 /* Effects wear out. When their "life" get below 0 they are removed from the director */
 
 export default class LineEffect {
@@ -10,10 +11,10 @@ export default class LineEffect {
         this.w = w;
         this.colorOrGradient = colorOrGradient;
     }
-    //returns true if it should be removed from the director's list because duration.
+    //returns true if it should be removed from the director's list because its "lifespan" has been exceded.
     draw(context, delta) {
         console.log(`LineEffect.drawing...start')`);
-        if (!context || isNan(delta)) throw (`LineEffect.draw: bad params context ${context}, delta ${delta}`);
+        if (!context || isNaN(delta)) throw (`LineEffect.draw: bad params context ${context}, delta ${delta}`);
         if (this.colorOrGradient instanceof Color) {
             context.strokeStyle = this.colorOrGradient.asHex();
         } else {
