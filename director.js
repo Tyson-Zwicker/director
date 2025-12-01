@@ -79,7 +79,7 @@ export default class Director {
     for (let i = 0; i < Director.backgroundEffects.length;i++) {
       let effect = Director.backgroundEffects[i];
       console.log (`Director.draw: effect ${effect}`)
-      if (!effect.draw(Director.view.context,delta)) survivingBackgroundEffects.push(i);
+      if (!effect.draw(Director.view.context,delta)) survivingBackgroundEffects.push(effect);
     }
 
     //Draw actors..
@@ -93,9 +93,8 @@ export default class Director {
     for (let i=0 ; i< Director.foregroundEffects.length;i++){
       console.log (`Director.draw: effect ${effect}`)
       let effect = Director.foregroundEffects[i];
-      if (!effect.draw(Director.view.context,delta)) survivingForegroundEffects.push(i);
+      if (!effect.draw(Director.view.context,delta)) survivingForegroundEffects.push(effect);
     }
-    
     this.backgroundEffects = survivingBackgroundEffects;
     this.foregroundEffects = survivingForegroundEffects;
   }
@@ -118,6 +117,7 @@ export default class Director {
     //TODO: I need a filter on this so it isn't iterating through EVERYTHING.
     //Basically how far away do you have to get where the force you exert hits a minimal threshold 
     //so it becomes irrelevent.  Then use the quadtree to get just whats inside that radius.
+    
     for (let actorField of Director.actorFields.values()) {
       for (let otherActor of Director.actors.values()) {
         actorField.enactForce(otherActor);
