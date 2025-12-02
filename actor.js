@@ -63,7 +63,6 @@ export default class Actor {
     Point.sub(origin, view.camera);
     Point.scale(origin, view.camera.zoom);
     Point.add(origin, view.screenCenter);
-
     let appearance = this.#drawChooseAppearance();
     this.polygon.draw(view, origin, this.rotation, appearance);
 

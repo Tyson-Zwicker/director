@@ -12,14 +12,14 @@ export default class Director {
     Director.actorFields = new Map();
     Director.backgroundEffects = [];
     Director.foregroundEffects = [];
-    
+
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
     Director.view = new View();
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(
       new Boundry(0
-        -Number.MAX_SAFE_INTEGER / 2,
+        - Number.MAX_SAFE_INTEGER / 2,
         -Number.MAX_SAFE_INTEGER / 2,
         Number.MAX_SAFE_INTEGER,
         Number.MAX_SAFE_INTEGER
@@ -62,26 +62,22 @@ export default class Director {
     for (let collision of collisions.values()) {
       Collisions.callActorCollisionEvents(collision);
       Collisions.handleCollisionPhysics(collision);
-    }0
+    } 0
   }
   static draw(delta) {
-
-
-    /*      HOW ARE WE SCALING/TRANSLATING THESE FORE/AFT GROUND IMAGES TO THE VIEW THAT HAS 
-      BEEN PANNED AND ZOOMED?
-      
-      ALSO MAYBE A GOOD TIME TO CONSIDER "LAYERS" FOR ACTORS.
+    /*    MAYBE A GOOD TIME TO CONSIDER "LAYERS" FOR ACTORS.
       */
-
-    Director.view.clear();
     //Draw background..
     let survivingBackgroundEffects = [];
-    for (let i = 0; i < Director.backgroundEffects.length;i++) {
+    for (let i = 0; i < Director.backgroundEffects.length; i++) {
       let effect = Director.backgroundEffects[i];
-      console.log (`Director.draw: effect ${effect}`)
-      if (!effect.draw(Director.view.context,delta)) survivingBackgroundEffects.push(effect);
+      console.log(`Director.draw: effect ${effect}`)
+      if (Director.view.canSee(p1) || Director.view.canSee(p2)) {
+        if (!effect.draw(Director.view.context, delta)) {
+          survivingBackgroundEffects.push(effect);
+        }
+      }
     }
-
     //Draw actors..
     for (let actor of Director.actors.values()) {
       if (Director.view.canSee(actor.position)) {
@@ -90,13 +86,17 @@ export default class Director {
     }
     //Draw foreground
     let survivingForegroundEffects = [];
-    for (let i=0 ; i< Director.foregroundEffects.length;i++){
-      console.log (`Director.draw: effect ${effect}`)
+    for (let i = 0; i < Director.foregroundEffects.length; i++) {
       let effect = Director.foregroundEffects[i];
-      if (!effect.draw(Director.view.context,delta)) survivingForegroundEffects.push(effect);
+      console.log(`Director.draw: effect ${effect}`)      
+      if (Director.view.canSee(p1) || Director.view.canSee(p2)) {
+        if (!effect.draw(Director.view.context, delta)) {
+          survivingForegroundEffects.push(effect);
+        }
+      }
+      this.backgroundEffects = survivingBackgroundEffects;
+      this.foregroundEffects = survivingForegroundEffects;
     }
-    this.backgroundEffects = survivingBackgroundEffects;
-    this.foregroundEffects = survivingForegroundEffects;
   }
   static checkUserActorInteraction() {
     let actorMouseInteraction = false;
@@ -117,7 +117,7 @@ export default class Director {
     //TODO: I need a filter on this so it isn't iterating through EVERYTHING.
     //Basically how far away do you have to get where the force you exert hits a minimal threshold 
     //so it becomes irrelevent.  Then use the quadtree to get just whats inside that radius.
-    
+
     for (let actorField of Director.actorFields.values()) {
       for (let otherActor of Director.actors.values()) {
         actorField.enactForce(otherActor);
@@ -126,10 +126,9 @@ export default class Director {
   }
   static loop(currentTime) {
     const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
-
     Director.lastFrameTime = currentTime;
-
     Director.kinematics(delta); //This redraws the entire quadtree.
+    Director.view.clear(); //<-- Only here. Do not clear the goddam screen anywhere else. It makes you shit be annoyingly invisibe..
     Director.draw(delta);
     Director.collisions(delta);
     if (Director.creatorFn) {
