@@ -71,8 +71,9 @@ export default class Director {
     let survivingBackgroundEffects = [];
     for (let i = 0; i < Director.backgroundEffects.length; i++) {
       let effect = Director.backgroundEffects[i];
-      console.log(`Director.draw: effect ${effect}`)
-      if (Director.view.canSee(p1) || Director.view.canSee(p2)) {
+      console.log(`Director.draw: effect:`);
+      console.log(effect);
+      if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
         if (!effect.draw(Director.view.context, delta)) {
           survivingBackgroundEffects.push(effect);
         }
@@ -89,7 +90,7 @@ export default class Director {
     for (let i = 0; i < Director.foregroundEffects.length; i++) {
       let effect = Director.foregroundEffects[i];
       console.log(`Director.draw: effect ${effect}`)      
-      if (Director.view.canSee(p1) || Director.view.canSee(p2)) {
+      if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
         if (!effect.draw(Director.view.context, delta)) {
           survivingForegroundEffects.push(effect);
         }
