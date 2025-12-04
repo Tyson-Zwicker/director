@@ -7,6 +7,7 @@ import Director from '../director.js';
 import Part from '../part.js';
 import Appearance from '../appearance.js';
 import LineEffect from '../lineeffect.js';
+import Color from '../color.js';
 
 // PRIME MOVER
 document.addEventListener('DOMContentLoaded', () => {
@@ -73,23 +74,43 @@ export default function init() {
   Director.addActor(d);
   //Add toggle button function to part test (triangle)
 
+  let count = 0;
   function doMyThing(delta) {
+    console.log (count);
+    count++;
     part1.rotation += 1;
     part2.rotation -= 3;
     let spread = 400;
-    if (delta % 100 === 0) {
-
-      Director.addBackgroundEffect(
-        //p1, p2, w, colorOrGradient, durationInSeconds
-        new LineEffect(
-          new Point(
-            -spread / 2 + Math.random() * spread,
-            -spread / 2 + Math.random() * spread,
-            spread / 2 + Math.random() * spread,
-            spread / 2 + Math.random() * spread),
-          40, new Color(15, 0, 15), 1
-        )
+    if (count === 100) {
+      console.log('adding effect');
+      let lineEffect = new LineEffect(
+        new Point(
+          -spread / 2 + Math.random() * spread,
+          -spread / 2 + Math.random() * spread
+        ),
+        new Point (
+          spread / 2 + Math.random() * spread,
+          spread / 2 + Math.random() * spread
+        ),
+        40, new Color(15, 0, 15), 1
       );
+      count =0;
+      console.log(`effect: ${lineEffect}`);
+      Director.addBackgroundEffect(lineEffect);
+      lineEffect = new LineEffect(
+        new Point(
+          -spread / 2 + Math.random() * spread,
+          -spread / 2 + Math.random() * spread
+        ),
+        new Point (
+          spread / 2 + Math.random() * spread,
+          spread / 2 + Math.random() * spread
+        ),
+        40, new Color(15, 15, 0), 1
+      );
+      count =0;
+      console.log(`effect: ${lineEffect}`);
+      Director.addBackgroundEffect(lineEffect);
     }
   }
   Director.addCreatorsFunction(doMyThing);
