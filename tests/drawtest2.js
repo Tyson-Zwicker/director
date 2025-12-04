@@ -110,7 +110,7 @@ export default function init() {
       );
       count =0;
       console.log(`effect: ${lineEffect}`);
-      Director.addBackgroundEffect(lineEffect);
+      Director.addForegroundEffect(lineEffect);
     }
   }
   Director.addCreatorsFunction(doMyThing);
