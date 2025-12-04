@@ -15,17 +15,13 @@ export default class LineEffect {
     }
     //returns true if it should be removed from the director's list because its "lifespan" has been exceded.
     draw(context, delta) {
-        /*scaling borowwed from actor draw method.... DO IT
-        Point.sub(origin, view.camera);
-        Point.scale(origin, view.camera.zoom);
-        Point.add(origin, view.screenCenter);
-        */
+
        console.log ('lineEffects.translating');
-        let tp1 = Point.from (p1); //The point is fixed in world coordinates, but screen moves so, tp = temporaty point ie. where the screen put you.
+        let tp1 = Point.from (this.p1); //The point is fixed in world coordinates, but screen moves so, tp = temporaty point ie. where the screen put you.
         Point.sub(tp1, Director.view.camera);
         Point.scale(tp1,  Director.view.camera.zoom);
         Point.add(tp1,  Director.view.screenCenter);
-        let tp2 = Point.from (p2); //The point is fixed in world coordinates, but screen moves so, tp = temporaty point ie. where the screen put you.
+        let tp2 = Point.from (this.p2); //The point is fixed in world coordinates, but screen moves so, tp = temporaty point ie. where the screen put you.
         Point.sub(tp2,  Director.view.camera);
         Point.scale(tp2,  Director.view.camera.zoom);
         Point.add(tp2,  Director.view.screenCenter);
@@ -33,13 +29,14 @@ export default class LineEffect {
         if (!context || isNaN(delta)) throw (`LineEffect.draw: bad params context ${context}, delta ${delta}`);
         if (this.colorOrGradient instanceof Color) {
             context.strokeStyle = this.colorOrGradient.asHex();
+            console.log (`color as hex=${this.colorOrGradient.asHex()}`);
         } else {
             context.strokeStyle = this.colorOrGradient;
         }
         context.lineWidth = this.w;
         context.beginPath();
-        context.moveTo(this.tp1.x, this.tp1.y);
-        context.lineTo(this.tp2.x, this.tp2.y);
+        context.moveTo(tp1.x, tp1.y);
+        context.lineTo(tp2.x, tp2.y);
         context.stroke();
         this.life -= delta;
         console.log(`LineEffect.drawing...done')`);
