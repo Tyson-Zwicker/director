@@ -62,11 +62,10 @@ export default class Director {
     for (let collision of collisions.values()) {
       Collisions.callActorCollisionEvents(collision);
       Collisions.handleCollisionPhysics(collision);
-    } 0
+    } 
   }
   static draw(delta) {
-    /*    MAYBE A GOOD TIME TO CONSIDER "LAYERS" FOR ACTORS.
-      */
+  
     //Draw background..
     let survivingBackgroundEffects = [];
     for (let i = 0; i < Director.backgroundEffects.length; i++) {
