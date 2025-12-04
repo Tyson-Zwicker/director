@@ -1,0 +1,3 @@
+-Finish drawing/debugging sensor/ray-casting code..
+-Actor Layers (also the idea of non-interaction BETWEEN layers to sim far distant..stuff)
+-Force enacters (engines/thrusters/etc.) ATTACHED to an actor.
