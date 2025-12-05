@@ -10,19 +10,19 @@ export default class Director {
     Director.continueAnimationLoop = false;
     Director.actors = new Map();
     Director.actorFields = new Map();
-    Director.backgroundEffects = [];
-    Director.foregroundEffects = [];
-
+    Director.bgEffects = [];
+    Director.fgEffects = [];
+    
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
     Director.view = new View();
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(
-      new Boundry(0
+      new Boundry(
         - Number.MAX_SAFE_INTEGER / 2,
-        -Number.MAX_SAFE_INTEGER / 2,
-        Number.MAX_SAFE_INTEGER,
-        Number.MAX_SAFE_INTEGER
+        - Number.MAX_SAFE_INTEGER / 2,
+        Number.MAX_SAFE_INTEGER / 2,
+        Number.MAX_SAFE_INTEGER / 2
       ),
       1, 10  // Default capacity and minimum size for the quadtree
     );
@@ -46,10 +46,10 @@ export default class Director {
     if (Director.actorFields.has(actor.name)) Director.actorFields.delete(actor.name);
   }
   static addBackgroundEffect(effect) {
-    Director.backgroundEffects.push(effect);
+    Director.bgEffects.push(effect);
   }
   static addForegroundEffect(effect) {
-    Director.foregroundEffects.push(effect);
+    Director.fgEffects.push(effect);
   }
   static kinematics(delta) {
     for (let actor of Director.actors.values()) {
@@ -62,15 +62,12 @@ export default class Director {
     for (let collision of collisions.values()) {
       Collisions.callActorCollisionEvents(collision);
       Collisions.handleCollisionPhysics(collision);
-    } 
+    }
   }
   static draw(delta) {
     //Draw background..
     let survivingBackgroundEffects = [];
-    for (let i = 0; i < Director.backgroundEffects.length; i++) {
-      let effect = Director.backgroundEffects[i];
-      console.log(`Director.draw: effect:`);
-      console.log(effect);
+    for (let effect of Director.bgEffects){
       if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
         if (!effect.draw(Director.view.context, delta)) {
           survivingBackgroundEffects.push(effect);
@@ -85,17 +82,15 @@ export default class Director {
     }
     //Draw foreground
     let survivingForegroundEffects = [];
-    for (let i = 0; i < Director.foregroundEffects.length; i++) {
-      let effect = Director.foregroundEffects[i];
-      console.log(`Director.draw: effect ${effect}`)      
+    for (let effect of Director.fgEffects) {      
       if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
         if (!effect.draw(Director.view.context, delta)) {
           survivingForegroundEffects.push(effect);
         }
       }
-      this.backgroundEffects = survivingBackgroundEffects;
-      this.foregroundEffects = survivingForegroundEffects;
     }
+    Director.bgEffects = survivingBackgroundEffects;
+    Director.fgEffects = survivingForegroundEffects;
   }
   static checkUserActorInteraction() {
     let actorMouseInteraction = false;
@@ -123,10 +118,10 @@ export default class Director {
       }
     }
   }
-  static sensing(){
-    for (let actor of Director.actors){
-      for (let sensor of actor.sensors){
-        sensor.sweep();
+  static sensing(delta) {
+    for (let actor of Director.actors.values()) {
+      for (let sensor of actor.sensors) {
+        sensor.sweep(delta);
       }
     }
   }
@@ -142,15 +137,13 @@ export default class Director {
     if (Director.creatorFn) {
       Director.creatorFn(delta);
     }
-    
     Director.checkUserActorInteraction();
-
     Director.quadtree.clear();      //QuadTree is cleared (will be recreated begining next loop)
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }
   static run() {
     Director.continueAnimationLoop = true;
-    requestAnimationFrame(Director.loop.bind(Director));
+    requestAnimationFrame(Director.loop.bind(Director),33);
   }
   static runOnce() {
     Director.continueAnimationLoop = false;

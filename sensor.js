@@ -50,7 +50,7 @@ export default class Sensor {
     let closestDistance = Number.MAX_SAFE_INTEGER;
     let closestPoint = undefined;
     let closestActor = undefined;
-    for (actor of foundActors) {
+    for (let actor of foundActors) {
       let points = actor.polygon.points;
       for (let i = 0; i < points.length; i++) {
         let barrierPoint1 = undefined;
