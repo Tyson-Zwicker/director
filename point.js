@@ -34,6 +34,9 @@ export default class Point {
     }
     throw new Error(`Point.from: object is not a point.`);
   }
+  static fromPolar(angle, distance){
+    return new Point (Math.cos (angle*180/Math.Pi)*distance, new Math.sin (angle*180/Math.PI));
+  }
   //This is a deep copy for points with added stuff 
   static copy(p) {
     if (this.isPointy(p)) {
