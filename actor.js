@@ -32,7 +32,7 @@ export default class Actor {
       if (this.polygon?.radius === undefined || this.polygon.radius === null|| isNaN(this.polygon.radius)) {
         throw new Error(`Actor ${this.name} has no radius/mass defined.`);
       }else{
-        return Math.PI  * Math.pow (this.polygon.radius,3);
+        return Math.PI  * Math.pow (this.polygon.radius,2);
       }
     }
     return this._mass;
@@ -51,11 +51,11 @@ export default class Actor {
   }
   attachSensor (sensor){
     sensor.actor = this;
-    sensors.sensors.push (sensor);
+    this.sensors.sensors.push (sensor);
     return sensors.length;
   }
   removeSensor (i){    
-    array.splice (i,1)
+    this.sensors.splice (i,1);
   }
   move(delta) {
     let scaledVelocity = Point.from(this.velocity);

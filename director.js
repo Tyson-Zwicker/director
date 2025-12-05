@@ -143,7 +143,7 @@ export default class Director {
   }
   static run() {
     Director.continueAnimationLoop = true;
-    requestAnimationFrame(Director.loop.bind(Director),33);
+    requestAnimationFrame(Director.loop.bind(Director));
   }
   static runOnce() {
     Director.continueAnimationLoop = false;
