@@ -65,7 +65,6 @@ export default class Director {
     } 
   }
   static draw(delta) {
-  
     //Draw background..
     let survivingBackgroundEffects = [];
     for (let i = 0; i < Director.backgroundEffects.length; i++) {
@@ -128,14 +127,19 @@ export default class Director {
     const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
     Director.lastFrameTime = currentTime;
     Director.kinematics(delta); //This redraws the entire quadtree.
-    Director.view.clear(); //<-- Only here. Do not clear the goddam screen anywhere else. It makes you shit be annoyingly invisibe..
+    Director.applyActorField(delta);
+    Director.view.clear(); //<-- Only here. Do not clear the goddamn screen anywhere else. It makes you shit be annoyingly invisibe..
+    
+    //-> Do some wacky shit to run the sensors.
+    //-> attach them to actors?  Makes sense...
     Director.draw(delta);
     Director.collisions(delta);
     if (Director.creatorFn) {
       Director.creatorFn(delta);
     }
-    Director.applyActorField(delta);
+    
     Director.checkUserActorInteraction();
+
     Director.quadtree.clear();      //QuadTree is cleared (will be recreated begining next loop)
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }

@@ -14,6 +14,7 @@ export default class Actor {
   polygon = undefined;
   #label = undefined;
   parts = [];
+  sensors = [];
   appearance = undefined;
   _mass = undefined;
   constructor(name, polygon, appearance, mass) {
@@ -47,6 +48,10 @@ export default class Actor {
   setLabel(text, offset, emSize) {
     let size = (emSize) ? emSize : 1;
     this.#label = { "text": text, "offset": offset, "emSize": size };
+  }
+  attachSensor (sensor){
+    //TODO: this, and also make a variable that keeps of track of longest range sensor so we
+    //don't look at the whole map per sensor.
   }
   move(delta) {
     let scaledVelocity = Point.from(this.velocity);

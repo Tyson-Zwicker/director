@@ -3,7 +3,6 @@ import Color from './color.js';
 import Director from './director.js';
 /* Effects wear out. When their "life" get below 0 they are removed from the director */
 
-//Chang use piont
 export default class LineEffect {
     constructor(p1, p2, w, colorOrGradient, durationInSeconds) {
         this.duration = durationInSeconds;
