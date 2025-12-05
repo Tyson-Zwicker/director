@@ -1,22 +1,25 @@
 import Director from './Director.js';
 import Point from './points.js';
 import Director from './director.js';
-import QuadTree from '.quadtree.js';
 import Boundry from 'boundry.js';
 export default class Sensor {
+  //Points reflect World Coordinates.
   //Direction is a component vector
   //returns "false" or an object with "position" and "distance".
-  //angle is its centerline. sweep is degrees to either side of centerline
+  //centerAngle is the degree of offset the sensor has from the centerline of the actor.
+  //sweep is # of degrees the sensor can swivel through toeither side of the centerAngle.
   //speed is degrees per second
-  //strength is used to calc the distance 
-  constructor(actor, angle, sweep, speed, distance) {
+  //currentDirection is either + or -1 depending on which way the sensor is sweepingn
+  //currentAngle is a between -sweep and +sweep.  It is added as an offset to "angle"
+    constructor(actor, centerAngle, sweep, speed, distance) {
     this.actor = actor;
-    this.angle = angle;
-    this.sweep = sweep;
-    this.currentAngle = angle;
-    this.currentDirection = 1;
+    this.centerAngle = centerAngle; //Defined as 0 if forward, -90 if port, +90 starboard, 180 to aft, etc.
+    this.sweep = sweep;    
     this.speed = speed;
     this.distance = distance;
+  
+    this.currentOffset = 0; //varies from -sweep to +sweep.
+    this.currentDirection = 1;
   }
 
   sweep(delta) {
@@ -25,40 +28,56 @@ export default class Sensor {
     let cy = this.actor.position.y;
     let sensorBoundry = new Boundry(cx - this.distance, cy - this.distance, cx + this.distance, cy + this.distance);
     let foundActors = Director.quadtree.findInBounds(sensorBoundry);
-
     let results = this.#examineCandidates();
-
-    //move sensors currentAngle, send it back the otherway when it reaches its the edge of its sweep
-    this.currentAngle += delta;
-    if (this.currentAngle > this.sweep + this.direction) {
-      this.currentAngle = this.sweep + this.direction * delta;
-      this.direction *= -1;
+    this.#moveSensor();
+    //Throw in relative bearing to target because that has got to be useful..
+    results[bearing] = this.currentAngle +this.direction;
+    return results;
+  }
+  #moveSensor(delta) {
+    //move sensors currentAngle. (relative agle from -sweep<->+sweep)
+    this.currentOffset += delta * this.speed*this.direction;
+    //send it back the otherway when it reaches its the edge of its sweep
+    if (this.currentOffset > this.sweep) {
+      this.currentOffset = this.sweep;
+      this.currentDirection *= -1;
     }
-    return closestActor;
+    if (this.currentOffset < -this.sweep) {
+      this.currentOffset = -this.sweep;
+      this.currentDirection *= -1;
+    }
   }
   #examineCandidates(foundActors) {
     let closestDistance = Number.MAX_SAFE_INTEGER;
+    let closestPoint = undefined;
     let closestActor = undefined;
     for (actor in foundActors) {
       let points = actor.polygon.points;
       for (let i = 0; i < points.length; i++) {
         let barrierPoint1 = undefined;
         let barrierPoint2 = undefined;
-        if (i == points.length - 1) {
+        if (i === points.length - 1) {
           //connect last point to first point.
-          barrierPoint1 = p[i];
-          barrierPoint2 = p[i + 1];
+          barrierPoint1 = points[i];
+          barrierPoint2 = points[0];
         } else {
           //connect all but last point to next point
-          barrierPoint1 = p[i];
-          barrierPoint2 = p[0];
+          barrierPoint1 = points[i];
+          barrierPoint2 = points[i + 1];
         }
-        let result = this.#rayCast(this.actor.position, this.direction + this.actor.rotation, barrierPoint1, barrierPoint2);
+        let worldAngle = this.actor.rotation + this.centerAngle+this.currentOffset
+        let result = this.#rayCast(this.actor.position, this.currentDirection + this.actor.rotation, barrierPoint1, barrierPoint2);
         if (result && result.distance < closestDistance) {
-           result[actor] = actor; //Add this information to the sensor results..
+          closestDistance = result.distance;
+          closestPoint = result.point;
+          closestActor = actor;
         }
       }
-      return result;
+      return {
+        closestPoint: closestPoint,
+        closestDistance: closestDistance,
+        cloesstActor: actor
+      };
     }
     //return the one with the shortest distance.
   }
@@ -82,7 +101,7 @@ export default class Sensor {
       const p = new Point(x1 + t * (x2 - x1), y1 + t * (y2 - y1));
       const d = Point.distance(originPoint, p);
       return {
-        position: p,
+        point: p,
         distance: d
       };
     }
