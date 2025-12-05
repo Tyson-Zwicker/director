@@ -123,16 +123,21 @@ export default class Director {
       }
     }
   }
+  static sensing(){
+    for (let actor of Director.actors){
+      for (let sensor of actor.sensors){
+        sensor.sweep();
+      }
+    }
+  }
   static loop(currentTime) {
     const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
     Director.lastFrameTime = currentTime;
     Director.kinematics(delta); //This redraws the entire quadtree.
     Director.applyActorField(delta);
     Director.view.clear(); //<-- Only here. Do not clear the goddamn screen anywhere else. It makes you shit be annoyingly invisibe..
-    
-    //-> Do some wacky shit to run the sensors.
-    //-> attach them to actors?  Makes sense...
     Director.draw(delta);
+    Director.sensing(delta);
     Director.collisions(delta);
     if (Director.creatorFn) {
       Director.creatorFn(delta);
