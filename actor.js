@@ -50,8 +50,12 @@ export default class Actor {
     this.#label = { "text": text, "offset": offset, "emSize": size };
   }
   attachSensor (sensor){
-    //TODO: this, and also make a variable that keeps of track of longest range sensor so we
-    //don't look at the whole map per sensor.
+    sensor.actor = this;
+    sensors.sensors.push (sensor);
+    return sensors.length;
+  }
+  removeSensor (i){    
+    array.splice (i,1)
   }
   move(delta) {
     let scaledVelocity = Point.from(this.velocity);
