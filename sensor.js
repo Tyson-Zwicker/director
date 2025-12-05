@@ -1,7 +1,6 @@
-import Director from './Director.js';
 import Point from './points.js';
 import Director from './director.js';
-import Boundry from 'boundry.js';
+import Boundry from './boudry.js';
 export default class Sensor {
   //Points reflect World Coordinates.
   //Direction is a component vector
@@ -28,7 +27,7 @@ export default class Sensor {
     let cy = this.actor.position.y;
     let sensorBoundry = new Boundry(cx - this.distance, cy - this.distance, cx + this.distance, cy + this.distance);
     let foundActors = Director.quadtree.findInBounds(sensorBoundry);
-    let results = this.#examineCandidates();
+    let results = this.#examineCandidates(foundActors);
     this.#moveSensor();
     //Throw in relative bearing to target because that has got to be useful..
     results[bearing] = this.currentAngle +this.direction;
@@ -36,7 +35,7 @@ export default class Sensor {
   }
   #moveSensor(delta) {
     //move sensors currentAngle. (relative agle from -sweep<->+sweep)
-    this.currentOffset += delta * this.speed*this.direction;
+    this.currentOffset += delta * this.speed*this.currentDirection;
     //send it back the otherway when it reaches its the edge of its sweep
     if (this.currentOffset > this.sweep) {
       this.currentOffset = this.sweep;
@@ -51,7 +50,7 @@ export default class Sensor {
     let closestDistance = Number.MAX_SAFE_INTEGER;
     let closestPoint = undefined;
     let closestActor = undefined;
-    for (actor in foundActors) {
+    for (actor of foundActors) {
       let points = actor.polygon.points;
       for (let i = 0; i < points.length; i++) {
         let barrierPoint1 = undefined;
@@ -66,20 +65,20 @@ export default class Sensor {
           barrierPoint2 = points[i + 1];
         }
         let worldAngle = this.actor.rotation + this.centerAngle+this.currentOffset
-        let result = this.#rayCast(this.actor.position, this.currentDirection + this.actor.rotation, barrierPoint1, barrierPoint2);
+        let result = this.#rayCast(this.actor.position, worldAngle, barrierPoint1, barrierPoint2);
         if (result && result.distance < closestDistance) {
           closestDistance = result.distance;
           closestPoint = result.point;
           closestActor = actor;
         }
-      }
-      return {
-        closestPoint: closestPoint,
-        closestDistance: closestDistance,
-        cloesstActor: actor
-      };
+      }     
     }
     //return the one with the shortest distance.
+     return {
+        closestPoint: closestPoint,
+        closestDistance: closestDistance,
+        closestActor: actor
+      };
   }
   #rayCast(originPoint, direction, barrierPoint1, barrierPoint2) {
     const x1 = barrierPoint1.x;
@@ -89,8 +88,9 @@ export default class Sensor {
 
     const x3 = originPoint.x;
     const y3 = originPoint.y;
-    const x4 = x3 + direction.x;
-    const y4 = y3 + direction.y;
+    const directionComponents = Point.fromPolar (direction,1);
+    const x4 = x3 + directionComponents.x;
+    const y4 = y3 + directionComponents.y;
 
     const den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
     if (den === 0) return false;  //They are parallel 
