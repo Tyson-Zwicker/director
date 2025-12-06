@@ -13,8 +13,12 @@ export default class Sensor {
   //currentAngle is a between -sweep and +sweep.  It is added as an offset to "angle"
   //***YOU MUST ATTACH THIS TO AN ACTOR USING [actor.attachSensor ()] OR IT WON'T WORK.
   constructor(name, centerAngle, sweep, speed, distance, active) {
-    if (!centerAngle || isNaN(centerAngle) || centerAngle < 0 || centerAngle > 359) throw new Error(`Sensor.constructor: Invalid centerAngle [${centerAngle}]`)
-    if (!sweep || isNaN(sweep) || sweep < 0 || sweep > 359) throw new Error(`Sensor.constructor: Invalid sweep [${sweep}]`);
+    if (typeof centerAngle!=='number' || centerAngle < 0 || centerAngle > 359) throw new Error(`Sensor.constructor: Invalid centerAngle [${centerAngle}]`)
+    if (typeof sweep!=='number' || sweep < 0 || sweep > 359) throw new Error(`Sensor.constructor: Invalid sweep [${sweep}]`);
+    if (typeof speed!=='number' || speed<0 || speed>sweep) throw new Error (`speed must be less than sweep and >0 [${speed}]`);
+    if (typeof distance!=='number' || distance>0) throw new Error (`distance must be  >0 [${distance}]`);
+    if (typeof active!='boolean') throw new Error (`active must true or false ${active}`);
+    
     this.name = name;
     this.centerAngle = centerAngle; //Defined as 0 if forward, -90 if port, +90 starboard, 180 to aft, etc.
     this.sweep = sweep;
@@ -38,7 +42,7 @@ export default class Sensor {
     return results;
   }
   #moveSensor(delta) {
-    //move sensors currentAngle. (relative agle from -sweep<->+sweep)
+    //move sensors currentAngle. (relative angle from -sweep<->+sweep)
     this.currentOffset += delta * this.speed * this.currentDirection;
     //send it back the otherway when it reaches its the edge of its sweep
     if (this.currentOffset > this.sweep) {
