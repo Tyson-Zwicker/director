@@ -1,5 +1,5 @@
 import Point from './point.js';
-
+import EventTracker from '.eventtracker.js';
 export default class Actor {
   position = new Point(0, 0); // world coordinates, defined in pixels.
   moves = true;
@@ -15,9 +15,9 @@ export default class Actor {
   #label = undefined;
   parts = [];
   sensors = [];
+  sensorData = new EventTracker();
   appearance = undefined;
   _mass = undefined;
-  sensorData = new Map();
   constructor(name, polygon, appearance, mass) {
     this.name = name;
     this.polygon = polygon;

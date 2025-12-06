@@ -4,6 +4,7 @@ import Collisions from './collisions.js';
 import Boundry from './boundry.js';//<--TODO: move to quadtree. We could just pass the numbers.
 import ActorField from './actorfields.js';
 import Actor from './actor.js';
+import EventTracker from './eventtracker.js';
 export default class Director {
   static initialize() {
     Director.MILLISECONDS = 1000;
@@ -13,6 +14,7 @@ export default class Director {
     Director.bgEffects = [];
     Director.fgEffects = [];
     
+    Director.signals = new EventTracker();
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
     Director.view = new View();
@@ -67,7 +69,7 @@ export default class Director {
   static draw(delta) {
     //Draw background..
     let survivingBackgroundEffects = [];
-    for (let effect of Director.bgEffects){
+    for (let effect of Director.bgEffects) {
       if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
         if (!effect.draw(Director.view.context, delta)) {
           survivingBackgroundEffects.push(effect);
@@ -82,7 +84,7 @@ export default class Director {
     }
     //Draw foreground
     let survivingForegroundEffects = [];
-    for (let effect of Director.fgEffects) {      
+    for (let effect of Director.fgEffects) {
       if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
         if (!effect.draw(Director.view.context, delta)) {
           survivingForegroundEffects.push(effect);
@@ -118,7 +120,7 @@ export default class Director {
       }
     }
   }
-  static sensing(delta) {
+  static sensing(delta, currentTime) {
     for (let actor of Director.actors.values()) {
       //Doing this here instead of inside Actor because ACTIVE sensing will leave a detectatble
       //point in the game world, for a period of time, that other actors can detect passively.
@@ -126,7 +128,7 @@ export default class Director {
       //SO we need to track temporary world-based sensor emminitions.
       //AND we need to relay the sensor data back to the actor... so it can think about it, when
       //we get to the  thinking part.
-      for (let sensor of actor.sensors) { 
+      for (let sensor of actor.sensors) {
         /* this is what you're getting back:
          return {
         closestPoint: closestPoint,
@@ -135,16 +137,17 @@ export default class Director {
         };
 
         The problem is how to key it.. its unlikely every sensor pulse will be at exactly the same angle
-        because delta isn't constant, so we need to give time-spans to the data..
+        because delta isn't constant, so we need to give time-spans to the data.. so they go away eventually.
         Maybe use a datastructure best suited to sorting by key, use timestamps as the key, and phase 
         them out over time.  If there are overlaps of the same thing being detected >1 it justs makes
         the sensor feedback stronger?  Fiddling with the time out.. maybe make it a function of % of
         maximum distance?
 
         
+        
         */
-
         let result = sensor.sweep(delta);
+
       }
     }
   }
@@ -155,7 +158,7 @@ export default class Director {
     Director.applyActorField(delta);
     Director.view.clear(); //<-- Only here. Do not clear the goddamn screen anywhere else. It makes you shit be annoyingly invisibe..
     Director.draw(delta);
-    Director.sensing(delta);
+    Director.sensing(delta, currentTime);
     Director.collisions(delta);
     if (Director.creatorFn) {
       Director.creatorFn(delta);
