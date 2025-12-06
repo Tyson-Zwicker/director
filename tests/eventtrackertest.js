@@ -21,7 +21,7 @@ function startTest(){
   tracker.add (time, event1);
   tracker.add (time, event2);
   tracker.add (time, event3);
-  //   't1000027'
+  /*
   time='t1000027';
   tracker.add (time, event3);
   
@@ -31,11 +31,16 @@ function startTest(){
   time='t1000038';
   tracker.add (time, event1);
   tracker.add (time, event2);
-
+*/
   console.log (tracker);
+  /*
+  console.log ('   -------Show t1000015--------');
+  let eventArray = tracker.getEvents('t1000015');
+  console.log (eventArray);
+
   console.log ('   -------RemoveFrom "t1000027--------');
   tracker.removeFrom ('t1000027');
   console.log (tracker);
-  
+  */
 
 }
