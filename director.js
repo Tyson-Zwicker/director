@@ -78,7 +78,7 @@ export default class Director {
     }
     //Draw actors..
     for (let actor of Director.actors.values()) {
-      if (Director.view.canSee(actor.position)) {
+      if (Director.view.canSee(actor.position, actor.radius())) {
         actor.draw(Director.view);
       }
     }

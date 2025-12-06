@@ -33,12 +33,19 @@ export default class View {
     window.addEventListener('resize', this.resizeCanvas.bind(this));
     this.resizeCanvas();  // This will set screenCenter and the bounds.
   }
-  canSee(point) {
+  canSee(point,radius) {
+    let {x0,y0,x1,y1} = this.bounds;
+    if (radius && typeof radius==='number'){
+      x0-=radius;
+      y0-=radius;
+      x1+=radius;
+      y1+=radius;
+    }
     return (
-      point.x >= this.bounds.x0 &&
-      point.y >= this.bounds.y0 &&
-      point.x <= this.bounds.x1 &&
-      point.y <= this.bounds.y1
+      point.x >= x0 &&
+      point.y >= y0 &&
+      point.x <= x1 &&
+      point.y <= y1
     );
   }
   #calcBounds() {
