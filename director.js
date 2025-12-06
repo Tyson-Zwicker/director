@@ -13,7 +13,7 @@ export default class Director {
     Director.actorFields = new Map();
     Director.bgEffects = [];
     Director.fgEffects = [];
-    
+
     Director.signals = new EventTracker();
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
@@ -122,32 +122,14 @@ export default class Director {
   }
   static sensing(delta, currentTime) {
     for (let actor of Director.actors.values()) {
-      //Doing this here instead of inside Actor because ACTIVE sensing will leave a detectatble
-      //point in the game world, for a period of time, that other actors can detect passively.
-      //Like shining a flashlight, or pinging a sonar, or a radar.
-      //SO we need to track temporary world-based sensor emminitions.
-      //AND we need to relay the sensor data back to the actor... so it can think about it, when
-      //we get to the  thinking part.
-      for (let sensor of actor.sensors) {
-        /* this is what you're getting back:
-         return {
-        closestPoint: closestPoint,
-        closestDistance: closestDistance,
-        closestActor: actor
-        };
-
-        The problem is how to key it.. its unlikely every sensor pulse will be at exactly the same angle
-        because delta isn't constant, so we need to give time-spans to the data.. so they go away eventually.
-        Maybe use a datastructure best suited to sorting by key, use timestamps as the key, and phase 
-        them out over time.  If there are overlaps of the same thing being detected >1 it justs makes
-        the sensor feedback stronger?  Fiddling with the time out.. maybe make it a function of % of
-        maximum distance?
-
-        
-        
-        */
-        let result = sensor.sweep(delta);
-
+      if (actor.sensors) {
+        for (let sensor of actor.sensors) {
+          let result = sensor.sweep(delta);
+          if (sensor.active) {
+            Director.signals.add(currentTime, result); //<-- everything within distance will see this "ping"
+          }
+          actor.sensorData.add(currentTime, result); //<-- it needs its own list of things "it" sees.
+        }
       }
     }
   }
