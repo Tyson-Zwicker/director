@@ -51,7 +51,7 @@ export default class Actor {
     this.#label = { "text": text, "offset": offset, "emSize": size };
   }
   attachSensor (sensor){
-    sensor.actor = this;
+    sensor['actor'] = this;
     this.sensors.sensors.push (sensor);
     return sensors.length;
   }
