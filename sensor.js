@@ -1,6 +1,7 @@
-import Point from './points.js';
+import Point from './point.js';
 import Director from './director.js';
-import Boundry from './boudry.js';
+import Boundry from './boundry.js';
+import Actor from './actor.js';
 export default class Sensor {
   //Points reflect World Coordinates.
   //Direction is a component vector
@@ -10,32 +11,35 @@ export default class Sensor {
   //speed is degrees per second
   //currentDirection is either + or -1 depending on which way the sensor is sweepingn
   //currentAngle is a between -sweep and +sweep.  It is added as an offset to "angle"
-    constructor(actor, centerAngle, sweep, speed, distance) {
-    this.actor = actor;
+  //***YOU MUST ATTACH THIS TO AN ACTOR USING [actor.attachSensor ()] OR IT WON'T WORK.
+  constructor(name, centerAngle, sweep, speed, distance, active) {
+    if (!centerAngle || isNaN(centerAngle) || centerAngle < 0 || centerAngle > 359) throw new Error(`Sensor.constructor: Invalid centerAngle [${centerAngle}]`)
+    if (!sweep || isNaN(sweep) || sweep < 0 || sweep > 359) throw new Error(`Sensor.constructor: Invalid sweep [${sweep}]`);
+    this.name = name;
     this.centerAngle = centerAngle; //Defined as 0 if forward, -90 if port, +90 starboard, 180 to aft, etc.
-    this.sweep = sweep;    
+    this.sweep = sweep;
     this.speed = speed;
     this.distance = distance;
-  
+    this.active = active;
     this.currentOffset = 0; //varies from -sweep to +sweep.
     this.currentDirection = 1;
+
   }
 
   sweep(delta) {
+    if (!this.actor || !(this.actor instanceof Actor)) throw new Error(`Sensor.sweep: No actor attached[ ${this.actor}]`);
     //Get the candidates and go through the list.
     let cx = this.actor.position.x;
     let cy = this.actor.position.y;
     let sensorBoundry = new Boundry(cx - this.distance, cy - this.distance, cx + this.distance, cy + this.distance);
     let foundActors = Director.quadtree.findInBounds(sensorBoundry);
     let results = this.#examineCandidates(foundActors);
-    this.#moveSensor();
-    //Throw in relative bearing to target because that has got to be useful..
-    results[bearing] = this.currentAngle +this.direction;
+    this.#moveSensor(delta);
     return results;
   }
   #moveSensor(delta) {
     //move sensors currentAngle. (relative agle from -sweep<->+sweep)
-    this.currentOffset += delta * this.speed*this.currentDirection;
+    this.currentOffset += delta * this.speed * this.currentDirection;
     //send it back the otherway when it reaches its the edge of its sweep
     if (this.currentOffset > this.sweep) {
       this.currentOffset = this.sweep;
@@ -64,21 +68,21 @@ export default class Sensor {
           barrierPoint1 = points[i];
           barrierPoint2 = points[i + 1];
         }
-        let worldAngle = this.actor.rotation + this.centerAngle+this.currentOffset
+        let worldAngle = this.actor.rotation + this.centerAngle + this.currentOffset
         let result = this.#rayCast(this.actor.position, worldAngle, barrierPoint1, barrierPoint2);
         if (result && result.distance < closestDistance) {
           closestDistance = result.distance;
           closestPoint = result.point;
           closestActor = actor;
         }
-      }     
+      }
     }
     //return the one with the shortest distance.
-     return {
-        closestPoint: closestPoint,
-        closestDistance: closestDistance,
-        closestActor: actor
-      };
+    return {
+      closestPoint: closestPoint,
+      closestDistance: closestDistance,
+      closestActor: closestActor
+    };
   }
   #rayCast(originPoint, direction, barrierPoint1, barrierPoint2) {
     const x1 = barrierPoint1.x;
@@ -88,7 +92,7 @@ export default class Sensor {
 
     const x3 = originPoint.x;
     const y3 = originPoint.y;
-    const directionComponents = Point.fromPolar (direction,1);
+    const directionComponents = Point.fromPolar(direction, 1);
     const x4 = x3 + directionComponents.x;
     const y4 = y3 + directionComponents.y;
 
