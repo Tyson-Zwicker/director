@@ -25,6 +25,7 @@ export default class Point {
     return p && typeof p.x === 'number' && typeof p.y === 'number' && !isNaN(p.x) && !isNaN(p.y);
   }
   static equal (p1,p2){
+    if (!this.isPointy (p1) || !this.isPointy(p2)) throw new Error (`Point.equals p1[${p1}] p2[${p2}]`);
     return p1.x ===p2.x && p1.y === p2.y;
   }
   ///Anything with an X and a Y is getting light copied to a new object.
@@ -34,8 +35,9 @@ export default class Point {
     }
     throw new Error(`Point.from: object is not a point.`);
   }
+  //Angle should be in Degrees.
   static fromPolar(angle, distance){
-    return new Point (Math.cos (angle*180/Math.Pi)*distance, new Math.sin (angle*180/Math.PI));
+    return new Point (Math.cos (angle*180/Math.PI)*distance, new Math.sin (angle*180/Math.PI));
   }
   //This is a deep copy for points with added stuff 
   static copy(p) {
