@@ -36,14 +36,15 @@ function startTest(){
   tracker.add (time, {name: "priveldges granted"});
   tracker.add (time, {name: "file sent."});
   console.log (tracker);
-/*
-  console.log ('   -------Show t1000015--------');
-  let eventArray = tracker.getEvents('t1000015');
+
+  console.log ('   -------Show t1000027--------');
+  let eventArray = tracker.getEvents('t1000027');
   console.log (eventArray);
 
-  console.log ('   -------RemoveFrom "t1000027--------');
-  tracker.removeFrom ('t1000027');
+  console.log ('   -------RemoveFrom "t1000026--------');
+  tracker.removeFrom ('t1000026');
   console.log (tracker);
-  */
 
+  console.log ('   --------------------');
+  console.log (tracker);
 }
