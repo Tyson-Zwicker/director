@@ -2,10 +2,10 @@ import Point from './point.js';
 
 export default class View {
   zoomFactor = 10;
-  minimumZoom = 0.1;  
+  minimumZoom = 0.1;
   canvas = document.createElement('canvas');
   context = this.canvas.getContext('2d');
-  camera = Point.zero();  
+  camera = Point.zero();
   screenCenter = null; // Initialize as null
   bounds = undefined;
   backgroundPressed = false;
@@ -33,13 +33,13 @@ export default class View {
     window.addEventListener('resize', this.resizeCanvas.bind(this));
     this.resizeCanvas();  // This will set screenCenter and the bounds.
   }
-  canSee(point,radius) {
-    let {x0,y0,x1,y1} = this.bounds;
-    if (radius && typeof radius==='number'){
-      x0-=radius;
-      y0-=radius;
-      x1+=radius;
-      y1+=radius;
+  canSee(point, radius) {
+    let { x0, y0, x1, y1 } = this.bounds;
+    if (radius && typeof radius === 'number') {
+      x0 -= radius;
+      y0 -= radius;
+      x1 += radius;
+      y1 += radius;
     }
     return (
       point.x >= x0 &&
@@ -64,7 +64,7 @@ export default class View {
     if (!actorMouseInteraction) {
       if (this.backgroundPressed && this.mouse.buttonDown) {
         //drag occuring..         
-        let drag = Point.from (this.backgroundPressedCoordinate);
+        let drag = Point.from(this.backgroundPressedCoordinate);
         let inverseMouse = new Point(this.mouse.x * -1, this.mouse.y * -1)
         Point.add(drag, inverseMouse);
         Point.scale(drag, 1 / this.camera.zoom);
@@ -114,7 +114,7 @@ export default class View {
     let ychange = ydiff * yratio;
     this.camera.x += xchange;
     this.camera.y += ychange;
-    this.camera.zoom = Math.max (this.minimumZoom, this.camera.zoom);
+    this.camera.zoom = Math.max(this.minimumZoom, this.camera.zoom);
     this.#calcBounds();
   }
   //Keep this as an arrow function or you will lose reference to "this".

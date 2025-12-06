@@ -26,7 +26,7 @@ export default class Director {
         Number.MAX_SAFE_INTEGER / 2,
         Number.MAX_SAFE_INTEGER / 2
       ),
-      1, 10  // Default capacity and minimum size for the quadtree
+      1, 1  // Default capacity and minimum size for the quadtree
     );
   }
   static addCreatorsFunction(fn) {
