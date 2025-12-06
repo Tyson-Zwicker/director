@@ -120,8 +120,31 @@ export default class Director {
   }
   static sensing(delta) {
     for (let actor of Director.actors.values()) {
-      for (let sensor of actor.sensors) {
-        sensor.sweep(delta);
+      //Doing this here instead of inside Actor because ACTIVE sensing will leave a detectatble
+      //point in the game world, for a period of time, that other actors can detect passively.
+      //Like shining a flashlight, or pinging a sonar, or a radar.
+      //SO we need to track temporary world-based sensor emminitions.
+      //AND we need to relay the sensor data back to the actor... so it can think about it, when
+      //we get to the  thinking part.
+      for (let sensor of actor.sensors) { 
+        /* this is what you're getting back:
+         return {
+        closestPoint: closestPoint,
+        closestDistance: closestDistance,
+        closestActor: actor
+        };
+
+        The problem is how to key it.. its unlikely every sensor pulse will be at exactly the same angle
+        because delta isn't constant, so we need to give time-spans to the data..
+        Maybe use a datastructure best suited to sorting by key, use timestamps as the key, and phase 
+        them out over time.  If there are overlaps of the same thing being detected >1 it justs makes
+        the sensor feedback stronger?  Fiddling with the time out.. maybe make it a function of % of
+        maximum distance?
+
+        
+        */
+
+        let result = sensor.sweep(delta);
       }
     }
   }

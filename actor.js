@@ -17,6 +17,7 @@ export default class Actor {
   sensors = [];
   appearance = undefined;
   _mass = undefined;
+  sensorData = new Map();
   constructor(name, polygon, appearance, mass) {
     this.name = name;
     this.polygon = polygon;
