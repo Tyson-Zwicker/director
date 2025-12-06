@@ -6,16 +6,21 @@ export default class EventTracker {
   sortedTimes = [];
   map = new Map();
   //The last thing that happened is on the bottom of the array.
-  add(time, event) {
+  add(time, evt) {
     if (!this.map.has(time)) {
       this.map.set (time,[]);                    //Give this time key an empty array, to hold events..
       this.sortedTimes.push(time);               //add latest time to sorted times
     }
-    this.map.get(time).push ( event);                //now add the event to the time property's arrray.
-    event['sortedTimeIndex'] = this.sortedTimes.length-1;  //And tell the event what its sortedTimeIndex was.
+    evt['sortedTimeIndex'] = this.sortedTimes.length-1;  //And tell the event what its sortedTimeIndex was.
+    this.map.get(time).push ( evt);                //now add the event to the time property's arrray.
+    console.log (evt);
+    console.log (this.map);
   }
   getEvents (time){
-    if (this.map.has(time)) return this.map.get(time);
+    if (this.map.has(time)) {
+      console.log (this.map.get(time));
+      return this.map.get(time);
+    }
     return null;
   }
   removeFrom(someTime) {
@@ -26,8 +31,8 @@ export default class EventTracker {
     let sortedTimeIndex = undefined;
     if (this.map.has(someTime)) {
       //Optimistic approach.
-      let event = this.map.get(someTime);
-      sortedTimeIndex = event.sortedTimeIndex;
+      let evt = this.map.get(someTime);
+      sortedTimeIndex = evt.sortedTimeIndex;
       for (let i = sortedTimeIndex; i > 0; i--) {
         this.map.delete (this.sortedTimes[i]);
       }
@@ -50,6 +55,7 @@ export default class EventTracker {
     if (this.map.has(time)) {
       let events = this.map.get(time);
       if (events.length-1>index) throw error (`EventTracker.removeAt: no event at time [${time}] and index [${index}]`);
+      events.splice (index,1);
     }
   }
 }
