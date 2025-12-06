@@ -1,5 +1,5 @@
 import Point from './point.js';
-import EventTracker from '.eventtracker.js';
+import EventTracker from './eventtracker.js';
 export default class Actor {
   position = new Point(0, 0); // world coordinates, defined in pixels.
   moves = true;

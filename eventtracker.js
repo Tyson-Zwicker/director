@@ -1,7 +1,7 @@
 //So this is basically just a map, but you can have more than one thing in it per key.  I use it to store time-based events
 //because sometimes things happens at the same time, but I am mostly interest in finding "when" faster than "what".
 
-class EventTracker {
+export default class EventTracker {
   sortedTimes = [];
   map = {};
   //The last thing that happened is on the bottom of the array.
