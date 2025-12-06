@@ -6,34 +6,37 @@ function startTest(){
   let tracker = new EventTracker();
 
   let time = 't1000000';
-  let event1 ={a:1, b:2};
-  let event2 ={a:3, b:4};
-  let event3 ={a:5, b:6};
-  tracker.add (time,event1);
+  
+  tracker.add (time,{name: "power on"});
 
   time ='t1000001';
-  tracker.add (time, event2);
+  tracker.add (time, {name: "initializing hardware"});
 
   time ='t1000013';
-  tracker.add (time, event3);
+  tracker.add (time, {name: "reading OS"});
   
   time ='t1000015';
-  tracker.add (time, event1);
-  tracker.add (time, event2);
-  tracker.add (time, event3);
-  /*
-  time='t1000027';
-  tracker.add (time, event3);
+  tracker.add (time, {name: "checking last log"});
+  tracker.add (time, {name: "confirming integrity"});
   
-  time='t1000028';
-  tracker.add (time, event1);
+  time='t1000027';
+  tracker.add (time, {name: "integrity confirmed"});
+  tracker.add (time, {name: "presenting login screen"});
+  
+  time='t1000033';
+  tracker.add (time, {name: "checking provided credentials"});
 
-  time='t1000038';
-  tracker.add (time, event1);
-  tracker.add (time, event2);
-*/
+  time='t1000035';
+  tracker.add (time, {name: "credential checks ok"});
+  tracker.add (time, {name: "starting shell"});
+
+  time='t1000110';
+  tracker.add (time, {name: "file request."}); 
+  tracker.add (time, {name: "requesting priviledges"});
+  tracker.add (time, {name: "priveldges granted"});
+  tracker.add (time, {name: "file sent."});
   console.log (tracker);
-  /*
+/*
   console.log ('   -------Show t1000015--------');
   let eventArray = tracker.getEvents('t1000015');
   console.log (eventArray);
