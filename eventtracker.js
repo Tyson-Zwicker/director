@@ -6,19 +6,17 @@ export default class EventTracker {
   sortedTimes = [];
   map = new Map();
   //The last thing that happened is on the bottom of the array.
-  add(time, evt) {
+  add(time, event) {
     if (!this.map.has(time)) {
-      this.map.set (time,[]);                    //Give this time key an empty array, to hold events..
+      this.map.set(time, []);                    //Give this time key an empty array, to hold events..
       this.sortedTimes.push(time);               //add latest time to sorted times
     }
-    evt['sortedTimeIndex'] = this.sortedTimes.length-1;  //And tell the event what its sortedTimeIndex was.
-    this.map.get(time).push ( evt);                //now add the event to the time property's arrray.
-    console.log (evt);
-    console.log (this.map);
+    event['sortedTimeIndex'] = this.sortedTimes.length - 1;  //And tell the event what its sortedTimeIndex was.
+    this.map.get(time).push(event);                //now add the event to the time property's arrray.
   }
-  getEvents (time){
+  getEvents(time) {
     if (this.map.has(time)) {
-      console.log (this.map.get(time));
+      console.log(this.map.get(time));
       return this.map.get(time);
     }
     return null;
@@ -29,24 +27,26 @@ export default class EventTracker {
     //once you find on that is => someTime, iterate tha map and remove the older stuff, using sortedTimes as key, reading from the top.
     //then splice the top off of the sortTimes array.
     let sortedTimeIndex = undefined;
-    if (this.map.has(someTime)) {
+    if (this.map.has(someTime) && this.map.get(someTime).length > 0) {
       //Optimistic approach.
-      let evt = this.map.get(someTime);
-      sortedTimeIndex = evt.sortedTimeIndex;
-      for (let i = sortedTimeIndex; i > 0; i--) {
-        this.map.delete (this.sortedTimes[i]);
+      let events = this.map.get(someTime);
+      //All the events here will share the same time index, because to be here, you got inserted at that time.
+      sortedTimeIndex = events[0].sortedTimeIndex; //We checked to make sure it has at least one cell to read..
+      for (let i = sortedTimeIndex; i >= 0; i--) {
+        this.map.delete(this.sortedTimes[i]);
       }
     } else {
       //The brute force way..
       sortedTimeIndex = undefined
-      for (let searchIndex = this.sortedTimes.length-1; searchIndex > 0 ; searchIndex++) {
+      for (let searchIndex = this.sortedTimes.length - 1; searchIndex >= 0; searchIndex++) {
         if (this.sortedTimes[searchIndex] <= someTime) {
-          sortedTimeIndex = searchIndex;          
-        }        
+          sortedTimeIndex = searchIndex;
+          break;
+        }
       }
-      if (sortedTimeIndex === undefined) throw Error (`EventTracker.removeFrom: No events found at, or prior to, [${time}]`);
-      for (let removeIndex = sortedTimeIndex; removeIndex>0; removeIndex--) {
-          this.map.delete (this.sortedTimes[removeIndex]);
+      if (sortedTimeIndex === undefined) throw Error(`EventTracker.removeFrom: No events found at, or prior to, [${someTime}]`);
+      for (let removeIndex = sortedTimeIndex; removeIndex >= 0; removeIndex--) {
+        this.map.delete(this.sortedTimes[removeIndex]);
       }
     }
     this.sortedTimes.splice(0, sortedTimeIndex + 1);
@@ -54,8 +54,8 @@ export default class EventTracker {
   removeAt(time, index) {
     if (this.map.has(time)) {
       let events = this.map.get(time);
-      if (events.length-1>index) throw error (`EventTracker.removeAt: no event at time [${time}] and index [${index}]`);
-      events.splice (index,1);
+      if (index < 0 || index >= events.length) throw Error(`EventTracker.removeAt: no event at time [${time}] and index [${index}]`);
+      events.splice(index, 1);
     }
   }
 }
