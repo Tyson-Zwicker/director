@@ -5,9 +5,8 @@ F=ma, a= `v/t, d = 1 pixel, v= 1 pixel/second, and t is time in milliseconds (de
 import Actor from './actor.js';
 import Point from './point.js'
 export default class ActorField {
-
-    strength = undefined;
     actor = undefined;
+    strength = undefined;    
     constructor(actor, strength) {
         if (typeof strength !== 'number') throw Error(`Field.constructor: strength is not a number [${strength}]`);
         if (!(actor instanceof Actor)) throw Error(`Field.constructor:  Actor is not an actor [${actor}]`)

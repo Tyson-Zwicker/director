@@ -9,9 +9,9 @@ export default class Part {
   appearance = undefined;
   constructor(name, x, y, polygon, rotation) {
     this.name = name;
-    this.polygon = polygon;
     this.offset = new Point(x, y);
-    this.rotation = (rotation)? rotation:0;
+    this.polygon = polygon;
+    this.rotation = (rotation) ? rotation : 0;
   }
   isPart() {
     return true;

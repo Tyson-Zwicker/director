@@ -1,4 +1,18 @@
--Finish drawing/debugging sensor/ray-casting code..
++-Sensors are added to actors
++-Director calls on them to perform sweep
++-NEXT:Where's the sensor data being stored? Director? Actor?
++-THEN:How to add sensor sweep as a foreground effect.
++-TEST:two actors.  Give one a sensor and fire it.  console out what happens. 
++-TEST2: draw the sensor trace.
+
+Currently:
+  results from test seem a little off so to say the least, so get inside the
+  #evaluateCandidates method and starting adding tattlers.
+
+
+
+
+
 -Actor Layers (also the idea of non-interaction BETWEEN layers to sim far distant..stuff)
 -Force enacters (engines/thrusters/fins/wings/legs/etc.) ATTACHED to an actor.
 -Universal Fields (universal attractor/repulsor)

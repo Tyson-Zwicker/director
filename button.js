@@ -1,30 +1,17 @@
 import Point from './point.js';
 export default class Button {
+  actor = null;
+  clicked = false;
+  clickFn = null;
   hovered = false;
   pressed = false;
-  clickFn = null;
-  clicked = false;
   toggle = false;
-  actor = null;
+
   constructor(hoveredAppearance, pressedAppearance, clickFn = null, toggle = false) {
     this.hoveredAppearance = hoveredAppearance;
     this.pressedAppearance = pressedAppearance;
     this.clickFn = clickFn;
     this.toggle = toggle;
-  }
-  #click() {
-    if (!this.toggle) {
-      if (this.clickFn) {
-        this.clickFn();
-      }
-    } else {
-      this.clicked = !this.clicked;
-      if (this.clicked) {
-        if (this.clickFn) {
-          this.clickFn();
-        }
-      } 
-    }
   }
   checkForMouse(mouse) {
     let interaction = false;
@@ -57,5 +44,19 @@ export default class Button {
       this.hovered = false;
     }
     return interaction;
+  }
+  #click() {
+    if (!this.toggle) {
+      if (this.clickFn) {
+        this.clickFn();
+      }
+    } else {
+      this.clicked = !this.clicked;
+      if (this.clicked) {
+        if (this.clickFn) {
+          this.clickFn();
+        }
+      }
+    }
   }
 }

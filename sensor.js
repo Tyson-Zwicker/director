@@ -15,20 +15,20 @@ export default class Sensor {
   //currentAngle is a between -fieldOfView and +fieldOfView.  It is added as an offset to "angle"
   //***YOU MUST ATTACH THIS TO AN ACTOR USING [actor.attachSensor ()] OR IT WON'T WORK.
   constructor(name, centerAngle, fieldOfView, speed, distance, active) {
-    if (typeof centerAngle!=='number' || centerAngle < 0 || centerAngle > 359) throw new Error(`Sensor.constructor: Invalid centerAngle [${centerAngle}]`)
-    if (typeof fieldOfView!=='number' || fieldOfView < 0 || fieldOfView > 359) throw new Error(`Sensor.constructor: Invalid fieldOfView [${fieldOfView}]`);
-    if (typeof speed!=='number' || speed<0 || speed>fieldOfView/2) throw new Error (`speed must be less than speed and >0 [${speed}]`);
-    if (typeof distance!=='number' || distance<1) throw new Error (`distance must be  >=1 [${distance}]`);
-    if (typeof active!='boolean') throw new Error (`active must true or false ${active}`);
-    
-    this.name = name;
-    this.centerAngle = centerAngle; //Defined as 0 if forward, -90 if port, +90 starboard, 180 to aft, etc.
-    this.fieldOfView = fieldOfView;
-    this.speed = speed;
-    this.distance = distance;
+    if (typeof active != 'boolean') throw new Error(`active must true or false ${active}`);
+    if (typeof centerAngle !== 'number' || centerAngle < 0 || centerAngle > 359) throw new Error(`Sensor.constructor: Invalid centerAngle [${centerAngle}]`)
+    if (typeof distance !== 'number' || distance < 1) throw new Error(`distance must be  >=1 [${distance}]`);
+    if (typeof fieldOfView !== 'number' || fieldOfView < 0 || fieldOfView > 359) throw new Error(`Sensor.constructor: Invalid fieldOfView [${fieldOfView}]`);
+    if (typeof speed !== 'number' || speed < 0 || speed > fieldOfView / 2) throw new Error(`speed must be less than speed and >0 [${speed}]`);
     this.active = active;
-    this.currentOffset = 0; //varies from -fieldOfView to +fieldOfView.
+    this.actor = undefined; //Assigned when attached to an actor.
+    this.centerAngle = centerAngle; //Defined as 0 if forward, -90 if port, +90 starboard, 180 to aft, etc.
     this.currentDirection = 1;
+    this.currentOffset = 0; //varies from -fieldOfView to +fieldOfView.
+    this.distance = distance;
+    this.fieldOfView = fieldOfView;
+    this.name = name;
+    this.speed = speed;
   }
 
   sweep(delta) {
@@ -54,11 +54,11 @@ export default class Sensor {
     if (this.currentOffset < -this.fieldOfView) {
       this.currentOffset = -this.fieldOfView;
       this.currentDirection = 1;
-    }    
+    }
   }
-  #draw(closestPoint){
-    let sensorRay = new LineEffect (this.actor.position, closestPoint, 1,new Color (15,15,15),this.fieldOfView);
-    Director.addForegroundEffect (sensorRay);
+  #draw(closestPoint) {
+    let sensorRay = new LineEffect(this.actor.position, closestPoint, 1, new Color(15, 15, 15), this.fieldOfView);
+    Director.addForegroundEffect(sensorRay);
   }
   #examineCandidates(foundActors) {
     let closestDistance = Number.MAX_SAFE_INTEGER;
@@ -79,9 +79,9 @@ export default class Sensor {
           barrierPoint2 = points[i + 1];
         }
         let worldAngle = this.actor.rotation + this.centerAngle + this.currentOffset
-        
+
         let result = this.#rayCast(this.actor.position, worldAngle, barrierPoint1, barrierPoint2);
-        
+
         if (result && result.distance < closestDistance) {
           closestDistance = result.distance;
           closestPoint = result.point;
@@ -115,10 +115,10 @@ export default class Sensor {
 
     if (t > 0 && t < 1 && u > 0) {
       //old: x1 + t * (x2 - x1), y1 + t * (y2 - y1)
-      
-      let x = x1+t*(x2-x1)
-      let y = y1+t*(y2-y1);
-      const p = new Point(x,y);
+
+      let x = x1 + t * (x2 - x1)
+      let y = y1 + t * (y2 - y1);
+      const p = new Point(x, y);
       const d = Point.distance(originPoint, p);
       return {
         point: p,

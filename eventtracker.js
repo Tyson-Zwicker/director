@@ -1,12 +1,10 @@
 //So this is basically just a map, but you can have more than one thing in it per key.  I use it to store time-based events
 //because sometimes things happens at the same time, but I am mostly interest in finding "when" faster than "what".
-
-
 export default class EventTracker {
-  sortedTimes = [];
-  map = new Map();
   //sortedTimes is built in chronological order, so its already sorted by default.
   //The last thing that happened is on the bottom of the array.
+  map = new Map();
+  sortedTimes = [];
   add(time, event) {
     if (!this.map.has(time)) {
       this.map.set(time, []);                    //Give this time key an empty array, to hold events..
@@ -21,14 +19,19 @@ export default class EventTracker {
     }
     return null;
   }
-  removeFrom(someTime) {    
-    //Try to find the actual "someTime" in the map, but (when its not there) fallback to:
-    //start from the top of sorted time, as it will be the oldest.  We'll probaly want to get rid of the old stuff not the new stuff.
-    //once you find on that is => someTime, iterate tha map and remove the older stuff, using sortedTimes as key, reading from the top.
-    //then splice the top off of the sortTimes array.
-
+  removeAt(time, index) {
+    if (this.map.has(time)) {
+      let events = this.map.get(time);
+      if (index < 0 || index >= events.length) throw Error(`EventTracker.removeAt: no event at time [${time}] and index [${index}]`);
+      events.splice(index, 1);
+      if (events.length === 0) {
+        this.map.delete(time); //Empty "time slots" need not be remembered.
+      }
+    }
+  }
+  removeFrom(someTime) {
     //return early if we're being to wipe out records preexissting any of the records..
-    if (this.sortedTimes.length>0 && this.sortedTimes[0]>someTime) return;
+    if (this.sortedTimes.length > 0 && this.sortedTimes[0] > someTime) return;
     let sortedTimeIndex = undefined;
     if (this.map.has(someTime) && this.map.get(someTime).length > 0) {
       //Optimistic approach.
@@ -55,14 +58,5 @@ export default class EventTracker {
     }
     this.sortedTimes.splice(0, sortedTimeIndex + 1);
   }
-  removeAt(time, index) {
-    if (this.map.has(time)) {
-      let events = this.map.get(time);      
-      if (index < 0 || index >= events.length) throw Error(`EventTracker.removeAt: no event at time [${time}] and index [${index}]`);
-      events.splice(index, 1);
-      if (events.length===0){
-        this.map.delete (time);
-      }
-    }
-  }
+
 }

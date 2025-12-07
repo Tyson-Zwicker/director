@@ -54,12 +54,30 @@ export default class Director {
   }
   static addForegroundEffect(effect) {
     Director.fgEffects.push(effect);
-  }
-  static kinematics(delta) {
-    for (let actor of Director.actors.values()) {
-      actor.move(delta);
-      Director.quadtree.insert(actor);
+  }  
+  static applyActorField(delta) {
+    for (let actorField of Director.actorFields.values()) {
+      for (let otherActor of Director.actors.values()) {
+        actorField.enactForce(otherActor);
+      }
     }
+  }
+
+  //------------------------- Workers called by main loop
+  static checkUserActorInteraction() {
+    let actorMouseInteraction = false;
+    for (let actor of Director.actors.values()) {
+      // Check if actor is in view before interacting
+      if (
+        Director.view.canSee(actor.position) &&
+        actor.button &&
+        actor.button.checkForMouse(Director.view.mouse)
+      ) {
+        actorMouseInteraction = true;
+        break;
+      }
+    }
+    Director.view.handleCameraDrag(actorMouseInteraction);
   }
   static collisions(delta) {
     let collisions = Collisions.getCollisions(Director.quadtree);
@@ -67,7 +85,7 @@ export default class Director {
       Collisions.callActorCollisionEvents(collision);
       Collisions.handleCollisionPhysics(collision);
     }
-  }
+  } 
   static draw(delta) {
     //Draw background..
     let survivingBackgroundEffects = [];
@@ -96,41 +114,21 @@ export default class Director {
     Director.bgEffects = survivingBackgroundEffects;
     Director.fgEffects = survivingForegroundEffects;
   }
-  static checkUserActorInteraction() {
-    let actorMouseInteraction = false;
+  static kinematics(delta) {
     for (let actor of Director.actors.values()) {
-      // Check if actor is in view before interacting
-      if (
-        Director.view.canSee(actor.position) &&
-        actor.button &&
-        actor.button.checkForMouse(Director.view.mouse)
-      ) {
-        actorMouseInteraction = true;
-        break;
-      }
-    }
-    Director.view.handleCameraDrag(actorMouseInteraction);
-  }
-  static applyActorField(delta) {
-    //TODO: I need a filter on this so it isn't iterating through EVERYTHING.
-    //Basically how far away do you have to get where the force you exert hits a minimal threshold 
-    //so it becomes irrelevent.  Then use the quadtree to get just whats inside that radius.
-
-    for (let actorField of Director.actorFields.values()) {
-      for (let otherActor of Director.actors.values()) {
-        actorField.enactForce(otherActor);
-      }
+      actor.move(delta);
+      Director.quadtree.insert(actor);
     }
   }
   static sensing(delta, currentTime) {
     for (let actor of Director.actors.values()) {
       if (actor.sensors) {
-        console.log (`sensing for ${actor.name}`);
+        console.log(`sensing for ${actor.name}`);
         for (let sensor of actor.sensors) {
-          console.log (`  using sensor ${sensor.name}`);
+          console.log(`  using sensor ${sensor.name}`);
           let result = sensor.sweep(delta);
-          console.log (`  result:`);
-          console.log (result);
+          console.log(`  result:`);
+          console.log(result);
           if (sensor.active) {
             Director.signals.add(currentTime, result); //<-- everything within distance will see this "ping"
           }
@@ -139,6 +137,7 @@ export default class Director {
       }
     }
   }
+  //------------------------- loop
   static loop(currentTime) {
     const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
     Director.lastFrameTime = currentTime;
@@ -156,6 +155,7 @@ export default class Director {
     Director.quadtree.clear();      //QuadTree is cleared (will be recreated begining next loop)
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }
+//------------------------- runners
   static run() {
     Director.continueAnimationLoop = true;
     requestAnimationFrame(Director.loop.bind(Director));

@@ -21,47 +21,6 @@ export default class Point {
     this.x = x;
     this.y = y;
   }
-  static isPointy(p) {
-    return p && typeof p.x === 'number' && typeof p.y === 'number' && !isNaN(p.x) && !isNaN(p.y);
-  }
-  static equal (p1,p2){
-    if (!this.isPointy (p1) || !this.isPointy(p2)) throw new Error (`Point.equals p1[${p1}] p2[${p2}]`);
-    return p1.x ===p2.x && p1.y === p2.y;
-  }
-  ///Anything with an X and a Y is getting light copied to a new object.
-  static from(obj) {
-    if (this.isPointy(obj)) {
-      return new Point(obj.x, obj.y);
-    }
-    throw new Error(`Point.from: object is not a point.`);
-  }
-  //Angle should be in Degrees.
-  static fromPolar(angle, distance){
-    return new Point (
-      Math.cos (angle*Math.PI / 180)*distance,
-      Math.sin (angle*Math.PI / 180)*distance);
-  }
-  //This is a deep copy for points with added stuff 
-  static copy(p) {
-    if (this.isPointy(p)) {
-      let copy = new Point(p.x, p.y);
-      let propertyNames = Object.getOwnPropertyNames(p);
-      for (let i = 0; i < propertyNames.length; i++) {
-        copy[propertyNames[i]] = p[propertyNames[i]];
-      }
-      return copy;
-    }
-    throw new Error(`Point.copy: p is not a point`);
-  }
-  static zero() {
-    return new Point(0, 0);
-  }
-  static create(x, y) {
-    if (typeof x === 'number' && typeof y === 'number') {
-      return new Point(x, y);
-    }
-    throw Error (`Point.create: Bad parameters x:${x}, y:${y}`);
-  }
   static add(persistent, change) {
     if (!this.isPointy(persistent)) {
       throw new Error(`Point.add: persistent is not a point [${persistent}]`);
@@ -84,26 +43,59 @@ export default class Point {
     persistent.y = Math.abs(persistent.y) + Math.abs(change.y);
     return persistent;
   }
-  static sub(persistent, change) {
-    if (!this.isPointy(persistent)) {
-      throw new Error(`Point.sub: persistent is not a point [${persistent}]`);
+  static copy(p) {
+    if (this.isPointy(p)) {
+      let copy = new Point(p.x, p.y);
+      let propertyNames = Object.getOwnPropertyNames(p);
+      for (let i = 0; i < propertyNames.length; i++) {
+        copy[propertyNames[i]] = p[propertyNames[i]];
+      }
+      return copy;
     }
-    if (!this.isPointy(change)) {
-      throw new Error(`Point.sub: change is not a point [${change}]`);
-    }
-    persistent.x -= change.x;
-    persistent.y -= change.y;
-    return persistent;
+    throw new Error(`Point.copy: p is not a point`);
   }
-  static scale(persistent, s) {
+  static distance(p1, p2) {
+    if (this.isPointy(p1) && this.isPointy(p2)) {
+      return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+    }
+    throw new Error(`Point.distance: p1 or p2 is not a point`);
+  }
+  static dot(p1, p2) {
+    if (this.isPointy(p1) && this.isPointy(p2)) {
+      return p1.x * p2.x + p1.y * p2.y;
+    }
+    throw new Error(`Point.dot: p1 or p2 is not a point`);
+  }
+  static equal(p1, p2) {
+    if (!this.isPointy(p1) || !this.isPointy(p2)) throw new Error(`Point.equals p1[${p1}] p2[${p2}]`);
+    return p1.x === p2.x && p1.y === p2.y;
+  }
+  ///Anything with an X and a Y is getting light copied to a new object.
+  static from(obj) {
+    if (this.isPointy(obj)) {
+      return new Point(obj.x, obj.y);
+    }
+    throw new Error(`Point.from: object is not a point.`);
+  }
+  //Angle should be in Degrees.
+  static fromPolar(angle, distance) {
+    return new Point(
+      Math.cos(angle * this.toRad) * distance,
+      Math.sin(angle * this.toRad) * distance);
+  }
+  static isPointy(p) {
+    return p && typeof p.x === 'number' && typeof p.y === 'number' && !isNaN(p.x) && !isNaN(p.y);
+  }
+  static normalize(persistent) {
     if (!this.isPointy(persistent)) {
-      throw new Error(`Point.scale: persistent is not a point [${persistent}]`);
+      throw new Error(`Point.normalize: persistent is not a point`);
     }
-    if (isNaN(s)) {
-      throw new Error(`Point.scale: s is NaN[${s}]`);
+    const length = Math.sqrt(persistent.x * persistent.x + persistent.y * persistent.y);
+    if (length === 0) {
+      throw new Error(`Point.normalize: zero-length vector`);
     }
-    persistent.x *= s;
-    persistent.y *= s;
+    persistent.x /= length;
+    persistent.y /= length;
     return persistent;
   }
   static rotate(persistent, degrees) {
@@ -122,32 +114,32 @@ export default class Point {
     persistent.y = x * sin + y * cos;
     return persistent;
   }
-  static distance(p1, p2) {
-    if (this.isPointy(p1) && this.isPointy(p2)) {
-      return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
-    }
-    throw new Error(`Point.distance: p1 or p2 is not a point`);
-  }
-  static normalize(persistent) {
+  static scale(persistent, s) {
     if (!this.isPointy(persistent)) {
-      throw new Error(`Point.normalize: persistent is not a point`);
+      throw new Error(`Point.scale: persistent is not a point [${persistent}]`);
     }
-    const length = Math.sqrt(persistent.x * persistent.x + persistent.y * persistent.y);
-    if (length === 0) {
-      throw new Error(`Point.normalize: zero-length vector`);
+    if (isNaN(s)) {
+      throw new Error(`Point.scale: s is NaN[${s}]`);
     }
-    persistent.x /= length;
-    persistent.y /= length;
+    persistent.x *= s;
+    persistent.y *= s;
     return persistent;
   }
-  static dot(p1, p2) {
-    if (this.isPointy(p1) && this.isPointy(p2)) {
-      return p1.x * p2.x + p1.y * p2.y;
+  static sub(persistent, change) {
+    if (!this.isPointy(persistent)) {
+      throw new Error(`Point.sub: persistent is not a point [${persistent}]`);
     }
-    throw new Error(`Point.dot: p1 or p2 is not a point`);
+    if (!this.isPointy(change)) {
+      throw new Error(`Point.sub: change is not a point [${change}]`);
+    }
+    persistent.x -= change.x;
+    persistent.y -= change.y;
+    return persistent;
   }
-   
-  toString() {
+  toString() {``
     return `Point(${this.x},${this.y})`;
+  }
+  static zero() {
+    return new Point(0, 0);
   }
 }
