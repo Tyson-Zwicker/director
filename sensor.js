@@ -12,16 +12,16 @@ export default class Sensor {
   //currentDirection is either + or -1 depending on which way the sensor is sweepingn
   //currentAngle is a between -sweep and +sweep.  It is added as an offset to "angle"
   //***YOU MUST ATTACH THIS TO AN ACTOR USING [actor.attachSensor ()] OR IT WON'T WORK.
-  constructor(name, centerAngle, sweep, speed, distance, active) {
+  constructor(name, centerAngle, fieldOfView, speed, distance, active) {
     if (typeof centerAngle!=='number' || centerAngle < 0 || centerAngle > 359) throw new Error(`Sensor.constructor: Invalid centerAngle [${centerAngle}]`)
-    if (typeof sweep!=='number' || sweep < 0 || sweep > 359) throw new Error(`Sensor.constructor: Invalid sweep [${sweep}]`);
-    if (typeof speed!=='number' || speed<0 || speed>sweep) throw new Error (`speed must be less than sweep and >0 [${speed}]`);
-    if (typeof distance!=='number' || distance>0) throw new Error (`distance must be  >0 [${distance}]`);
+    if (typeof fieldOfView!=='number' || fieldOfView < 0 || fieldOfView > 359) throw new Error(`Sensor.constructor: Invalid fieldOfView [${fieldOfView}]`);
+    if (typeof speed!=='number' || speed<0 || speed>fieldOfView/2) throw new Error (`speed must be less than sweep and >0 [${speed}]`);
+    if (typeof distance!=='number' || distance<1) throw new Error (`distance must be  >=1 [${distance}]`);
     if (typeof active!='boolean') throw new Error (`active must true or false ${active}`);
     
     this.name = name;
     this.centerAngle = centerAngle; //Defined as 0 if forward, -90 if port, +90 starboard, 180 to aft, etc.
-    this.sweep = sweep;
+    this.fieldOfView = fieldOfView;
     this.speed = speed;
     this.distance = distance;
     this.active = active;
@@ -36,7 +36,7 @@ export default class Sensor {
     let cx = this.actor.position.x;
     let cy = this.actor.position.y;
     let sensorBoundry = new Boundry(cx - this.distance, cy - this.distance, cx + this.distance, cy + this.distance);
-    let foundActors = Director.quadtree.findInBounds(sensorBoundry);
+    let foundActors = Director.quadtree.findInRange(sensorBoundry);
     let results = this.#examineCandidates(foundActors);
     this.#moveSensor(delta);
     return results;

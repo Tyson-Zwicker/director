@@ -52,8 +52,8 @@ export default class Actor {
   }
   attachSensor (sensor){
     sensor['actor'] = this;
-    this.sensors.sensors.push (sensor);
-    return sensors.length;
+    this.sensors.push (sensor);
+    return this.sensors.length;
   }
   removeSensor (i){    
     this.sensors.splice (i,1);

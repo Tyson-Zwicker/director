@@ -63,19 +63,19 @@ export default class Quadtree {
     }
   }
   findInRange(otherBoundry, found = []) {
-    if (!this.bounds.touches(otherBoundry)) return found;     //Safely ignore this whole quadrant..
+    if (!this.bounds.touches(otherBoundry)) return found; //Safely ignore this whole quadrant..
     for (let actor of this.actors) {
       let actorBounds = Boundry.getActorBounds(actor);
       if (actorBounds.touches(otherBoundry)) {
-        found.push(actor);         //Anything in the same quadrant is worth looking at more closely..
+        found.push(actor);                                //Anything in the same quadrant is worth looking at more closely..
       }
     }
-    if (this.divided) {                                                 //Probably nothing in the top level quadrant because it has been subdivided,
-      this.northwest.findInRange(otherBoundry, found);                 //and the actors moved to other locations, so we check the subquadants
+    if (this.divided) {                                   //Probably nothing in the top level quadrant because it has been subdivided,
+      this.northwest.findInRange(otherBoundry, found);    //and the actors moved to other locations, so we check the subquadants
       this.northeast.findInRange(otherBoundry, found);
       this.southwest.findInRange(otherBoundry, found);
       this.southeast.findInRange(otherBoundry, found);
     }
-    return found;                                                       //Recurse..
+    return found;                                         //Recurse..
   }
 }

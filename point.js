@@ -37,7 +37,7 @@ export default class Point {
   }
   //Angle should be in Degrees.
   static fromPolar(angle, distance){
-    return new Point (Math.cos (angle*180/Math.PI)*distance, new Math.sin (angle*180/Math.PI));
+    return new Point (Math.cos (angle*180/Math.PI)*distance, Math.sin (angle*180/Math.PI));
   }
   //This is a deep copy for points with added stuff 
   static copy(p) {
