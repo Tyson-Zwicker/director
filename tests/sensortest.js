@@ -14,8 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 export default function init() {
-  let sensorsActive = false;
-
   let a = new Actor(`Scout Craft`, Polygon.triangle(50, 100));
   a.position = new Point(-200, -200);
   a.spin = 1;
@@ -30,15 +28,17 @@ export default function init() {
   Director.addActor(a);
   let hovered = new Appearance ('#ff9','#f00','#fff',2);
   let pressed = new Appearance ('#6ff','#f82','#fff',3);
+  let sensorA = new Sensor ("SensorA", 90, 20,1,6000,false);
+  let sensorB = new Sensor ("SensorB",270,20,1,6000,false);
+  a.attachSensor (sensorA);
+  a.attachSensor (sensorB);
   let sensorToggleButton = new Button (hovered,pressed);
   sensorToggleButton.clickFn = function toggleSensors(){
     sensorsActive = !sensorsActive;
+    sensorA.active = !sensorA.active;
+    sensorB.active = !sensorA.active;
   }
   a.attachButton (sensorToggleButton);
-  let sensorA = new Sensor ("SensorA", 90, 20,1,6000,true);
-  let sensorB = new Sensor ("SensorB",270,20,1,6000,true);
-  a.attachSensor (sensorA);
-  a.attachSensor (sensorB);
 
   let b = new Actor(`BigRed`, Polygon.makeIrregular(70, 500,700));
   b.position = new Point(3000, 0);
@@ -62,10 +62,11 @@ export default function init() {
   Director.addActor(d);
   
   function runTheTest() { 
-    if (sensorsActive){
-      part1.rotation += 5;
-      part2.rotation -= 5;
-    }
+    if (sensorA.active) part1.rotation += 5;    
+    if (sensorB.active) part2.rotation -= 5;
+    
+    sensorA.active = !sensorA.active;
+    sensorB.active = !sensorB.active;
   }
   Director.addCreatorsFunction(runTheTest);
   Director.run();
