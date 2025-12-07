@@ -14,7 +14,7 @@ export default class Actor {
   polygon = undefined;
   #label = undefined;
   parts = [];
-  sensors = [];
+  sensors = undefined;
   sensorData = new EventTracker();
   appearance = undefined;
   _mass = undefined;
@@ -51,6 +51,7 @@ export default class Actor {
     this.#label = { "text": text, "offset": offset, "emSize": size };
   }
   attachSensor (sensor){
+    if (!this.sensors) this['sensors'] = [];
     sensor['actor'] = this;
     this.sensors.push (sensor);
     return this.sensors.length;

@@ -34,10 +34,9 @@ export default class Director {
   }
   static addActor(actor) {
     Director.actors.set(actor.name, actor);
-    Director.quadtree.insert(actor); //This will automically remove the actor if it is already in the quadtree
+    Director.quadtree.insert(actor);
   }
   static removeActor(actor) {
-    Director.actors.delete(actor.name);
     if (Director.actorFields.has(actor.name)) Director.actorFields.delete(actor.name);
   }
   static addFieldToActor(actor, strength) {
@@ -123,8 +122,12 @@ export default class Director {
   static sensing(delta, currentTime) {
     for (let actor of Director.actors.values()) {
       if (actor.sensors) {
+        console.log (`sensing for ${actor.name}`);
         for (let sensor of actor.sensors) {
+          console.log (`  using sensor ${sensor.name}`);
           let result = sensor.sweep(delta);
+          console.log ('  result:');
+          console.log (result);
           if (sensor.active) {
             Director.signals.add(currentTime, result); //<-- everything within distance will see this "ping"
           }
