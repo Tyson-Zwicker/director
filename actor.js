@@ -119,11 +119,6 @@ export default class Actor {
     let size = (emSize) ? emSize : 1;
     this.#label = { "text": text, "offset": offset, "emSize": size };
   }
-
-
-
-
-
   toString() {
     return `[${this.name}], contains [${this.parts.length}] parts, label [${this.#label?.text}]`;
   }

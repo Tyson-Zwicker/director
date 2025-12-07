@@ -68,6 +68,17 @@ export default class Color {
     if (value < 0 || value > 15) throw new Error(`color.#intToHex: value out of bounds ${value}. Must be (0,15) inclusive`);
     return value.toString(16).toUpperCase();
   }
+  static random(min) {
+    if (!min || min < 0 || min > 15) min = 6;
+    return new Color(this.#rnd(0, 15), this.#rnd(0, 15), this.#rnd(0, 15));
+  }
+  static #rnd(min, max) {
+    let n = Math.random() * (max + 1); //random is exclusive..
+    n = Math.floor(n); //an integer "i" between 0 and 15.
+    n = Math.max(n, min); //an integer between min and "i".
+    n = Math.min(n, max); // an integer between max and "i".
+    return n;
+  }
   toString() {
     let r = `r:${this.r} g:${this.g} b:${this.b} a:${this.opacity} hex:${this.asHex()}`;
     return r;

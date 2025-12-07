@@ -107,9 +107,6 @@ export default class Polygon {
       new Point(h / 2, 0));
     return new Polygon(parray);
   }
-
-
-
   toString() {
     let s = '';
     let so = '';
