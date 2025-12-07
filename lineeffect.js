@@ -14,8 +14,6 @@ export default class LineEffect {
     }
     //returns true if it should be removed from the director's list because its "lifespan" has been exceded.
     draw(context, delta) {
-
-       console.log ('lineEffects.translating');
         let tp1 = Point.from (this.p1); //The point is fixed in world coordinates, but screen moves so, tp = temporaty point ie. where the screen put you.
         Point.sub(tp1, Director.view.camera);
         Point.scale(tp1,  Director.view.camera.zoom);
@@ -24,11 +22,9 @@ export default class LineEffect {
         Point.sub(tp2,  Director.view.camera);
         Point.scale(tp2,  Director.view.camera.zoom);
         Point.add(tp2,  Director.view.screenCenter);
-        console.log(`LineEffect.drawing...start')`);
         if (!context || isNaN(delta)) throw (`LineEffect.draw: bad params context ${context}, delta ${delta}`);
         if (this.colorOrGradient instanceof Color) {
             context.strokeStyle = this.colorOrGradient.asHex();
-            console.log (`color as hex=${this.colorOrGradient.asHex()}`);
         } else {
             context.strokeStyle = this.colorOrGradient;
         }
@@ -38,7 +34,6 @@ export default class LineEffect {
         context.lineTo(tp2.x, tp2.y);
         context.stroke();
         this.life -= delta;
-        console.log(`LineEffect.drawing...done')`);
-        return (this.life < 0);
+        return (this.life > 0);
     }
 }
