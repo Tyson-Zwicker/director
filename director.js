@@ -5,6 +5,9 @@ import Boundry from './boundry.js';//<--TODO: move to quadtree. We could just pa
 import ActorField from './actorfields.js';
 import Actor from './actor.js';
 import EventTracker from './eventtracker.js';
+import LineEffect from './lineeffect.js';
+import Color from './color.js';
+
 export default class Director {
   static initialize() {
     Director.MILLISECONDS = 1000;
@@ -70,7 +73,7 @@ export default class Director {
     let survivingBackgroundEffects = [];
     for (let effect of Director.bgEffects) {
       if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
-        if (!effect.draw(Director.view.context, delta)) {
+        if (effect.draw(Director.view.context, delta)) {
           survivingBackgroundEffects.push(effect);
         }
       }
@@ -85,7 +88,7 @@ export default class Director {
     let survivingForegroundEffects = [];
     for (let effect of Director.fgEffects) {
       if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
-        if (!effect.draw(Director.view.context, delta)) {
+        if (effect.draw(Director.view.context, delta)) {
           survivingForegroundEffects.push(effect);
         }
       }
@@ -126,12 +129,14 @@ export default class Director {
         for (let sensor of actor.sensors) {
           console.log (`  using sensor ${sensor.name}`);
           let result = sensor.sweep(delta);
-          console.log ('  result:');
+          console.log (`  result:00`);
           console.log (result);
           if (sensor.active) {
             Director.signals.add(currentTime, result); //<-- everything within distance will see this "ping"
           }
           actor.sensorData.add(currentTime, result); //<-- it needs its own list of things "it" sees.
+          let sensorRay = new LineEffect (actor.position, result.closestPoint, new Color (15,0,0),5);
+          Director.addForegroundEffect (sensorRay);
         }
       }
     }
@@ -142,8 +147,9 @@ export default class Director {
     Director.kinematics(delta); //This redraws the entire quadtree.
     Director.applyActorField(delta);
     Director.view.clear(); //<-- Only here. Do not clear the goddamn screen anywhere else. It makes you shit be annoyingly invisibe..
+    Director.sensing(delta, currentTime); //<- do this before draw, as it may add effects..
     Director.draw(delta);
-    Director.sensing(delta, currentTime);
+
     Director.collisions(delta);
     if (Director.creatorFn) {
       Director.creatorFn(delta);
