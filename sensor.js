@@ -27,7 +27,6 @@ export default class Sensor {
     this.active = active;
     this.currentOffset = 0; //varies from -sweep to +sweep.
     this.currentDirection = 1;
-
   }
 
   sweep(delta) {
