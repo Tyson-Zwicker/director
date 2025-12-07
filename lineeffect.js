@@ -24,7 +24,8 @@ export default class LineEffect {
         Point.add(tp2,  Director.view.screenCenter);
         if (!context || isNaN(delta)) throw (`LineEffect.draw: bad params context ${context}, delta ${delta}`);
         if (this.colorOrGradient instanceof Color) {
-            context.strokeStyle = this.colorOrGradient.asHex();
+            let color = this.colorOrGradient.changeBrightness(this.life/this.duration);
+            context.strokeStyle = color.asHex();
         } else {
             context.strokeStyle = this.colorOrGradient;
         }
