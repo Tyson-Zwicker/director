@@ -15,9 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 export default function init() {
   let a = new Actor(`Scout Craft`, Polygon.triangle(50, 100));
-  a.position = new Point(-200, -200);
-  a.spin = 1;
-  a.rotation = 0;
+  a.position = new Point(0, 0);
+  a.spin = 0;
+  a.rotation = 90;
   a.appearance = new Appearance('#066', '#06f', '#fff');
   let part1 = new Part('box', -25, -20, Polygon.rectangle(15, 5), 0);
   part1.appearance = new Appearance('#ff0', '#f00', '#fff');
@@ -28,13 +28,12 @@ export default function init() {
   Director.addActor(a);
   let hovered = new Appearance ('#ff9','#f00','#fff',2);
   let pressed = new Appearance ('#6ff','#f82','#fff',3);
-  let sensorA = new Sensor ("SensorA", 90, 20,1,6000,false);
-  let sensorB = new Sensor ("SensorB",270,20,1,6000,false);
+  let sensorA = new Sensor ("SensorA", 90, 10,1,6000,false);
+  let sensorB = new Sensor ("SensorB",270,10,1,6000,false);
   a.attachSensor (sensorA);
   a.attachSensor (sensorB);
   let sensorToggleButton = new Button (hovered,pressed);
   sensorToggleButton.clickFn = function toggleSensors(){
-    sensorsActive = !sensorsActive;
     sensorA.active = !sensorA.active;
     sensorB.active = !sensorA.active;
   }
