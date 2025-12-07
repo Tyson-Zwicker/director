@@ -6,7 +6,7 @@ import Actor from '../actor.js';
 import Director from '../director.js';
 import Part from '../part.js';
 import Appearance from '../appearance.js';
-
+import Sensor from '../sensor.js';
 // PRIME MOVER
 document.addEventListener('DOMContentLoaded', () => {
   Director.initialize();
@@ -35,6 +35,10 @@ export default function init() {
     sensorsActive = !sensorsActive;
   }
   a.attachButton (sensorToggleButton);
+  let sensorA = new Sensor ("SensorA", 90, 20,1,6000,true);
+  let sensorB = new Sensor ("SensorB",270,20,1,6000,true);
+  a.attachSensor (sensorA);
+  a.attachSensor (sensorB);
 
   let b = new Actor(`BigRed`, Polygon.makeIrregular(70, 500,700));
   b.position = new Point(3000, 0);
