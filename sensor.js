@@ -79,7 +79,9 @@ export default class Sensor {
           barrierPoint2 = points[i + 1];
         }
         let worldAngle = this.actor.rotation + this.centerAngle + this.currentOffset
+        
         let result = this.#rayCast(this.actor.position, worldAngle, barrierPoint1, barrierPoint2);
+        
         if (result && result.distance < closestDistance) {
           closestDistance = result.distance;
           closestPoint = result.point;
@@ -112,7 +114,11 @@ export default class Sensor {
     const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
 
     if (t > 0 && t < 1 && u > 0) {
-      const p = new Point(x1 + t * (x2 - x1), y1 + t * (y2 - y1));
+      //old: x1 + t * (x2 - x1), y1 + t * (y2 - y1)
+      
+      let x = x1+t*(x2-x1)
+      let y = y1+t*(y2-y1);
+      const p = new Point(x,y);
       const d = Point.distance(originPoint, p);
       return {
         point: p,
