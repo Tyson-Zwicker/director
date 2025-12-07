@@ -26,20 +26,20 @@ export default function init() {
   part2.appearance = new Appearance('#0f7', '#0ff', '#fff');
   a.attachPart(part2);
   Director.addActor(a);
-  let hovered = new Appearance ('#ff9','#f00','#fff',2);
-  let pressed = new Appearance ('#6ff','#f82','#fff',3);
-  let sensorA = new Sensor ("SensorA", 90, 10,1,6000,false);
-  let sensorB = new Sensor ("SensorB",270,10,1,6000,false);
-  a.attachSensor (sensorA);
-  a.attachSensor (sensorB);
-  let sensorToggleButton = new Button (hovered,pressed);
-  sensorToggleButton.clickFn = function toggleSensors(){
+  let hovered = new Appearance('#ff9', '#f00', '#fff', 2);
+  let pressed = new Appearance('#6ff', '#f82', '#fff', 3);
+  let sensorA = new Sensor("SensorA", 90, 10, 1, 6000, false);
+  let sensorB = new Sensor("SensorB", 270, 10, 1, 6000, false);
+  a.attachSensor(sensorA);
+  a.attachSensor(sensorB);
+  let sensorToggleButton = new Button(hovered, pressed);
+  sensorToggleButton.clickFn = function toggleSensors() {
     sensorA.active = !sensorA.active;
     sensorB.active = !sensorA.active;
   }
-  a.attachButton (sensorToggleButton);
+  a.attachButton(sensorToggleButton);
 
-  let b = new Actor(`BigRed`, Polygon.makeIrregular(70, 500,700));
+  let b = new Actor(`BigRed`, Polygon.makeIrregular(70, 500, 700));
   b.position = new Point(3000, 0);
   b.spin = 2;
   b.rotation = 30;
@@ -59,16 +59,22 @@ export default function init() {
   d.rotation = 90;
   d.appearance = new Appearance('#b0d', '#f0f', '#f0f');
   Director.addActor(d);
-  
-  function runTheTest() { 
-    if (sensorA.active) part1.rotation += 5;    
+
+  function runTheTest() {
+    if (sensorA.active) part1.rotation += 5;
     if (sensorB.active) part2.rotation -= 5;
-    
+
     sensorA.active = !sensorA.active;
     sensorB.active = !sensorB.active;
   }
   Director.addCreatorsFunction(runTheTest);
+
+  /*
+                  Don't forget to change back to run() at some point...
+  */
+
   Director.run();
+  //---
 }
 
 
