@@ -7,15 +7,15 @@ export default class Sensor {
   //Direction is a component vector
   //returns "false" or an object with "position" and "distance".
   //centerAngle is the degree of offset the sensor has from the centerline of the actor.
-  //sweep is # of degrees the sensor can swivel through toeither side of the centerAngle.
+  //fieldOfView is # of degrees the sensor can swivel through to either side of the centerAngle.
   //speed is degrees per second
-  //currentDirection is either + or -1 depending on which way the sensor is sweepingn
-  //currentAngle is a between -sweep and +sweep.  It is added as an offset to "angle"
+  //currentDirection is either + or -1 depending on which way the sensor is sweeping
+  //currentAngle is a between -fieldOfView and +fieldOfView.  It is added as an offset to "angle"
   //***YOU MUST ATTACH THIS TO AN ACTOR USING [actor.attachSensor ()] OR IT WON'T WORK.
   constructor(name, centerAngle, fieldOfView, speed, distance, active) {
     if (typeof centerAngle!=='number' || centerAngle < 0 || centerAngle > 359) throw new Error(`Sensor.constructor: Invalid centerAngle [${centerAngle}]`)
     if (typeof fieldOfView!=='number' || fieldOfView < 0 || fieldOfView > 359) throw new Error(`Sensor.constructor: Invalid fieldOfView [${fieldOfView}]`);
-    if (typeof speed!=='number' || speed<0 || speed>fieldOfView/2) throw new Error (`speed must be less than sweep and >0 [${speed}]`);
+    if (typeof speed!=='number' || speed<0 || speed>fieldOfView/2) throw new Error (`speed must be less than speed and >0 [${speed}]`);
     if (typeof distance!=='number' || distance<1) throw new Error (`distance must be  >=1 [${distance}]`);
     if (typeof active!='boolean') throw new Error (`active must true or false ${active}`);
     
@@ -25,7 +25,7 @@ export default class Sensor {
     this.speed = speed;
     this.distance = distance;
     this.active = active;
-    this.currentOffset = 0; //varies from -sweep to +sweep.
+    this.currentOffset = 0; //varies from -fieldOfView to +fieldOfView.
     this.currentDirection = 1;
   }
 
@@ -41,16 +41,16 @@ export default class Sensor {
     return results;
   }
   #moveSensor(delta) {
-    //move sensors currentAngle. (relative angle from -sweep<->+sweep)
+    //move sensors currentAngle. (relative angle from -fieldOfView<->+fieldOFView)
     this.currentOffset += delta * this.speed * this.currentDirection;
     //send it back the otherway when it reaches its the edge of its sweep
-    if (this.currentOffset > this.sweep) {
-      this.currentOffset = this.sweep;
-      this.currentDirection *= -1;
+    if (this.currentOffset > this.fieldOfView) {
+      this.currentOffset = this.fieldOfView;
+      this.currentDirection = -1;
     }
-    if (this.currentOffset < -this.sweep) {
-      this.currentOffset = -this.sweep;
-      this.currentDirection *= -1;
+    if (this.currentOffset < -this.fieldOfView) {
+      this.currentOffset = -this.fieldOfView;
+      this.currentDirection = 1;
     }
   }
   #examineCandidates(foundActors) {
