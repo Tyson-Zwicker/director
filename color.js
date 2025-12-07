@@ -32,6 +32,17 @@ export default class Color {
     let base10 = value * 15;
     return this.#intToHex(Math.round(base10));
   }
+  static fromHex(hex) {
+    if (hex[0] !== '#') throw new Error(`Color.fromHex: must start with # ${hex}`);
+    let r = parseInt(hex[1], 16);
+    let g = parseInt(hex[2], 16);
+    let b = parseInt(hex[3], 16);
+    let op = 1;
+    if (hex.length === 5) {
+      let op = parseInt(hex[4], 16) / 15;//This turns #F into 1 and #0 into 0..
+    }
+    return new Color(r, g, b, op);
+  }
   getLinearGradient(context, x1, y1, x2, y2, stopPoint1, color1, stopPoint2, color2, stopPoint3, color3, stopPoint4, color4) {
     if (isNaN(x1) || isNaN(x2)) throw new Error(`line.draw bad coordinates (${x1},${y1}) (${x2},${y2})`)
     let gradient = context.createLinearGradient(x1, y1, x2, y2);

@@ -1,17 +1,19 @@
 import Point from './point.js';
 
 export default class View {
-  zoomFactor = 10;
-  minimumZoom = 0.1;
-  canvas = document.createElement('canvas');
-  context = this.canvas.getContext('2d');
-  camera = Point.zero();
-  screenCenter = null; // Initialize as null
-  bounds = undefined;
+
+
   backgroundPressed = false;
   backgroundPressedCoordinate = null;
   backgroundColor = "#012";
+  bounds = undefined;
+  camera = Point.zero();
+  canvas = document.createElement('canvas');
+  context = this.canvas.getContext('2d');
+  minimumZoom = 0.1;
   mouse = new Point(0, 0);
+  screenCenter = null; // Initialize as null
+  zoomFactor = 10;
 
   constructor(background) {
     this.mouse.buttonDown = false;
@@ -90,17 +92,30 @@ export default class View {
       }
     }
   }
-  resizeCanvas() {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
-    if (!this.screenCenter) {
-      this.screenCenter = new Point(window.innerWidth / 2, window.innerHeight / 2);
-    } else {
-      this.screenCenter.x = window.innerWidth / 2;
-      this.screenCenter.y = window.innerHeight / 2;
-    }
-    this.#calcBounds();
+  //Keep this as an arrow function or you will lose reference to "this".
+  handleContextMenu = (event) => {
+    event.preventDefault();
+    return false;
   }
+
+  //Keep this as an arrow function or you will lose reference to "this".
+  handleMouseMove = (event) => {
+    this.mouse.x = event.clientX;
+    this.mouse.y = event.clientY;
+  };
+  //Keep this as an arrow function or you will lose reference to "this".
+  handleMouseDown = (event) => {
+    if (event.button === 0) {
+      this.mouse.buttonDown = true;
+    } else if (event.button === 2) {
+      event.preventDefault();
+      return false;
+    }
+  };
+  //Keep this as an arrow function or you will lose reference to "this".
+  handleMouseUp = (event) => {
+    this.mouse.buttonDown = false;
+  };
   //Keep this as an arrow function or you will lose reference to "this".
   handleWheel = (event) => {
     let zoomChange = this.camera.zoom * -Math.sign(event.deltaY) / this.zoomFactor;
@@ -117,27 +132,15 @@ export default class View {
     this.camera.zoom = Math.max(this.minimumZoom, this.camera.zoom);
     this.#calcBounds();
   }
-  //Keep this as an arrow function or you will lose reference to "this".
-  handleMouseMove = (event) => {
-    this.mouse.x = event.clientX;
-    this.mouse.y = event.clientY;
-  };
-  //Keep this as an arrow function or you will lose reference to "this".
-  handleMouseDown = (event) => {
-    if (event.button === 0) {
-      this.mouse.buttonDown = true;
-    } else if (event.button === 2) {
-      event.preventDefault();
-      return false;
+  resizeCanvas() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+    if (!this.screenCenter) {
+      this.screenCenter = new Point(window.innerWidth / 2, window.innerHeight / 2);
+    } else {
+      this.screenCenter.x = window.innerWidth / 2;
+      this.screenCenter.y = window.innerHeight / 2;
     }
-  };
-  //Keep this as an arrow function or you will lose reference to "this".
-  handleContextMenu = (event) => {
-    event.preventDefault();
-    return false;
+    this.#calcBounds();
   }
-  //Keep this as an arrow function or you will lose reference to "this".
-  handleMouseUp = (event) => {
-    this.mouse.buttonDown = false;
-  };
 }
