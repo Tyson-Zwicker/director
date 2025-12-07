@@ -2,6 +2,8 @@ import Point from './point.js';
 import Director from './director.js';
 import Boundry from './boundry.js';
 import Actor from './actor.js';
+import LineEffect from './lineeffect.js';
+import Color from './color.js';
 export default class Sensor {
   //Points reflect World Coordinates.
   //Direction is a component vector
@@ -38,6 +40,7 @@ export default class Sensor {
     let foundActors = Director.quadtree.findInRange(sensorBoundry);
     let results = this.#examineCandidates(foundActors);
     this.#moveSensor(delta);
+    this.#draw(results.closestPoint)
     return results;
   }
   #moveSensor(delta) {
@@ -51,7 +54,11 @@ export default class Sensor {
     if (this.currentOffset < -this.fieldOfView) {
       this.currentOffset = -this.fieldOfView;
       this.currentDirection = 1;
-    }
+    }    
+  }
+  #draw(closestPoint){
+    let sensorRay = new LineEffect (this.actor.position, closestPoint, 1,new Color (15,15,15),this.fieldOfView);
+    Director.addForegroundEffect (sensorRay);
   }
   #examineCandidates(foundActors) {
     let closestDistance = Number.MAX_SAFE_INTEGER;

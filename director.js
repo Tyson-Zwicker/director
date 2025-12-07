@@ -134,9 +134,7 @@ export default class Director {
           if (sensor.active) {
             Director.signals.add(currentTime, result); //<-- everything within distance will see this "ping"
           }
-          actor.sensorData.add(currentTime, result); //<-- it needs its own list of things "it" sees.
-          let sensorRay = new LineEffect (actor.position, result.closestPoint, new Color (15,15,15),1);
-          Director.addForegroundEffect (sensorRay);
+          actor.sensorData.add(currentTime, result); //<-- it needs its own list of things "it" sees.         
         }
       }
     }
