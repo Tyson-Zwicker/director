@@ -129,13 +129,13 @@ export default class Director {
         for (let sensor of actor.sensors) {
           console.log (`  using sensor ${sensor.name}`);
           let result = sensor.sweep(delta);
-          console.log (`  result:00`);
+          console.log (`  result:`);
           console.log (result);
           if (sensor.active) {
             Director.signals.add(currentTime, result); //<-- everything within distance will see this "ping"
           }
           actor.sensorData.add(currentTime, result); //<-- it needs its own list of things "it" sees.
-          let sensorRay = new LineEffect (actor.position, result.closestPoint, new Color (15,0,0),5);
+          let sensorRay = new LineEffect (actor.position, result.closestPoint, new Color (15,15,15),1);
           Director.addForegroundEffect (sensorRay);
         }
       }
