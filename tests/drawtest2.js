@@ -92,7 +92,7 @@ export default function init() {
           spread / 2 + Math.random() * spread,
           spread / 2 + Math.random() * spread
         ),
-        40, new Color(15, 0, 15), 1
+        4, new Color(15, 0, 15), Math.random()*10
       );
       count =0;
       console.log(`effect: ${lineEffect}`);
@@ -106,7 +106,7 @@ export default function init() {
           spread / 2 + Math.random() * spread,
           spread / 2 + Math.random() * spread
         ),
-        40, new Color(15, 15, 0), 1
+        4, new Color(15, 15, 0), Math.random()*10
       );
       count =0;
       console.log(`effect: ${lineEffect}`);
