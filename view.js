@@ -5,7 +5,7 @@ export default class View {
 
   backgroundPressed = false;
   backgroundPressedCoordinate = null;
-  backgroundColor = "#012";
+  backgroundColor = "#000";
   bounds = undefined;
   camera = Point.zero();
   canvas = document.createElement('canvas');
