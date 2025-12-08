@@ -41,7 +41,7 @@ export default class Sensor {
     let foundActors = Director.quadtree.findInRange(sensorBoundry);
     let results = this.#examineCandidates(foundActors);
     this.#moveSensor(delta);
-    if (results !== undefined) {          //We're drawing the "bounce back" so if nothing is seen, nothing gets drawn.
+    if (results.locationOfResponse !== undefined) {          //We're drawing the "bounce back" so if nothing is seen, nothing gets drawn.
       this.#draw(results.closestPoint)
     }
     return results;

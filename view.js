@@ -1,8 +1,6 @@
 import Point from './point.js';
 
 export default class View {
-
-
   backgroundPressed = false;
   backgroundPressedCoordinate = null;
   backgroundColor = "#000";

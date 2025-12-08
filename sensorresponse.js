@@ -14,7 +14,6 @@ export default class SensorResponse {
     this.time = time;
     this.sensor = sensor;
     this.actor = actor;
-    this.distance = distance;
     this.locationOfOrigin = locationOfOrigin;
     this.worldAngle = worldAngle;
     this.actorOrientation = actorOrientation;
