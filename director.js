@@ -5,8 +5,6 @@ import Boundry from './boundry.js';//<--TODO: move to quadtree. We could just pa
 import ActorField from './actorfields.js';
 import Actor from './actor.js';
 import EventTracker from './eventtracker.js';
-import LineEffect from './lineeffect.js';
-import Color from './color.js';
 
 export default class Director {
   static initialize() {
@@ -120,6 +118,9 @@ export default class Director {
       Director.quadtree.insert(actor);
     }
   }
+  static removeOldSensorData(currentTime){
+    //TODO:  This...
+  }
   static sensing(delta, currentTime) {
     for (let actor of Director.actors.values()) {
       if (actor.sensors) {
@@ -146,10 +147,10 @@ export default class Director {
     Director.lastFrameTime = currentTime;
     Director.kinematics(delta); //This redraws the entire quadtree.
     Director.applyActorField(delta);
-    Director.view.clear(); //<-- Only here. Do not clear the goddamn screen anywhere else. It makes you shit be annoyingly invisibe..
+    Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.
+    Director.removeOldSensorData(currentTime);
     Director.sensing(delta, currentTime); //<- do this before draw, as it may add effects..
     Director.draw(delta);
-
     Director.collisions(delta);
     if (Director.creatorFn) {
       Director.creatorFn(delta);
