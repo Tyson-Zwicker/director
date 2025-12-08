@@ -5,7 +5,7 @@ import Actor from '../actor.js';
 import Director from '../director.js';
 import Part from '../part.js';
 import Appearance from '../appearance.js';
-
+import Color from '../color.js';
 // ----------> PRIME MOVER <-------------
 document.addEventListener('DOMContentLoaded', () => {
   Director.initialize();
@@ -29,15 +29,11 @@ export default function init() {
       a.position = new Point(startX + i * spacing, startY + j * spacing);
       a.spin = Math.random() * 20 - 10;
       a.rotation = Math.random() * 360;
-      a.appearance = new Appearance(
-        `hsl(${Math.floor(Math.random() * 360)},80%,40%)`,
-        `hsl(${Math.floor(Math.random() * 360)},80%,60%)`,
-        "#fff"
-      );
+      a.appearance = new Appearance(Color.random(8).asHex(),Color.random(8).asHex(),Color.random(8).asHex());
       // Random velocity
 
       let angle = Math.random() * Math.PI * 2;
-      let speed = 1 + Math.random() * 15;
+      let speed = 5 + Math.random() * 15;
       a.velocity = new Point(Math.cos(angle) * speed, Math.sin(angle) * speed);
       a.bounceCoefficient = Math.random();
       a.setLabel(name, new Point(0, 0), 1);

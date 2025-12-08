@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 export default function init() {
   let a = new Actor(`Scout Craft`, Polygon.triangle(50, 100));
   a.position = new Point(0, 0);
-  a.spin = 0;
+  a.spin = 5;
   a.rotation = 90;
   a.appearance = new Appearance('#066', '#06f', '#fff');
   let part1 = new Part('box', -25, -20, Polygon.rectangle(15, 5), 0);
@@ -28,7 +28,7 @@ export default function init() {
   Director.addActor(a);
   let hovered = new Appearance('#ff9', '#f00', '#fff', 2);
   let pressed = new Appearance('#6ff', '#f82', '#fff', 3);
-  let sensorA = new Sensor("SensorA", 90, 10, 1, 6000, false);
+  let sensorA = new Sensor("SensorA", 90, 10, 1, 60000, false);
   let sensorB = new Sensor("SensorB", 270, 10, 1, 6000, false);
   a.attachSensor(sensorA);
   a.attachSensor(sensorB);
@@ -40,7 +40,7 @@ export default function init() {
   a.attachButton(sensorToggleButton);
 
   let b = new Actor(`BigRed`, Polygon.makeIrregular(70, 500, 700));
-  b.position = new Point(3000, 0);
+  b.position = new Point(1500, 0);
   b.spin = 2;
   b.rotation = 30;
   b.appearance = new Appearance('#f06', '#f00', '#f72');
@@ -54,7 +54,7 @@ export default function init() {
   Director.addActor(c);
 
   let d = new Actor(`BigPurple`, Polygon.makeRegular(30, 1000));
-  d.position = new Point(200, 6000);
+  d.position = new Point(200, 9000);
   d.spin = 4;
   d.rotation = 90;
   d.appearance = new Appearance('#b0d', '#f0f', '#f0f');
