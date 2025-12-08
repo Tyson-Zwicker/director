@@ -54,7 +54,7 @@ export default class Director {
   }
   static addForegroundEffect(effect) {
     Director.fgEffects.push(effect);
-  }  
+  }
   static applyActorField(delta) {
     for (let actorField of Director.actorFields.values()) {
       for (let otherActor of Director.actors.values()) {
@@ -85,7 +85,7 @@ export default class Director {
       Collisions.callActorCollisionEvents(collision);
       Collisions.handleCollisionPhysics(collision);
     }
-  } 
+  }
   static draw(delta) {
     //Draw background..
     let survivingBackgroundEffects = [];
@@ -123,16 +123,19 @@ export default class Director {
   static sensing(delta, currentTime) {
     for (let actor of Director.actors.values()) {
       if (actor.sensors) {
-        console.log(`sensing for ${actor.name}`);
         for (let sensor of actor.sensors) {
-          console.log(`  using sensor ${sensor.name}`);
+          console.log(`  using sensor ${sensor.name} owned by ${actor.name}`);
           let result = sensor.sweep(delta);
-          console.log(`  result:`);
           console.log(result);
+          //If they sensor is active, its shine like a beacon, everything knows "something" is there.
           if (sensor.active) {
-            Director.signals.add(currentTime, result); //<-- everything within distance will see this "ping"
+             //It knows where it came from, when, and what its "signature" is.
+             //This works regardless of wether or not the result returned anything to the one using the sensor.
+            Director.signals.add(currentTime, {position: actor.position, sensor:sensor.name});
           }
-          actor.sensorData.add(currentTime, result); //<-- it needs its own list of things "it" sees.         
+          if (result !== undefined) {                  // Sometimes the sensor doesn't see anything..
+            actor.sensorData.add(currentTime, result); //<-- it needs its own list of things "it" sees.         
+          }
         }
       }
     }
@@ -155,7 +158,7 @@ export default class Director {
     Director.quadtree.clear();      //QuadTree is cleared (will be recreated begining next loop)
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }
-//------------------------- runners
+  //------------------------- runners
   static run() {
     Director.continueAnimationLoop = true;
     requestAnimationFrame(Director.loop.bind(Director));

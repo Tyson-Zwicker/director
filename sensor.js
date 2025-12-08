@@ -4,6 +4,7 @@ import Boundry from './boundry.js';
 import Actor from './actor.js';
 import LineEffect from './lineeffect.js';
 import Color from './color.js';
+import SensorResponse from './sensorresponse.js';
 export default class Sensor {
   //Points reflect World Coordinates.
   //Direction is a component vector
@@ -40,7 +41,9 @@ export default class Sensor {
     let foundActors = Director.quadtree.findInRange(sensorBoundry);
     let results = this.#examineCandidates(foundActors);
     this.#moveSensor(delta);
-    this.#draw(results.closestPoint)
+    if (results !== undefined) {          //We're drawing the "bounce back" so if nothing is seen, nothing gets drawn.
+      this.#draw(results.closestPoint)
+    }
     return results;
   }
   #moveSensor(delta) {
@@ -57,13 +60,20 @@ export default class Sensor {
     }
   }
   #draw(closestPoint) {
-    let sensorRay = new LineEffect(this.actor.position, closestPoint, 1, new Color(15, 15, 15), this.fieldOfView);
+    let sensorRay = new LineEffect(this.actor.position, closestPoint, 2, new Color(15, 0, 0, .5), this.fieldOfView / 3);
     Director.addForegroundEffect(sensorRay);
   }
   #examineCandidates(foundActors) {
-    let closestDistance = Number.MAX_SAFE_INTEGER;
-    let closestPoint = undefined;
-    let closestActor = undefined;
+    let worldAngle = this.actor.rotation + this.centerAngle + this.currentOffset;
+    let response = new SensorResponse(
+      Director.lastFrameTime,
+      this,
+      this.actor,
+      Point.from(this.actor.position),
+      worldAngle,
+      this.actor.rotation,
+      this.currentOffset
+    );
     for (let actor of foundActors) {
       let points = actor.polygon.points;
       for (let i = 0; i < points.length; i++) {
@@ -71,30 +81,18 @@ export default class Sensor {
         let barrierPoint2 = undefined;
         if (i === points.length - 1) {
           //connect last point to first point.
-          barrierPoint1 = points[i];
-          barrierPoint2 = points[0];
+          barrierPoint1 = points[i]; barrierPoint2 = points[0];
         } else {
           //connect all but last point to next point
-          barrierPoint1 = points[i];
-          barrierPoint2 = points[i + 1];
+          barrierPoint1 = points[i]; barrierPoint2 = points[i + 1];
         }
-        let worldAngle = this.actor.rotation + this.centerAngle + this.currentOffset
-
         let result = this.#rayCast(this.actor.position, worldAngle, barrierPoint1, barrierPoint2);
-
-        if (result && result.distance < closestDistance) {
-          closestDistance = result.distance;
-          closestPoint = result.point;
-          closestActor = actor;
+        if (result !== false && result.distance < response.distance && result.distance < this.distance) {
+          response.setResponse(result.point, result.distance, actor);
         }
       }
     }
-    //return the one with the shortest distance.
-    return {
-      closestPoint: closestPoint,
-      closestDistance: closestDistance,
-      closestActor: closestActor
-    };
+    return response;
   }
   #rayCast(originPoint, direction, barrierPoint1, barrierPoint2) {
     const x1 = barrierPoint1.x;
@@ -114,8 +112,6 @@ export default class Sensor {
     const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
 
     if (t > 0 && t < 1 && u > 0) {
-      //old: x1 + t * (x2 - x1), y1 + t * (y2 - y1)
-
       let x = x1 + t * (x2 - x1)
       let y = y1 + t * (y2 - y1);
       const p = new Point(x, y);
