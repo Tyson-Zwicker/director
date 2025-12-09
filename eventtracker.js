@@ -58,5 +58,4 @@ export default class EventTracker {
     }
     this.sortedTimes.splice(0, sortedTimeIndex + 1);
   }
-
 }
