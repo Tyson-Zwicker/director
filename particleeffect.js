@@ -2,14 +2,15 @@ import Point from './point.js';
 import Color from './color.js';
 import Director from './director.js';
 
-export default class RadialEffect {
-  constructor(position, radius, colorOrGradient, durationInSeconds) {
+export default class ParticleEffect {
+  particleSize = 1;
+  constructor(position, radius, color, durationInSeconds) {
     this.position = position;
-    this.radius = radius;
-    this.colorOrGradient = colorOrGradient;
+    this.color = color;
     this.duration = durationInSeconds;
     this.life = durationInSeconds;
   }
+  
   draw(context, delta) {
     let tp = Point.from(this.position); //The point is fixed in world coordinates, but screen moves so, tp = temporaty point ie. where the screen put you.
     Point.sub(tp, Director.view.camera);
@@ -22,10 +23,8 @@ export default class RadialEffect {
     } else {
       context.fillStyle = this.colorOrGradient;
     }
-    context.moveTo (this.position.x, this.position.y);
-    let zoomedRadius = this.radius * Director.view.camera.zoom;
-    context.ellipse(this.position.x, this.position.y, zoomedRadius, zoomedRadius, 0, 0, Math.PI * 2);
-    context.fill();
+    let scale = Math.max (1, Director.view.camera.zoom*particleSize);
+    context.fillRect(this.position.x-scale/2, this.position.y - scale/2,scale, scale);    
     this.life -= delta;
     return (this.life > 0);
   }

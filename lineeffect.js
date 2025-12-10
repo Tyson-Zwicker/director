@@ -11,7 +11,6 @@ export default class LineEffect {
     this.duration = durationInSeconds;
     this.life = durationInSeconds;
   }
-  //returns true if it should be removed from the director's list because its "lifespan" has been exceded.
   draw(context, delta) {
     let tp1 = Point.from(this.p1); //The point is fixed in world coordinates, but screen moves so, tp = temporaty point ie. where the screen put you.
     Point.sub(tp1, Director.view.camera);
