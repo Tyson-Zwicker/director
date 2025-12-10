@@ -10,7 +10,6 @@ export default class Keyboard {
 
   keyDown(e) {
     this.lastKey = e.key;
-    console.log(e.key);
     let eventInfo = {};
     if (this.events.has(e.key)) {
       eventInfo['key'] = e.key;
