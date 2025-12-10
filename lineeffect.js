@@ -28,7 +28,7 @@ export default class LineEffect {
     } else {
       context.strokeStyle = this.colorOrGradient;
     }
-    context.lineWidth = this.w;
+    context.lineWidth = this.w *Director.view.camera.zoom;
     context.beginPath();
     context.moveTo(tp1.x, tp1.y);
     context.lineTo(tp2.x, tp2.y);

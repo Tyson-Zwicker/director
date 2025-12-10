@@ -76,7 +76,6 @@ export default function init() {
 
   let count = 0;
   function doMyThing(delta) {
-    console.log(count);
     count++;
     part1.rotation += 1;
     part2.rotation -= 3;

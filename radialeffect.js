@@ -17,15 +17,17 @@ export default class RadialEffect {
     Point.add(tp, Director.view.screenCenter);
     if (!context || isNaN(delta)) throw (`LineEffect.draw: bad params context ${context}, delta ${delta}`);
     if (this.colorOrGradient instanceof Color) {
-      let color = this.colorOrGradient.changeBrightness(this.life / this.duration);
+      let color = this.colorOrGradient.withOpacity(this.life / this.duration);
       context.fillStyle = color.asHex();
     } else {
       context.fillStyle = this.colorOrGradient;
     }
-    context.moveTo (this.position.x, this.position.y);
+    context.beginPath();
+    context.moveTo(tp.x, tp.y);
     let zoomedRadius = this.radius * Director.view.camera.zoom;
-    context.ellipse(this.position.x, this.position.y, zoomedRadius, zoomedRadius, 0, 0, Math.PI * 2);
+    context.ellipse(tp.x, tp.y, zoomedRadius, zoomedRadius, 0, 0, Math.PI * 2);
     context.fill();
+
     this.life -= delta;
     return (this.life > 0);
   }
