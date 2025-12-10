@@ -16,6 +16,9 @@ export default class Color {
     let r = `#${this.#intToHex(this.r)}${this.#intToHex(this.g)}${this.#intToHex(this.b)}${this.#floatToHex(this.opacity)}`;
     return r;
   }
+  withOpacity(opacity) {
+    return new Color (this.r,this.g,this.b,this.opacity * opacity );
+  }
   //negative number makes it brighter or dimmer. Range is 0 to 1. 0 makes it black,1 changes nothing.
   changeBrightness(c) {
     if (isNaN(c) || c < 0 || c > 1) throw new Error(`color.changeBrightness: change should be a value between 0 and 1 ${c}`);
