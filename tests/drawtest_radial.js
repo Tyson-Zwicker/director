@@ -1,4 +1,3 @@
-
 import Point from '../point.js';
 import Polygon from '../polygon.js';
 import Button from '../button.js';
@@ -80,8 +79,7 @@ export default function init() {
     part1.rotation += 1;
     part2.rotation -= 3;
     let spread = 400;
-    if (count === 100) {
-      console.log('adding effect');
+    if (count === 100) {      
       let radialEffect = new RadialEffect(
         new Point(
           Math.random() * spread,
@@ -91,7 +89,6 @@ export default function init() {
         new Color(0, 15, 8), Math.random() * 10
       );
       count = 0;
-      console.log(`effect: ${radialEffect}`);
       Director.addBackgroundEffect(radialEffect);
       radialEffect = new RadialEffect(
         new Point(
@@ -102,17 +99,12 @@ export default function init() {
         new Color(8, 15, 0), Math.random() * 10
       );
       count = 0;
-      console.log(radialEffect);
       Director.addForegroundEffect(radialEffect);
     }
   }
   Director.addCreatorsFunction(doMyThing);
-
-
-
   Director.run();
 }
-
 
 function rnd(min, max) {
   return Math.floor(min + Math.random() * (Math.abs(max) - min));

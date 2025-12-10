@@ -76,13 +76,11 @@ export default function init() {
 
   let count = 0;
   function doMyThing(delta) {
-    console.log (count);
     count++;
     part1.rotation += 1;
     part2.rotation -= 3;
     let spread = 400;
     if (count === 100) {
-      console.log('adding effect');
       let lineEffect = new LineEffect(
         new Point(
           -spread / 2 + Math.random() * spread,
@@ -95,7 +93,6 @@ export default function init() {
         4, new Color(15, 0, 15), Math.random()*10
       );
       count =0;
-      console.log(`effect: ${lineEffect}`);
       Director.addBackgroundEffect(lineEffect);
       lineEffect = new LineEffect(
         new Point(
@@ -109,7 +106,6 @@ export default function init() {
         4, new Color(15, 15, 0), Math.random()*10
       );
       count =0;
-      console.log(`effect: ${lineEffect}`);
       Director.addForegroundEffect(lineEffect);
     }
   }
