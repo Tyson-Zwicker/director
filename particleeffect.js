@@ -2,15 +2,22 @@ import Point from './point.js';
 import Color from './color.js';
 import Director from './director.js';
 
-export default class ParticleEffect {
-  particleSize = 1;
-  constructor(position, radius, color, durationInSeconds) {
+export default class ParticleEffect {  
+  constructor(position, velocity, color, size, durationInSeconds) {
     this.position = position;
+    this.size = size;
     this.color = color;
+    if (!Point.isPointy(velocity)) throw new Error(`ParticleEffect.constructor: velocity should be a compenent vector. ${velocity}`);
+    this.velocity = velocity;
     this.duration = durationInSeconds;
     this.life = durationInSeconds;
   }
-  
+  move(delta) {
+    if (delta == undefined) throw new Error(`ParticleEffect.move: no delta ${delta}`);
+    let scaledVelocity = Point.from(this.velocity);
+    Point.scale(scaledVelocity, delta);
+    Point.add(this.position, this.velocity);
+  }
   draw(context, delta) {
     let tp = Point.from(this.position); //The point is fixed in world coordinates, but screen moves so, tp = temporaty point ie. where the screen put you.
     Point.sub(tp, Director.view.camera);
@@ -23,8 +30,8 @@ export default class ParticleEffect {
     } else {
       context.fillStyle = this.colorOrGradient;
     }
-    let scale = Math.max (1, Director.view.camera.zoom*particleSize);
-    context.fillRect(this.position.x-scale/2, this.position.y - scale/2,scale, scale);    
+    let particleSize = this.size * Director.view.camera.zoom;
+    context.fillRect(this.position.x - particleSize / 2, this.position.y - particleSize / 2, particleSize, particleSize);
     this.life -= delta;
     return (this.life > 0);
   }
