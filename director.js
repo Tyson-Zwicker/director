@@ -21,7 +21,7 @@ export default class Director {
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
     Director.view = new View();
-    Director.keyboard.bindEvents(Director.keyboard);
+    Director.keyboard.bindEvents();
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(
       new Boundry(

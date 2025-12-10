@@ -2,14 +2,8 @@ export default class Keyboard {
   functions = new Map();
   events = new Map();
   lastKey = undefined;
-  constructor() {
-    console.log('keyboard constructor start');
-    //I think this is where I need to use "bind" to tame
-    //JS's crazy idea of what "this" means.
-    //example IRL:
-    // /Director.loop.bind(Director)
-  }
-  bindEvents(keyboard){
+
+  bindEvents(){
     window.onkeydown = this.keyDown.bind (this);
     window.onkeyup = this.keyUp.bind (this);
   }
@@ -39,11 +33,11 @@ export default class Keyboard {
     this.lastKey = e.key;
     this.events.set({ key: e.key, when: Date.now(), action: 'release' });
     if (this.functions.has(e.key)) {
-      let keyFunction = Director.keyboard.functions.get(e.key);
+      let keyFunction = this.functions.get(e.key);
       keyFunction();
     }
   }
-  static setKeyFunction(key, fn) {
-    Director.keyboard.functions.set(key, fn);
+  setKeyFunction(key, fn) {
+    this.functions.set(key, fn);
   }
 }
