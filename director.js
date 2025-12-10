@@ -6,9 +6,11 @@ import ActorField from './actorfields.js';
 import Actor from './actor.js';
 import EventTracker from './eventtracker.js';
 import KeyBoard from './keyboard.js';
+import LineEffect from './lineeffect.js';
+import RadialEffect from './radialeffect.js';
 
 export default class Director {
-  static keyboard = new KeyBoard();    
+  static keyboard = new KeyBoard();
   static initialize() {
     Director.MILLISECONDS = 1000;
     Director.continueAnimationLoop = false;
@@ -91,9 +93,18 @@ export default class Director {
     //Draw background..
     let survivingBackgroundEffects = [];
     for (let effect of Director.bgEffects) {
-      if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
-        if (effect.draw(Director.view.context, delta)) {
-          survivingBackgroundEffects.push(effect);
+      if (effect instanceof LineEffect) {
+        if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
+          if (effect.draw(Director.view.context, delta)) {
+            survivingBackgroundEffects.push(effect);
+          }
+        }
+      }
+      if (effect instanceof RadialEffect) {
+        if (Director.view.canSee(effect.position, effect.radius)) {
+          if (effect.draw(Director.view.context, delta)) {
+            survivingBackgroundEffects.push(effect);
+          }
         }
       }
     }
@@ -106,9 +117,18 @@ export default class Director {
     //Draw foreground
     let survivingForegroundEffects = [];
     for (let effect of Director.fgEffects) {
-      if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
-        if (effect.draw(Director.view.context, delta)) {
-          survivingForegroundEffects.push(effect);
+      if (effect instanceof LineEffect) {
+        if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
+          if (effect.draw(Director.view.context, delta)) {
+            survivingBackgroundEffects.push(effect);
+          }
+        }
+      }
+      if (effect instanceof RadialEffect) {
+        if (Director.view.canSee(effect.position, effect.radius)) {
+          if (effect.draw(Director.view.context, delta)) {
+            survivingBackgroundEffects.push(effect);
+          }
         }
       }
     }
@@ -121,7 +141,7 @@ export default class Director {
       Director.quadtree.insert(actor);
     }
   }
-  static removeOldSensorData(currentTime){
+  static removeOldSensorData(currentTime) {
     //TODO:  This...
   }
   static sensing(delta, currentTime) {
@@ -133,9 +153,9 @@ export default class Director {
           console.log(result);
           //If they sensor is active, its shine like a beacon, everything knows "something" is there.
           if (sensor.active) {
-             //It knows where it came from, when, and what its "signature" is.
-             //This works regardless of wether or not the result returned anything to the one using the sensor.
-            Director.signals.add(currentTime, {position: actor.position, sensor:sensor.name});
+            //It knows where it came from, when, and what its "signature" is.
+            //This works regardless of wether or not the result returned anything to the one using the sensor.
+            Director.signals.add(currentTime, { position: actor.position, sensor: sensor.name });
           }
           if (result !== undefined) {                  // Sometimes the sensor doesn't see anything..
             actor.sensorData.add(currentTime, result); //<-- it needs its own list of things "it" sees.         
