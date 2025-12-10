@@ -1,12 +1,14 @@
 import View from './view.js';
 import Quadtree from './quadtree.js';
 import Collisions from './collisions.js';
-import Boundry from './boundry.js';//<--TODO: move to quadtree. We could just pass the numbers.
+import Boundry from './boundry.js';
 import ActorField from './actorfields.js';
 import Actor from './actor.js';
 import EventTracker from './eventtracker.js';
+import KeyBoard from './keyboard.js';
 
 export default class Director {
+  static keyboard = new KeyBoard();    
   static initialize() {
     Director.MILLISECONDS = 1000;
     Director.continueAnimationLoop = false;
@@ -19,6 +21,7 @@ export default class Director {
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
     Director.view = new View();
+    Director.keyboard.bindEvents(Director.keyboard);
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(
       new Boundry(
