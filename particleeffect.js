@@ -2,9 +2,10 @@ import Point from './point.js';
 import Color from './color.js';
 import Director from './director.js';
 
-export default class ParticleEffect {  
+export default class ParticleEffect {
   constructor(position, velocity, color, size, durationInSeconds) {
     this.position = position;
+    console.log (`Particle construcotr: initial position [${position}]`)
     this.size = size;
     this.color = color;
     if (!Point.isPointy(velocity)) throw new Error(`ParticleEffect.constructor: velocity should be a compenent vector. ${velocity}`);
@@ -31,7 +32,13 @@ export default class ParticleEffect {
       context.fillStyle = this.colorOrGradient;
     }
     let particleSize = this.size * Director.view.camera.zoom;
-    context.fillRect(this.position.x - particleSize / 2, this.position.y - particleSize / 2, particleSize, particleSize);
+    context.beginPath();
+    context.fillRect(
+      this.position.x - particleSize / 2,
+      this.position.y - particleSize / 2,
+      particleSize, particleSize
+    );
+    console.log(this);
     this.life -= delta;
     return (this.life > 0);
   }
