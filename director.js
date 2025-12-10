@@ -110,7 +110,7 @@ export default class Director {
       if (effect instanceof ParticleEffect) {
         if (Director.view.canSee(effect.position)) {
           if (effect.draw(Director.view.context, delta)) {
-            effect.move(); //Particles move themselves if you let them..
+            effect.move(delta); //Particles move themselves if you let them..
             survivingBackgroundEffects.push(effect);
           }
         }
@@ -142,7 +142,7 @@ export default class Director {
       if (effect instanceof ParticleEffect) {
         if (Director.view.canSee(effect.position)) {
           if (effect.draw(Director.view.context, delta)) {
-            effect.move(); //Particles move themselves if you let them..
+            effect.move(delta); //Particles move themselves if you let them..
             survivingBackgroundEffects.push(effect);
           }
         }
@@ -150,6 +150,8 @@ export default class Director {
     }
     Director.bgEffects = survivingBackgroundEffects;
     Director.fgEffects = survivingForegroundEffects;
+    console.log (survivingBackgroundEffects.length)
+    console.log (survivingForegroundEffects.length)
   }
   static kinematics(delta) {
     for (let actor of Director.actors.values()) {
