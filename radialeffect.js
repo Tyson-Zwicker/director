@@ -23,6 +23,7 @@ export default class RadialEffect {
     } else {
       context.fillStyle = this.colorOrGradient;
     }
+    context.moveTo (this.position.x, this.position.y);
     context.ellipse(this.position.x, this.position.y, this.radius, this.radius, 0, 0, Math.PI * 2);
     context.fill();
     this.life -= delta;

@@ -120,14 +120,14 @@ export default class Director {
       if (effect instanceof LineEffect) {
         if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
           if (effect.draw(Director.view.context, delta)) {
-            survivingBackgroundEffects.push(effect);
+            survivingForegroundEffects.push(effect);
           }
         }
       }
       if (effect instanceof RadialEffect) {
         if (Director.view.canSee(effect.position, effect.radius)) {
           if (effect.draw(Director.view.context, delta)) {
-            survivingBackgroundEffects.push(effect);
+            survivingForegroundEffects.push(effect);
           }
         }
       }
