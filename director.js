@@ -105,9 +105,6 @@ export default class Director {
           if (effect.draw(Director.view.context, delta)) {
             survivingBackgroundEffects.push(effect);
           }
-          else {
-            console.log(`radial event removed. remaining [${survivingBackgroundEffects.length}] `);
-          }
         }
       }
       if (effect instanceof ParticleEffect) {
@@ -140,9 +137,6 @@ export default class Director {
           if (effect.draw(Director.view.context, delta)) {
             survivingForegroundEffects.push(effect);
           }
-          else {
-            console.log(`radial event removed. remaining [${survivingForegroundEffects.length}] `);
-          }
         }
       }
       if (effect instanceof ParticleEffect) {
@@ -170,9 +164,7 @@ export default class Director {
     for (let actor of Director.actors.values()) {
       if (actor.sensors) {
         for (let sensor of actor.sensors) {
-          console.log(`  using sensor ${sensor.name} owned by ${actor.name}`);
           let result = sensor.sweep(delta);
-          console.log(result);
           //If they sensor is active, its shine like a beacon, everything knows "something" is there.
           if (sensor.active) {
             //It knows where it came from, when, and what its "signature" is.
