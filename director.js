@@ -8,7 +8,7 @@ import EventTracker from './eventtracker.js';
 import KeyBoard from './keyboard.js';
 import LineEffect from './lineeffect.js';
 import RadialEffect from './radialeffect.js';
-import ParticleEffect from './Particleeffect.js';
+import ParticleEffect from './particleeffect.js';
 
 export default class Director {
   static keyboard = new KeyBoard();
@@ -66,7 +66,6 @@ export default class Director {
       }
     }
   }
-
   //------------------------- Workers called by main loop
   static checkUserActorInteraction() {
     let actorMouseInteraction = false;
@@ -104,8 +103,10 @@ export default class Director {
       if (effect instanceof RadialEffect) {
         if (Director.view.canSee(effect.position, effect.radius)) {
           if (effect.draw(Director.view.context, delta)) {
-            console.log (`life:${effect.life} duration:${effect.duration}`);
             survivingBackgroundEffects.push(effect);
+          }
+          else {
+            console.log(`radial event removed. remaining [${survivingBackgroundEffects.length}] `);
           }
         }
       }
@@ -139,9 +140,12 @@ export default class Director {
           if (effect.draw(Director.view.context, delta)) {
             survivingForegroundEffects.push(effect);
           }
+          else {
+            console.log(`radial event removed. remaining [${survivingForegroundEffects.length}] `);
+          }
         }
       }
-         if (effect instanceof ParticleEffect) {
+      if (effect instanceof ParticleEffect) {
         if (Director.view.canSee(effect.position)) {
           if (effect.draw(Director.view.context, delta)) {
             effect.move(); //Particles move themselves if you let them..
