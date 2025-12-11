@@ -51,28 +51,16 @@ export default function init() {
   Director.addActor(d);
   //Add toggle button function to part test (triangle)
 
-  let count = 0;
-  function doMyThing(delta) {
-    count++;
+  let particleEffect = new ParticleEffect(
+        new Point(0, 0),
+        new Point (0,20),
+        new Color (15,15,15), 20, 60  //color, size, duration
+  );
+  Director.addBackgroundEffect (particleEffect);
+  
+  function doMyThing(delta) { 
     part1.rotation += 1;
     part2.rotation -= 3;
-    let spread = 400;
-    if (count === 10) {
-      let particleEffect = new ParticleEffect(
-        new Point(0, 0),
-        new Point (0,Math.random()*10+10),
-        Color.random(10), 1, 5  //color, size, duration
-      );
-      count = 0;
-      Director.addBackgroundEffect(particleEffect);
-      particleEffect = new ParticleEffect(
-        new Point(0, 0),
-        new Point (0,Math.random()*10+10),
-        Color.random(10), 1, 5  //color, size, duration
-      );
-      count = 0;
-      Director.addForegroundEffect(particleEffect);
-    }
   }
   Director.addCreatorsFunction(doMyThing);
   Director.run();
