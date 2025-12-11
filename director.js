@@ -150,8 +150,6 @@ export default class Director {
     }
     Director.bgEffects = survivingBackgroundEffects;
     Director.fgEffects = survivingForegroundEffects;
-    console.log (survivingBackgroundEffects.length)
-    console.log (survivingForegroundEffects.length)
   }
   static kinematics(delta) {
     for (let actor of Director.actors.values()) {

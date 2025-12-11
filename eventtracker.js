@@ -30,7 +30,7 @@ export default class EventTracker {
     }
   }
   removeFrom(someTime) {
-    //return early if we're being to wipe out records preexissting any of the records..
+    //return early if we're being asked to wipe out records preexissting any of the records..
     if (this.sortedTimes.length > 0 && this.sortedTimes[0] > someTime) return;
     let sortedTimeIndex = undefined;
     if (this.map.has(someTime) && this.map.get(someTime).length > 0) {
