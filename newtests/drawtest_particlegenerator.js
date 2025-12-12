@@ -52,7 +52,7 @@ export default function init() {
   //Add toggle button function to part test (triangle)
 
   let generator = new ParticleGenerator(
-    'testgenerator', -1,            //name, duration (- values mean permanent- they have to be removed manually from the Director,using its name)
+    'testgenerator', 5,            //name, duration (- values mean permanent- they have to be removed manually from the Director,using its name)
     new Point(0, 0),
     90, 20,                         //angles
     5, 20,                           //velocities
@@ -67,8 +67,4 @@ export default function init() {
   }
   Director.addCreatorsFunction(doMyThing);
   Director.run();
-}
-
-function rnd(min, max) {
-  return Math.floor(min + Math.random() * (Math.abs(max) - min));
 }
