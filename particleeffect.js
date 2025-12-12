@@ -34,6 +34,12 @@ export default class ParticleEffect {
       tp.y - particleSize / 2,
       particleSize, particleSize
     );
+    context.fillStyle = color.asHex();
+    context.beginPath();
+    context.moveTo (0,0);
+    context.lineTo (tp.x, tp.y);
+    context.stroke();
+
     this.life -= delta;
     return (this.life > 0);
   }
