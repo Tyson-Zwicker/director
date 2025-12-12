@@ -5,7 +5,9 @@ import Director from './director.js';
 import ParticleEffect from './particleeffect.js';
 import Point from './point.js';
 export default class ParticleGenerator {
+  
   constructor(name, duration, position, centerAngle, sweep, absoluteVelocityMin, absoluteVelocityMax, color, foreground, particlesPerSecond, durationMin, durationMax) {
+    this.counter =0;
     this.name = name;
     this.duration = duration;
     this.life = duration;
@@ -24,8 +26,7 @@ export default class ParticleGenerator {
     this.frequencyInMilliseconds = 1000 / particlesPerSecond;
     this.lastParticleMilliseconds = Date.now();
   }
-  generate() {
-    let now = Date.now();
+  generate(now) {    
     if (now - this.lastParticleMilliseconds > this.frequencyInMilliseconds) {
       this.lastParticleMilliseconds = now;
       let a = this.centerAngle - this.sweep / 2 + Math.random() * this.sweep;
@@ -33,8 +34,9 @@ export default class ParticleGenerator {
       let velocity = Point.fromPolar(a, v);
       let duration = this.rnd (this.durationMin, this.durationMax );
       let p = new ParticleEffect(this.position, velocity, this.color, 3, duration);
-      console.log ('ParticleGenerator.generate: adding...');
-      console.log (p);
+      p.id = this.counter++;
+      //console.log ('ParticleGenerator.generate: adding...');
+      //console.log (p);
       if (this.foreground) {
         Director.addForegroundEffect(p);
       } else {
