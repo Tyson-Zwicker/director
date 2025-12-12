@@ -19,7 +19,7 @@ export default class Director {
     Director.actorFields = new Map();
     Director.bgEffects = [];
     Director.fgEffects = [];
-
+    Director.particleGenerators = new Map();
     Director.signals = new EventTracker();
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
@@ -66,6 +66,9 @@ export default class Director {
       }
     }
   }
+  static addParticleGenerator(generator) {
+    Director.particleGenerators.set(generator.name, generator);
+  }
   //------------------------- Workers called by main loop
   static checkUserActorInteraction() {
     let actorMouseInteraction = false;
@@ -96,7 +99,7 @@ export default class Director {
       if (effect instanceof LineEffect) {
         if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
           if (effect.draw(Director.view.context, delta)) {
-            survivingBackgroundEffects.push(effect);
+            survivingBackgroundEffects.push(effect);           
           }
         }
       }
@@ -116,7 +119,7 @@ export default class Director {
         if (Director.view.canSee(effect.position)) {
           if (effect.draw(Director.view.context, delta)) {
             effect.move(delta); //Particles move themselves if you let them..
-            survivingBackgroundEffects.push(effect);
+            survivingBackgroundEffects.push(effect);                        
           }
         }
       }
@@ -144,11 +147,11 @@ export default class Director {
           }
         }
       }
-      if (effect instanceof ParticleEffect) {
+      if (effect instanceof ParticleEffect) {        
         if (Director.view.canSee(effect.position)) {
-          if (effect.draw(Director.view.context, delta)) {
+          if (effect.draw(Director.view.context, delta)) {            
             effect.move(delta); //Particles move themselves if you let them..
-            survivingBackgroundEffects.push(effect);
+            survivingBackgroundEffects.push(effect);            
           }
         }
       }
@@ -160,6 +163,11 @@ export default class Director {
     for (let actor of Director.actors.values()) {
       actor.move(delta);
       Director.quadtree.insert(actor);
+    }
+  }
+  static particles() {
+    for (let particleGenerator of Director.particleGenerators.values()) {
+      particleGenerator.generate();
     }
   }
   static removeOldSensorData(currentTime) {
@@ -192,6 +200,7 @@ export default class Director {
     Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.
     Director.removeOldSensorData(currentTime);
     Director.sensing(delta, currentTime); //<- do this before draw, as it may add effects..
+    Director.particles();
     Director.draw(delta);
     Director.collisions(delta);
     if (Director.creatorFn) {
