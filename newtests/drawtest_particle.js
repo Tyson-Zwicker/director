@@ -54,7 +54,7 @@ export default function init() {
   let particleEffect = new ParticleEffect(
         new Point(0, 0),
         new Point (0,20),
-        new Color (15,15,15), 20, 60  //color, size, duration
+        new Color (15,15,15), 20, 20  //color, size, duration
   );
   Director.addBackgroundEffect (particleEffect);
   

@@ -107,6 +107,11 @@ export default class Director {
           }
         }
       }
+      //Particles are lost when they go off screen becauase, if they don't drawn, they
+      //don't get preserved...  I don't think this will matter much because particles are going
+      //to be produced on mass from "particle sprayers" so it just making more when the sprayer
+      //comes back on screen.  If it is a big deal at some point we just change how the survival
+      //system works so it doesn't care about being drawn or not.  
       if (effect instanceof ParticleEffect) {
         if (Director.view.canSee(effect.position)) {
           if (effect.draw(Director.view.context, delta)) {
