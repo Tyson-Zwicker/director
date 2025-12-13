@@ -6,6 +6,7 @@ import Director from '../director.js';
 import Part from '../part.js';
 import Appearance from '../appearance.js';
 import ParticleEffect from '../particleeffect.js';
+import ParticleGenerator from '../particlegenerator.js';
 import Color from '../color.js';
 
 // PRIME MOVER
@@ -50,20 +51,43 @@ export default function init() {
   d.appearance = new Appearance('#600', '#f00', '#fff');
   Director.addActor(d);
 
+  //constructor(
+  // origin, 
+  // angleMin, angleMax, velMin, velMax,
+  //  color,
+  //  size, durMin, durMax, periodMillis, foreground) {
+
+  let redParticles = new ParticleGenerator(
+    'red',
+    new Point(0, 0),
+    180, 355, 50, 150,
+    new Color(15, 0, 0),
+    2,
+    5, 20,
+    10, true
+  );
+  Director.addParticleGenerator(redParticles);
+   let blueParticles = new ParticleGenerator(
+    'blue',
+    new Point(0, 0),
+    90, 270, 50, 150,
+    new Color(0, 0, 15),
+    2,
+    5, 20,
+    10, true
+  );
+  Director.addParticleGenerator(blueParticles);
+   let greenParticles = new ParticleGenerator(
+    'green',
+    new Point(0, 0),
+    180, 355, 50, 150,
+    new Color(0, 15, 0),
+    2,
+    5, 20,
+    10, true
+  );
+  Director.addParticleGenerator(greenParticles);
   function doMyThing(delta) {
-    //position, velocity, color, size, durationInSeconds)
-    let particleEffect1 = new ParticleEffect(
-      new Point(0, 0),                //origin
-      new Point(rnd (-20,20),20),      //compnent velocity
-      Color.random(12), 2, rnd (2,6)  //color, size, duration
-    );
-    let particleEffect2 = new ParticleEffect(
-      new Point(0, 0),
-      new Point(rnd (-10,10),50),
-      Color.random(12), 1, rnd (2,4)  //color, size, duration
-    );
-    Director.addForegroundEffect(particleEffect1);
-    Director.addBackgroundEffect(particleEffect2);
     part1.rotation += 1;
     part2.rotation -= 3;
   }
