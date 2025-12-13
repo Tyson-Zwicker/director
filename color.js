@@ -76,11 +76,11 @@ export default class Color {
     return new Color(this.#rnd(0, 15), this.#rnd(0, 15), this.#rnd(0, 15));
   }
   static #rnd(min, max) {
-    let n = Math.random() * (max + 1); //random is exclusive..
-    n = Math.floor(n); //an integer "i" between 0 and 15.
-    n = Math.max(n, min); //an integer between min and "i".
-    n = Math.min(n, max); // an integer between max and "i".
-    return n;
+    let n = Math.random() * (max + 1); //random float between could be anything from 0 to 15.99999.. random is exclusive..
+    let i = Math.floor(n);  //an integer between 0 and 15.
+    i = Math.max(i, min);   //an integer between min and "i".
+    i = Math.min(i, max);   // an integer between max and "i".
+    return i;
   }
   toString() {
     let r = `r:${this.r} g:${this.g} b:${this.b} a:${this.opacity} hex:${this.asHex()}`;

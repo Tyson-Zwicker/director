@@ -49,14 +49,20 @@ export default function init() {
   d.rotation = 90;
   d.appearance = new Appearance('#600', '#f00', '#fff');
   Director.addActor(d);
-  //Add toggle button function to part test (triangle)
+  
 
-  let particleEffect = new ParticleEffect(
-        new Point(0, 0),
-        new Point (0,20),
-        new Color (15,15,15), 20, 20  //color, size, duration
+  let particleEffect1 = new ParticleEffect(
+        new Point(-50, 0),
+        new Point (0,-20),
+        new Color (15,15,0), 20, 20  //color, size, duration
   );
-  Director.addBackgroundEffect (particleEffect);
+  let particleEffect2 = new ParticleEffect(
+        new Point(50, 0),
+        new Point (0,20),
+        new Color (0,15,15), 20, 10  //color, size, duration
+  );
+  Director.addBackgroundEffect (particleEffect1);
+  Director.addBackgroundEffect (particleEffect2);
   
   function doMyThing(delta) { 
     part1.rotation += 1;

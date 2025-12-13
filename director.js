@@ -166,8 +166,9 @@ export default class Director {
     }
   }
   static particles() {
+    let now =Date.now();
     for (let particleGenerator of Director.particleGenerators.values()) {
-      particleGenerator.generate();
+      particleGenerator.generate(now);
     }
   }
   static removeOldSensorData(currentTime) {

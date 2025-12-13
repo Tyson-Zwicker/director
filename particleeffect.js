@@ -39,7 +39,7 @@ export default class ParticleEffect {
     context.moveTo (0,0);
     context.lineTo (tp.x, tp.y);
     context.stroke();
-
+    console.log (`drawing ${this.id} p${this.position} tp(${tp.x},${tp.y})v${this.velocity} l:${this.life} c${this.color.asHex()}`);
     this.life -= delta;
     return (this.life > 0);
   }
