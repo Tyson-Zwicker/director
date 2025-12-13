@@ -78,10 +78,10 @@ export default class Point {
     throw new Error(`Point.from: object is not a point.`);
   }
   //Angle should be in Degrees.
-  static fromPolar(angle, distance) {
+  static fromPolar(angle, magnitude) {
     return new Point(
-      Math.cos(angle * this.toRad) * distance,
-      Math.sin(angle * this.toRad) * distance);
+      Math.cos(angle * this.toRad) * magnitude,
+      Math.sin(angle * this.toRad) * magnitude);
   }
   static isPointy(p) {
     return p && typeof p.x === 'number' && typeof p.y === 'number' && !isNaN(p.x) && !isNaN(p.y);
