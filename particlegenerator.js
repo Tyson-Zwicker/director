@@ -1,31 +1,34 @@
-import ParticleEffect from "./particleeffect.js";
 import Color from './color.js';
+import Director from './director.js';
+import ParticleEffect from "./particleeffect.js";
+import Point from './point.js';
 
 export default class ParticleGenertor {
-  constructor(origin, angleMin, angleMax, velMin, velMax, color, size, durMin, durMax, periodMillis, foreground) {
-    if (!isPointry(origin)) throw new Error(`ParticleGenerator.constructor origin must be a point ${origin}`);
+  constructor(name,origin, angleMin, angleMax, velMin, velMax, color, size, durMin, durMax, periodMillis, foreground) {
+    if (typeof name !== 'string') throw new Error (`ParticleGenerator.constructor ParticleGeneraetors must be named ${name}`);
+    if (!Point.isPointy(origin)) throw new Error(`ParticleGenerator.constructor origin must be a point ${origin}`);
     this.origin = origin;
-    if (!(angleMin instanceof 'number') || !(angleMax instanceof 'number')) throw new Error(`ParticleGenerator.constructor: angles be degreest ${angleMin}, ${angleMax}`);
+    if (typeof angleMin !== 'number' || typeof angleMax !== 'number') throw new Error(`ParticleGenerator.constructor: angles be degreest ${angleMin}, ${angleMax}`);
     this.angleMin = angleMin;
     this.angleMax = angleMax;
-    if (!(velMin instanceof 'number') || !(velMax instanceof 'number')) throw new Error(`ParticleGenerator.constructor: velocities be numbers ${velMin}, ${velMax}`);
+    if (typeof velMin !== 'number' || typeof velMax !== 'number') throw new Error(`ParticleGenerator.constructor: velocities be numbers ${velMin}, ${velMax}`);
     this.velMin = velMin;
     this.velMax = velMin;
-    if (!(color instanceof 'Color')) throw new Error(`ParticleGenerator.constructor: color must be a Color, ${color}`);
+    if (!(color instanceof Color)) throw new Error(`ParticleGenerator.constructor: color must be a Color, ${color}`);
     this.color = color;
-    if (!(size instanceof 'number' || size <= 0)) new Error(`ParticleGenerator.constructor: size must be a number and >0 ${size}`);
+    if (typeof size !== 'number' || size <= 0) new Error(`ParticleGenerator.constructor: size must be a number and >0 ${size}`);
     this.size = size;
-    if (!(durMin instanceof 'number') || !(durMax instanceof 'number')) throw new Error(`ParticleGenerator.constructor: durations be numbers (in seconds)${velMin}, ${velMax}`);
+    if (typeof durMin !== 'number' || typeof durMax !== 'number') throw new Error(`ParticleGenerator.constructor: durations be numbers (in seconds)${velMin}, ${velMax}`);
     this.durMin = durMin;   //in seconds.
     this.durMax = durMax;   //in seconds.
-    if (!(foreground instanceof 'bool')) throw new Error(`ParticleGenerator.constructor: foreground must be true, or false (for background) [${foreground}].`)
+    if (typeof foreground !== 'boolean') throw new Error(`ParticleGenerator.constructor: foreground must be true, or false (for background) [${foreground}].`)
     this.foreground = foreground;
     this.lastGeneratedMillis = 0;
-    if (!(periodMillis instanceof 'number' || size <= 0)) new Error(`ParticleGenerator.constructor: period must be a number and >0 (inMilliseconds) ${periodMillis}`);
+    if (typeof periodMillis !== 'number' || size <= 0) new Error(`ParticleGenerator.constructor: period must be a number and >0 (inMilliseconds) ${periodMillis}`);
     this.periodMillis = periodMillis;
   }
   generate(now) {
-    if (now - this.astGeneratedMillis > this.periodMillis) {
+    if (now - this.lastGeneratedMillis > this.periodMillis) {
       let particleEffect = new ParticleEffect(
         this.origin,
         this.#getRandomVelocityComponents(),
@@ -33,16 +36,18 @@ export default class ParticleGenertor {
       );
       if (this.foreground) {
         Director.addForegroundEffect(particleEffect)
+        console.log (Director.fgEffects.size);
         return;
       }
-      Director.addBackgroundEffect(particleEffect)
+      
+      Director.addBackgroundEffect(particleEffect);                           
+      console.log (Director.bgEffects.size);
     }
   }
   #getRandomVelocityComponents() {
-    let a = rnd(angleMin, angleMax);
-    let v = rnd(velMin, velMax);
-    return Point.fromPolar(a, l);
-
+    let a = rnd(this.angleMin, this.angleMax);
+    let m = rnd(this.velMin, this.velMax);
+    return Point.fromPolar(a, m);
   }
 }
 
