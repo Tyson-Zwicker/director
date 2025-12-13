@@ -19,7 +19,6 @@ export default class Director {
     Director.actorFields = new Map();
     Director.bgEffects = [];
     Director.fgEffects = [];
-    Director.particleGenerators = new Map();
     Director.signals = new EventTracker();
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
@@ -66,9 +65,6 @@ export default class Director {
       }
     }
   }
-  static addParticleGenerator(generator) {
-    Director.particleGenerators.set(generator.name, generator);
-  }
   //------------------------- Workers called by main loop
   static checkUserActorInteraction() {
     let actorMouseInteraction = false;
@@ -93,13 +89,50 @@ export default class Director {
     }
   }
   static draw(delta) {
+    Director.#draw_foregroundEffects(delta);
+    for (let actor of Director.actors.values()) {
+      if (Director.view.canSee(actor.position, actor.radius())) {
+        actor.draw(Director.view);
+      }
+    }
+    Director.#draw_backgroundEffects(delta);
+  }
+  static #draw_foregroundEffects(delta) {
+    let survivingForegroundEffects = [];
+    for (let effect of Director.fgEffects) {
+      if (effect instanceof LineEffect) {       //----------lines
+        if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
+          if (effect.draw(Director.view.context, delta)) {
+            survivingForegroundEffects.push(effect);
+          }
+        }
+      }
+      if (effect instanceof RadialEffect) {     //----------circle
+        if (Director.view.canSee(effect.position, effect.radius)) {
+          if (effect.draw(Director.view.context, delta)) {
+            survivingForegroundEffects.push(effect);
+          }
+        }
+      }
+      if (effect instanceof ParticleEffect) {   //---------Particles
+        if (Director.view.canSee(effect.position)) {
+          if (effect.draw(Director.view.context, delta)) {
+            effect.move(delta); //Particles move themselves if you let them..
+            survivingForegroundEffects.push(effect);
+          }
+        }
+      }
+    }
+    Director.fgEffects = survivingForegroundEffects;
+  }
+  static #draw_backgroundEffects(delta) {
     //Draw background..
     let survivingBackgroundEffects = [];
     for (let effect of Director.bgEffects) {
       if (effect instanceof LineEffect) {
         if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
           if (effect.draw(Director.view.context, delta)) {
-            survivingBackgroundEffects.push(effect);           
+            survivingBackgroundEffects.push(effect);
           }
         }
       }
@@ -110,69 +143,23 @@ export default class Director {
           }
         }
       }
-      //Particles are lost when they go off screen becauase, if they don't drawn, they
-      //don't get preserved...  I don't think this will matter much because particles are going
-      //to be produced on mass from "particle sprayers" so it just making more when the sprayer
-      //comes back on screen.  If it is a big deal at some point we just change how the survival
-      //system works so it doesn't care about being drawn or not.  
+      //Particles are lost when they go off screen becauase, if they don't drawn, they don't get preserved...
       if (effect instanceof ParticleEffect) {
         if (Director.view.canSee(effect.position)) {
           if (effect.draw(Director.view.context, delta)) {
             effect.move(delta); //Particles move themselves if you let them..
-            survivingBackgroundEffects.push(effect);                        
-          }
-        }
-      }
-    }
-    //Draw actors..
-    for (let actor of Director.actors.values()) {
-      if (Director.view.canSee(actor.position, actor.radius())) {
-        actor.draw(Director.view);
-      }
-    }
-    //Draw foreground
-    let survivingForegroundEffects = [];
-    for (let effect of Director.fgEffects) {
-      if (effect instanceof LineEffect) {
-        if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
-          if (effect.draw(Director.view.context, delta)) {
-            survivingForegroundEffects.push(effect);
-          }
-        }
-      }
-      if (effect instanceof RadialEffect) {
-        if (Director.view.canSee(effect.position, effect.radius)) {
-          if (effect.draw(Director.view.context, delta)) {
-            survivingForegroundEffects.push(effect);
-          }
-        }
-      }
-      if (effect instanceof ParticleEffect) {        
-        if (Director.view.canSee(effect.position)) {
-          if (effect.draw(Director.view.context, delta)) {            
-            effect.move(delta); //Particles move themselves if you let them..
-            survivingBackgroundEffects.push(effect);            
+            survivingBackgroundEffects.push(effect);
           }
         }
       }
     }
     Director.bgEffects = survivingBackgroundEffects;
-    Director.fgEffects = survivingForegroundEffects;
   }
   static kinematics(delta) {
     for (let actor of Director.actors.values()) {
       actor.move(delta);
       Director.quadtree.insert(actor);
     }
-  }
-  static particles() {
-    let now =Date.now();
-    for (let particleGenerator of Director.particleGenerators.values()) {
-      particleGenerator.generate(now);
-    }
-  }
-  static removeOldSensorData(currentTime) {
-    //TODO:  This...
   }
   static sensing(delta, currentTime) {
     for (let actor of Director.actors.values()) {
@@ -199,9 +186,8 @@ export default class Director {
     Director.kinematics(delta); //This redraws the entire quadtree.
     Director.applyActorField(delta);
     Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.
-    Director.removeOldSensorData(currentTime);
-    Director.sensing(delta, currentTime); //<- do this before draw, as it may add effects..
-    Director.particles();
+    //BROKEN: Director.removeOldSensorData(currentTime);
+    //BROKEN: Director.sensing(delta, currentTime); //<- do this before draw, as it may add effects..
     Director.draw(delta);
     Director.collisions(delta);
     if (Director.creatorFn) {
