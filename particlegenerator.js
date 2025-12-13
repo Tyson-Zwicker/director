@@ -4,8 +4,9 @@ import ParticleEffect from "./particleeffect.js";
 import Point from './point.js';
 
 export default class ParticleGenertor {
-  constructor(name,origin, angleMin, angleMax, velMin, velMax, color, size, durMin, durMax, periodMillis, foreground) {
-    if (typeof name !== 'string') throw new Error (`ParticleGenerator.constructor ParticleGeneraetors must be named ${name}`);
+  constructor(name, origin, angleMin, angleMax, velMin, velMax, color, size, durMin, durMax, periodMillis, foreground) {
+    if (typeof name !== 'string') throw new Error(`ParticleGenerator.constructor ParticleGenerators must be named ${name}`);
+    this.name = name;
     if (!Point.isPointy(origin)) throw new Error(`ParticleGenerator.constructor origin must be a point ${origin}`);
     this.origin = origin;
     if (typeof angleMin !== 'number' || typeof angleMax !== 'number') throw new Error(`ParticleGenerator.constructor: angles be degreest ${angleMin}, ${angleMax}`);
@@ -18,7 +19,7 @@ export default class ParticleGenertor {
     this.color = color;
     if (typeof size !== 'number' || size <= 0) new Error(`ParticleGenerator.constructor: size must be a number and >0 ${size}`);
     this.size = size;
-    if (typeof durMin !== 'number' || typeof durMax !== 'number') throw new Error(`ParticleGenerator.constructor: durations be numbers (in seconds)${velMin}, ${velMax}`);
+    if (typeof durMin !== 'number' || typeof durMax !== 'number' || durMin <= 0) throw new Error(`ParticleGenerator.constructor: durations be numbers (in seconds)${velMin}, ${velMax}`);
     this.durMin = durMin;   //in seconds.
     this.durMax = durMax;   //in seconds.
     if (typeof foreground !== 'boolean') throw new Error(`ParticleGenerator.constructor: foreground must be true, or false (for background) [${foreground}].`)
@@ -29,19 +30,18 @@ export default class ParticleGenertor {
   }
   generate(now) {
     if (now - this.lastGeneratedMillis > this.periodMillis) {
+      this.lastGeneratedMillis = now;
       let particleEffect = new ParticleEffect(
-        this.origin,
+        Point.from (this.origin),
         this.#getRandomVelocityComponents(),
-        this.color, this.size, rnd(this.minDur, this.maxDur)  //color, size, duration
+        this.color, this.size, rnd(this.durMin, this.durMax)  //color, size, duration
       );
       if (this.foreground) {
-        Director.addForegroundEffect(particleEffect)
-        console.log (Director.fgEffects.size);
+        Director.addForegroundEffect(particleEffect);
         return;
       }
-      
-      Director.addBackgroundEffect(particleEffect);                           
-      console.log (Director.bgEffects.size);
+
+      Director.addBackgroundEffect(particleEffect);
     }
   }
   #getRandomVelocityComponents() {

@@ -7,10 +7,11 @@ export default class ParticleEffect {
     if (!Point.isPointy(position)) throw new Error(`ParticleEffect.constructor: position should be a point: ${position}`);
     this.position = position;
     this.size = size;
-    if (!(color instanceof Color)) throw new Error (`Color must be a Color object : ${color}`);
+    if (!(color instanceof Color)) throw new Error(`Color must be a Color object : ${color}`);
     this.color = color;
     if (!Point.isPointy(velocity)) throw new Error(`ParticleEffect.constructor: velocity should be a compenent vector. ${velocity}`);
     this.velocity = velocity;
+    if (typeof durationInSeconds !=='number' && durationInSeconds>0) throw (`ParticleEffect.constructor.  Duration must a number greater than zero. [${durationInSeconds}]`)
     this.duration = durationInSeconds;
     this.life = durationInSeconds;
   }
@@ -35,13 +36,6 @@ export default class ParticleEffect {
       particleSize, particleSize
     );
     context.fillStyle = color.asHex();
-    /*  Remove when particle generator actually works..
-    context.beginPath();
-    context.moveTo (0,0);
-    context.lineTo (tp.x, tp.y);
-    context.stroke();
-    console.log (`drawing ${this.id} p${this.position} tp(${tp.x},${tp.y})v${this.velocity} l:${this.life} c${this.color.asHex()}`);
-    */
     this.life -= delta;
     return (this.life > 0);
   }

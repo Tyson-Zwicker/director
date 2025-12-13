@@ -9,6 +9,7 @@ import KeyBoard from './keyboard.js';
 import LineEffect from './lineeffect.js';
 import RadialEffect from './radialeffect.js';
 import ParticleEffect from './particleeffect.js';
+import ParticleGenerator from './particlegenerator.js';
 
 export default class Director {
   static keyboard = new KeyBoard();
@@ -19,6 +20,7 @@ export default class Director {
     Director.actorFields = new Map();
     Director.bgEffects = [];
     Director.fgEffects = [];
+    Director.pGenerators = new Map();
     Director.signals = new EventTracker();
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
@@ -58,6 +60,18 @@ export default class Director {
   static addForegroundEffect(effect) {
     Director.fgEffects.push(effect);
   }
+  static addParticleGenerator(generator) {
+    this.pGenerators.set(generator.name, generator);
+  }
+  static removeParticalGenerator(generatorName) {
+    this.pGenerators.delete(generatorName);
+  }
+  //------------------------- Workers called by main loop
+  static runParticleGenerators(now) {
+    for (let pg of this.pGenerators.values()) {
+      pg.generate(now);
+    }
+  }
   static applyActorField(delta) {
     for (let actorField of Director.actorFields.values()) {
       for (let otherActor of Director.actors.values()) {
@@ -65,7 +79,6 @@ export default class Director {
       }
     }
   }
-  //------------------------- Workers called by main loop
   static checkUserActorInteraction() {
     let actorMouseInteraction = false;
     for (let actor of Director.actors.values()) {
@@ -117,6 +130,7 @@ export default class Director {
       if (effect instanceof ParticleEffect) {   //---------Particles
         if (Director.view.canSee(effect.position)) {
           if (effect.draw(Director.view.context, delta)) {
+        
             effect.move(delta); //Particles move themselves if you let them..
             survivingForegroundEffects.push(effect);
           }
@@ -188,6 +202,7 @@ export default class Director {
     Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.
     //BROKEN: Director.removeOldSensorData(currentTime);
     //BROKEN: Director.sensing(delta, currentTime); //<- do this before draw, as it may add effects..
+    Director.runParticleGenerators(currentTime);
     Director.draw(delta);
     Director.collisions(delta);
     if (Director.creatorFn) {
