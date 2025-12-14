@@ -9,7 +9,6 @@ import KeyBoard from './keyboard.js';
 import LineEffect from './lineeffect.js';
 import RadialEffect from './radialeffect.js';
 import ParticleEffect from './particleeffect.js';
-import ParticleGenerator from './particlegenerator.js';
 
 export default class Director {
   static keyboard = new KeyBoard();
