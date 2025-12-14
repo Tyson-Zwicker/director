@@ -30,7 +30,7 @@ export default function init() {
    
       let newlabel = `${this.actor.name} (${this.actor.position.x},${this.actor.position.y})`;
       this.actor.setLabel(newlabel, new Point(0, 0), 1);
-      this.actor.velocity = new Point(rnd(-10, 10), rnd(-10, 10));
+      this.actor.velocity = new Point(rnd(-50, 50), rnd(-50, 50));
       this.actor.spin = rnd(-10, 10);
       }
     a.appearance = appearance;
