@@ -130,9 +130,12 @@ export default class Director {
       if (effect instanceof ParticleEffect) {   //---------Particles
         if (Director.view.canSee(effect.position)) {
           if (effect.draw(Director.view.context, delta)) {
-        
             effect.move(delta); //Particles move themselves if you let them..
             survivingForegroundEffects.push(effect);
+          } else {
+            if (effect.generator) {
+              effect.generator.recycle(effect);
+            }
           }
         }
       }
@@ -163,6 +166,10 @@ export default class Director {
           if (effect.draw(Director.view.context, delta)) {
             effect.move(delta); //Particles move themselves if you let them..
             survivingBackgroundEffects.push(effect);
+          } else {
+            if (effect.generator) {
+              effect.generator.recycle(effect);
+            }
           }
         }
       }

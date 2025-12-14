@@ -32,6 +32,7 @@ export default class ParticleGenertor {
     this.poolSize = 100; // Pre-allocate 100 particles
     this.#initializePool();
   }
+
   #initializePool() {
     for (let i = 0; i < this.poolSize; i++) {
       this.particlePool.push(
@@ -47,25 +48,39 @@ export default class ParticleGenertor {
   }
   #getParticleFromPool() {
     if (this.particlePool.length > 0) {
-      return this.particlePool.pop();
+      let p = this.particlePool.pop();
+      this.#refresh(p);
+      return p;
     }
     // Create new one if pool exhausted
     return this.#makeNew();
   }
-  #returnParticleToPool(particle){
-    this.particlePool.push (particle);
+  recycle (particle) {
+    this.particlePool.push(particle);
+  }
+  #refresh(p) {
+    p.position = Point.from (this.origin);
+    p.size = this.size;
+    p.color = this.color;
+    p.velocity= this.#getRandomVelocityComponents();
+    let life = rnd (this.durMin, this.durMax);
+    p.duration = life;
+    p.life = life;
+    p.generator = this;
   }
   #makeNew() {
-    return new ParticleEffect(
+    let particle = new ParticleEffect(
       Point.from(this.origin),
       this.#getRandomVelocityComponents(),
       this.color, this.size, rnd(this.durMin, this.durMax)  //color, size, duration
     );
+    particle.genertor = this;
+    return particle;
   }
   generate(now) {
     if (now - this.lastGeneratedMillis > this.periodMillis) {
       this.lastGeneratedMillis = now;
-      let particleEffect = this.#makeNew();
+      let particleEffect = this.#getParticleFromPool();
       if (this.foreground) {
         Director.addForegroundEffect(particleEffect);
         return;
@@ -80,7 +95,6 @@ export default class ParticleGenertor {
     return Point.fromPolar(a, m);
   }
 }
-
 
 function rnd(min, max) {
   return Math.floor(min + (max - min) * Math.random());

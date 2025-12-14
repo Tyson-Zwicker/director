@@ -15,10 +15,10 @@ export default class Sensor {
   //currentDirection is either + or -1 depending on which way the sensor is sweeping
   //currentAngle is a between -fieldOfView and +fieldOfView.  It is added as an offset to "angle"
   //***YOU MUST ATTACH THIS TO AN ACTOR USING [actor.attachSensor ()] OR IT WON'T WORK.
-  constructor(name, centerAngle, fieldOfView, speed, distance, active) {
+  constructor(name, centerAngle, fieldOfView, speed, range, active) {
     if (typeof active != 'boolean') throw new Error(`active must true or false ${active}`);
     if (typeof centerAngle !== 'number' || centerAngle < 0 || centerAngle > 359) throw new Error(`Sensor.constructor: Invalid centerAngle [${centerAngle}]`)
-    if (typeof distance !== 'number' || distance < 1) throw new Error(`distance must be  >=1 [${distance}]`);
+    if (typeof range !== 'number' || range < 1) throw new Error(`distance must be  >=1 [${range}]`);
     if (typeof fieldOfView !== 'number' || fieldOfView < 0 || fieldOfView > 359) throw new Error(`Sensor.constructor: Invalid fieldOfView [${fieldOfView}]`);
     if (typeof speed !== 'number' || speed < 0 || speed > fieldOfView / 2) throw new Error(`speed must be less than speed and >0 [${speed}]`);
     this.active = active;
@@ -26,7 +26,7 @@ export default class Sensor {
     this.centerAngle = centerAngle; //Defined as 0 if forward, -90 if port, +90 starboard, 180 to aft, etc.
     this.currentDirection = 1;
     this.currentOffset = 0; //varies from -fieldOfView to +fieldOfView.
-    this.distance = distance;
+    this.range = range;
     this.fieldOfView = fieldOfView;
     this.name = name;
     this.speed = speed;
@@ -37,7 +37,7 @@ export default class Sensor {
     //Get the candidates and go through the list.
     let cx = this.actor.position.x;
     let cy = this.actor.position.y;
-    let sensorBoundry = new Boundry(cx - this.distance, cy - this.distance, cx + this.distance, cy + this.distance);
+    let sensorBoundry = new Boundry(cx - this.range, cy - this.range, cx + this.range, cy + this.range);
     let foundActors = Director.quadtree.findInRange(sensorBoundry);
     let results = this.#examineCandidates(foundActors);
     this.#moveSensor(delta);
@@ -86,15 +86,15 @@ export default class Sensor {
           //connect all but last point to next point
           barrierPoint1 = points[i]; barrierPoint2 = points[i + 1];
         }
-        let result = this.#rayCast(this.actor.position, worldAngle, barrierPoint1, barrierPoint2);
-        if (result !== false && result.distance < response.distance && result.distance < this.distance) {
+        let result = this.#rayCast(this.actor.position, worldAngle, this.range, barrierPoint1, barrierPoint2);
+        if (result !== false && result.distance < response.distance && result.distance < this.range) {
           response.setResponse(result.point, result.distance, actor);
         }
       }
     }
     return response;
   }
-  #rayCast(originPoint, direction, barrierPoint1, barrierPoint2) {
+  #rayCast(originPoint, direction, range, barrierPoint1, barrierPoint2) {
     const x1 = barrierPoint1.x;
     const y1 = barrierPoint1.y;
     const x2 = barrierPoint2.x;
@@ -102,7 +102,7 @@ export default class Sensor {
 
     const x3 = originPoint.x;
     const y3 = originPoint.y;
-    const directionComponents = Point.fromPolar(direction, 1);
+    const directionComponents = Point.fromPolar(direction, range);
     const x4 = x3 + directionComponents.x;
     const y4 = y3 + directionComponents.y;
 
