@@ -51,12 +51,6 @@ export default function init() {
   d.appearance = new Appearance('#600', '#f00', '#fff');
   Director.addActor(d);
 
-  //constructor(
-  // origin, 
-  // angleMin, angleMax, velMin, velMax,
-  //  color,
-  //  size, durMin, durMax, periodMillis, foreground) {
-
   let redParticles = new ParticleGenerator(
     'red',
     new Point(0, 0),
@@ -64,7 +58,7 @@ export default function init() {
     new Color(15, 0, 0),
     2,
     5, 20,
-    10, true
+    5, true
   );
   Director.addParticleGenerator(redParticles);
   let blueParticles = new ParticleGenerator(
@@ -74,7 +68,7 @@ export default function init() {
     new Color(0, 0, 15),
     2,
     5, 20,
-    10, true
+    2, true
   );
   Director.addParticleGenerator(blueParticles);
   let greenParticles = new ParticleGenerator(
