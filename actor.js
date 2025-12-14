@@ -64,17 +64,8 @@ export default class Actor {
   }
   #drawParts(view) {
     let origin = Point.from(this.position);
-    for (let part of this.parts) {
-      //TODO: Move partOrigin math to "part"
-      let partOrigin = part.getWorldCoordinates (this, origin);
-      /*let partOrigin = Point.from(part.offset);
-      Point.rotate(partOrigin, this.rotation);
-      Point.add(partOrigin, origin);
-
-      Point.sub(partOrigin, view.camera);
-      Point.scale(partOrigin, view.camera.zoom);
-      Point.add(partOrigin, view.screenCenter);
-      */
+    for (let part of this.parts) {      
+      let partOrigin = part.getWorldCoordinates (this, origin);      
       let appearance = (part.appearance) ? part.appearance : this.appearance;
       part.polygon.draw(view, partOrigin, part.rotation + this.rotation, appearance);
     }
