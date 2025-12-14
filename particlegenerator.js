@@ -12,6 +12,7 @@ export default class ParticleGenertor {
     if (typeof angleMin !== 'number' || typeof angleMax !== 'number') throw new Error(`ParticleGenerator.constructor: angles be degreest ${angleMin}, ${angleMax}`);
     this.angleMin = angleMin;
     this.angleMax = angleMax;
+    this.anglePartOffset =0;
     if (typeof velMin !== 'number' || typeof velMax !== 'number') throw new Error(`ParticleGenerator.constructor: velocities be numbers ${velMin}, ${velMax}`);
     this.velMin = velMin;
     this.velMax = velMin;
@@ -27,9 +28,9 @@ export default class ParticleGenertor {
     this.lastGeneratedMillis = 0;
     if (typeof periodMillis !== 'number' || size <= 0) new Error(`ParticleGenerator.constructor: period must be a number and >0 (inMilliseconds) ${periodMillis}`);
     this.periodMillis = periodMillis;
-    // Object pool for reusing ParticleEffect instances
     this.particlePool = [];
-    this.poolSize = this.durMax*1000 / this.periodMillis; 
+    this.poolSize = this.durMax*1000 / this.periodMillis;
+    this.attachedPart = undefined; // Add this property
     this.#initializePool();
   }
 
@@ -90,9 +91,17 @@ export default class ParticleGenertor {
     }
   }
   #getRandomVelocityComponents() {
-    let a = rnd(this.angleMin, this.angleMax);
+    let a = this.anglePartOffset+rnd(this.angleMin, this.angleMax);
     let m = rnd(this.velMin, this.velMax);
     return Point.fromPolar(a, m);
+  }
+  setOrigin(newOrigin) {
+    this.origin = Point.from(newOrigin);
+  }
+  
+  setRotation(angleInDegrees) {
+    // Store rotation if you need it for particle generation
+    this.anglePartOffset = angleInDegrees;
   }
 }
 

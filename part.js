@@ -5,9 +5,11 @@ export default class Part {
   name = undefined;
   offset = undefined;
   rotation = 0;
-  owner = undefined; //This is defined by the Actor class when attachPart() is called.
+  owner = undefined;
   polygon = null;
   appearance = undefined;
+  particleGenerator = undefined; // Add this property
+  
   constructor(name, x, y, polygon, rotation, actor) {
     this.name = name;
     this.offset = new Point(x, y);
@@ -15,20 +17,40 @@ export default class Part {
     this.rotation = (rotation) ? rotation : 0;
     this.actor = actor;
   }
+  
+  attachParticleGenerator(generator) {
+    this.particleGenerator = generator;
+    generator.attachedPart = this;
+    return this;
+  }
+  
+  updateParticleGenerator() {
+    if (this.particleGenerator) {
+      let worldCoords = this.getWorldCoordinates();
+      this.particleGenerator.setOrigin(worldCoords);
+      this.particleGenerator.setRotation(this.actor.rotation + this.rotation);
+    }
+  }
+  
   getWorldCoordinates() {
     let origin = Point.from(this.actor.position);
     let partOrigin = Point.from(this.offset);
     Point.rotate(partOrigin, this.actor.rotation);
-    Point.add(partOrigin, origin);
+    Point.add(partOrigin, origin);   
+    return partOrigin;
+  }
+  getScreenCoordinates(){
+    let partOrigin = this.getWorldCoordinates();
     Point.sub(partOrigin, Director.view.camera);
     Point.scale(partOrigin, Director.view.camera.zoom);
     Point.add(partOrigin, Director.view.screenCenter);
     return partOrigin;
-
   }
+  
   isPart() {
     return true;
   }
+  
   toString() {
     return `part [${this.name}] owned by [${this.owner?.name}]
     polygon ${this.polygon.toString()}`;

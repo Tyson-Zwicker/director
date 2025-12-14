@@ -178,6 +178,10 @@ export default class Director {
   static kinematics(delta) {
     for (let actor of Director.actors.values()) {
       actor.move(delta);
+      // Update particle generators attached to parts
+      for (let part of actor.parts) {
+        part.updateParticleGenerator();
+      }
       Director.quadtree.insert(actor);
     }
   }
