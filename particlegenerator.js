@@ -27,15 +27,45 @@ export default class ParticleGenertor {
     this.lastGeneratedMillis = 0;
     if (typeof periodMillis !== 'number' || size <= 0) new Error(`ParticleGenerator.constructor: period must be a number and >0 (inMilliseconds) ${periodMillis}`);
     this.periodMillis = periodMillis;
+    // Object pool for reusing ParticleEffect instances
+    this.particlePool = [];
+    this.poolSize = 100; // Pre-allocate 100 particles
+    this.#initializePool();
+  }
+  #initializePool() {
+    for (let i = 0; i < this.poolSize; i++) {
+      this.particlePool.push(
+        new ParticleEffect(
+          Point.from(this.origin),
+          { x: 0, y: 0 },
+          this.color,
+          this.size,
+          0
+        )
+      );
+    }
+  }
+  #getParticleFromPool() {
+    if (this.particlePool.length > 0) {
+      return this.particlePool.pop();
+    }
+    // Create new one if pool exhausted
+    return this.#makeNew();
+  }
+  #returnParticleToPool(particle){
+    this.particlePool.push (particle);
+  }
+  #makeNew() {
+    return new ParticleEffect(
+      Point.from(this.origin),
+      this.#getRandomVelocityComponents(),
+      this.color, this.size, rnd(this.durMin, this.durMax)  //color, size, duration
+    );
   }
   generate(now) {
     if (now - this.lastGeneratedMillis > this.periodMillis) {
       this.lastGeneratedMillis = now;
-      let particleEffect = new ParticleEffect(
-        Point.from (this.origin),
-        this.#getRandomVelocityComponents(),
-        this.color, this.size, rnd(this.durMin, this.durMax)  //color, size, duration
-      );
+      let particleEffect = this.#makeNew();
       if (this.foreground) {
         Director.addForegroundEffect(particleEffect);
         return;
