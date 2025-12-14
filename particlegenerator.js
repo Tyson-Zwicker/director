@@ -29,7 +29,7 @@ export default class ParticleGenertor {
     this.periodMillis = periodMillis;
     // Object pool for reusing ParticleEffect instances
     this.particlePool = [];
-    this.poolSize = 100; // Pre-allocate 100 particles
+    this.poolSize = this.durMax*1000 / this.periodMillis; 
     this.#initializePool();
   }
 
