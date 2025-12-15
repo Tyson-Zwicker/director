@@ -4,11 +4,11 @@ import ParticleEffect from "./particleeffect.js";
 import Point from './point.js';
 
 export default class ParticleGenertor {
-  constructor(name, origin, angleMin, angleMax, velMin, velMax, color, size, durMin, durMax, periodMillis, foreground) {
+  constructor(name, position, angleMin, angleMax, velMin, velMax, color, size, durMin, durMax, periodMillis, foreground) {
     if (typeof name !== 'string') throw new Error(`ParticleGenerator.constructor ParticleGenerators must be named ${name}`);
     this.name = name;
-    if (!Point.isPointy(origin)) throw new Error(`ParticleGenerator.constructor origin must be a point ${origin}`);
-    this.origin = origin;
+    if (!Point.isPointy(position)) throw new Error(`ParticleGenerator.constructor origin must be a point ${position}`);
+    this.position = position;
     if (typeof angleMin !== 'number' || typeof angleMax !== 'number') throw new Error(`ParticleGenerator.constructor: angles be degreest ${angleMin}, ${angleMax}`);
     this.angleMin = angleMin;
     this.angleMax = angleMax;
@@ -38,7 +38,7 @@ export default class ParticleGenertor {
     for (let i = 0; i < this.poolSize; i++) {
       this.particlePool.push(
         new ParticleEffect(
-          Point.from(this.origin),
+          Point.from(this.position),
           { x: 0, y: 0 },
           this.color,
           this.size,
@@ -60,7 +60,7 @@ export default class ParticleGenertor {
     this.particlePool.push(particle);
   }
   #refresh(p) {
-    p.position = Point.from (this.origin);
+    p.position = Point.from (this.position);
     p.size = this.size;
     p.color = this.color;
     p.velocity= this.#getRandomVelocityComponents();
@@ -71,7 +71,7 @@ export default class ParticleGenertor {
   }
   #makeNew() {
     let particle = new ParticleEffect(
-      Point.from(this.origin),
+      Point.from(this.position),
       this.#getRandomVelocityComponents(),
       this.color, this.size, rnd(this.durMin, this.durMax)  //color, size, duration
     );
@@ -95,8 +95,8 @@ export default class ParticleGenertor {
     let m = rnd(this.velMin, this.velMax);
     return Point.fromPolar(a, m);
   }
-  setOrigin(newOrigin) {
-    this.origin = Point.from(newOrigin);
+  setPosition(newPosition) {
+    this.position = Point.from(newPosition);
   }
   
   setFacing(angleInDegrees) {
