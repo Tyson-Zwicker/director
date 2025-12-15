@@ -3,18 +3,18 @@ import Director from './director.js';
 import Appearance from './appearance.js'
 export default class Part {
   name = undefined;
-  offset = undefined;
-  rotation = 0;
+  position = undefined;
+  facing = 0;
   owner = undefined;
   polygon = null;
   appearance = undefined;
   particleGenerator = undefined; // Add this property
   
-  constructor(name, x, y, polygon, rotation, actor) {
+  constructor(name, x, y, polygon, facing, actor) {
     this.name = name;
-    this.offset = new Point(x, y);
+    this.position = new Point(x, y);
     this.polygon = polygon;
-    this.rotation = (rotation) ? rotation : 0;
+    this.facing = (facing) ? facing : 0;
     this.actor = actor;
   }
   
@@ -28,14 +28,14 @@ export default class Part {
     if (this.particleGenerator) {
       let worldCoords = this.getWorldCoordinates();
       this.particleGenerator.setOrigin(worldCoords);
-      this.particleGenerator.setRotation(this.actor.rotation + this.rotation);
+      this.particleGenerator.setFacing(this.actor.facing + this.facing);
     }
   }
   
   getWorldCoordinates() {
     let origin = Point.from(this.actor.position);
-    let partOrigin = Point.from(this.offset);
-    Point.rotate(partOrigin, this.actor.rotation);
+    let partOrigin = Point.from(this.position);
+    Point.rotate(partOrigin, this.actor.facing);
     Point.add(partOrigin, origin);   
     return partOrigin;
   }

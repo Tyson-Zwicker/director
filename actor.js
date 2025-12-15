@@ -12,7 +12,7 @@ export default class Actor {
   parts = [];
   polygon = undefined;
   position = new Point(0, 0); // world coordinates, defined in pixels.
-  rotation = 0; // Defined in degrees
+  facing = 0; // Defined in degrees
   sensorData = new EventTracker();
   sensors = undefined;
   spin = 0; // Defined in degrees per second.
@@ -48,7 +48,7 @@ export default class Actor {
     Point.scale(origin, view.camera.zoom);
     Point.add(origin, view.screenCenter);
     let appearance = this.#drawChooseAppearance();
-    this.polygon.draw(view, origin, this.rotation, appearance);
+    this.polygon.draw(view, origin, this.facing, appearance);
 
     this.#drawParts(view);
     this.#drawLabels(view);
@@ -67,7 +67,7 @@ export default class Actor {
     for (let part of this.parts) {      
       let partOrigin = part.getScreenCoordinates ();      
       let appearance = (part.appearance) ? part.appearance : this.appearance;
-      part.polygon.draw(view, partOrigin, part.rotation + this.rotation, appearance);
+      part.polygon.draw(view, partOrigin, part.facing + this.facing, appearance);
     }
   }
   #drawLabels(view) {
@@ -102,9 +102,9 @@ export default class Actor {
     let scaledVelocity = Point.from(this.velocity);
     Point.scale(scaledVelocity, delta);
     Point.add(this.position, scaledVelocity);
-    this.rotation += this.spin * delta;
-    if (this.rotation > 360) this.rotation -= 360;
-    if (this.rotation < 0) this.rotation += 360;
+    this.facing += this.spin * delta;
+    if (this.facing > 360) this.facing -= 360;
+    if (this.facing < 0) this.facing += 360;
   }
   radius() {
     return this.polygon.radius;
