@@ -99,7 +99,7 @@ export default class ParticleGenertor {
     this.origin = Point.from(newOrigin);
   }
   
-  setRotation(angleInDegrees) {
+  setFacing(angleInDegrees) {
     // Store rotation if you need it for particle generation
     this.anglePartOffset = angleInDegrees;
   }
