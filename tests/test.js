@@ -74,8 +74,8 @@ export default function init() {
   //Add toggle button function to part test (triangle)
 
   function rotateTheParts() { 
-    part1.rotation += 1;
-    part2.rotation -= 3;
+    part1.facing += 1;
+    part2.facing -= 3;
   }
   Director.addCreatorsFunction(rotateTheParts);
   Director.run();
