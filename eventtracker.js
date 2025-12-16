@@ -19,6 +19,9 @@ export default class EventTracker {
     }
     return null;
   }
+  
+  //TODO: This badly needs a getEventsAfter /getEventsBefore method...
+
   removeAt(time, index) {
     if (this.map.has(time)) {
       let events = this.map.get(time);
