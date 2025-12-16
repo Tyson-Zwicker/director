@@ -17,7 +17,7 @@ export default function init() {
   let a = new Actor(`Scout Craft`, Polygon.triangle(50, 100));
   a.position = new Point(0, 0);
   a.spin = 5;
-  a.rotation = 90;
+  a.facing = 90;
   a.appearance = new Appearance('#066', '#06f', '#fff');
   let part1 = new Part('box', -25, -20, Polygon.rectangle(15, 5), 0,a);
   part1.appearance = new Appearance('#ff0', '#f00', '#fff');
@@ -42,27 +42,27 @@ export default function init() {
   let b = new Actor(`BigRed`, Polygon.makeIrregular(70, 500, 700));
   b.position = new Point(1500, 0);
   b.spin = 2;
-  b.rotation = 30;
+  b.facing = 30;
   b.appearance = new Appearance('#f06', '#f00', '#f72');
   Director.addActor(b);
 
   let c = new Actor(`BigBlue`, Polygon.makeRegular(30, 1500));
   c.position = new Point(-3000, -3000);
   c.spin = 3;
-  c.rotation = 60;
+  c.facing = 60;
   c.appearance = new Appearance('#03F', '#09f', '#0af');
   Director.addActor(c);
 
   let d = new Actor(`BigPurple`, Polygon.makeRegular(30, 1000));
   d.position = new Point(200, 9000);
   d.spin = 4;
-  d.rotation = 90;
+  d.facing = 90;
   d.appearance = new Appearance('#b0d', '#f0f', '#f0f');
   Director.addActor(d);
 
   function runTheTest() {
-    if (sensorA.active) part1.rotation += 5;
-    if (sensorB.active) part2.rotation -= 5;
+    if (sensorA.active) part1.facing += 5;
+    if (sensorB.active) part2.facing -= 5;
 
     sensorA.active = !sensorA.active;
     sensorB.active = !sensorB.active;

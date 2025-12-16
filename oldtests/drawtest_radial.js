@@ -36,13 +36,13 @@ export default function init() {
     }
     actor.appearance = appearance;
     actor.attachButton(button);
-    this.actor.setLabel(i.toString(), new Point(0, 50), appearance,1);
+    actor.setLabel(i.toString(), new Point(0, 50), appearance,1);
     Director.addActor(actor);
   }
   let a = new Actor(`A1`, Polygon.triangle(50, 100));
   a.position = new Point(-200, -200);
   a.spin = 10;
-  a.rotation = 0;
+  a.facing = 0;
   a.appearance = new Appearance('#066', '#06f', '#fff');
   let part1 = new Part('box', 20, 0, Polygon.rectangle(20, 20), 0,a);
   part1.appearance = new Appearance('#ff0', '#f00', '#fff');
@@ -55,21 +55,21 @@ export default function init() {
   let b = new Actor(`B2`, Polygon.triangle(50, 100));
   b.position = new Point(-200, 200);
   b.spin = 2;
-  b.rotation = 30;
+  b.facing = 30;
   b.appearance = new Appearance('#606', '#60f', '#fff');
   Director.addActor(b);
 
   let c = new Actor(`C3`, Polygon.triangle(50, 100));
   c.position = new Point(200, 200);
   c.spin = 3;
-  c.rotation = 60;
+  c.facing = 60;
   c.appearance = new Appearance('#660', '#6f0', '#fff');
   Director.addActor(c);
 
   let d = new Actor(`D4`, Polygon.triangle(50, 100));
   d.position = new Point(200, -200);
   d.spin = 4;
-  d.rotation = 90;
+  d.facing = 90;
   d.appearance = new Appearance('#600', '#f00', '#fff');
   Director.addActor(d);
   //Add toggle button function to part test (triangle)
@@ -77,8 +77,8 @@ export default function init() {
   let count = 0;
   function doMyThing(delta) {
     count++;
-    part1.rotation += 1;
-    part2.rotation -= 3;
+    part1.facing += 1;
+    part2.facing -= 3;
     let spread = 400;
     if (count === 100) {      
       let radialEffect = new RadialEffect(

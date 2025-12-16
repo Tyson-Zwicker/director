@@ -28,7 +28,7 @@ export default function init() {
       let a = new Actor(name, poly);
       a.position = new Point(startX + i * spacing, startY + j * spacing);
       a.spin = Math.random() * 20 - 10;
-      a.rotation = Math.random() * 360;
+      a.facing = Math.random() * 360;
       a.appearance = new Appearance(
         Color.random(8).asHex(),
         Color.random(8).asHex(),
