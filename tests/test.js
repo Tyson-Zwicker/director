@@ -29,13 +29,13 @@ export default function init() {
     b.clickFn = function () {
    
       let newlabel = `${this.actor.name} (${this.actor.position.x},${this.actor.position.y})`;
-      this.actor.setLabel(newlabel, new Point(0, 0), 1);
+      this.actor.setLabel(newlabel, new Point(0, 0),appearance, 1);
       this.actor.velocity = new Point(rnd(-50, 50), rnd(-50, 50));
       this.actor.spin = rnd(-10, 10);
       }
     a.appearance = appearance;
     a.attachButton(b);
-    a.setLabel(i.toString(), new Point(0, 50), 1);
+    a.setLabel(i.toString(), new Point(0, 50),appearance, 1);
     Director.addActor(a);
   }
   let a = new Actor(`A1`, Polygon.triangle(50, 100));
@@ -74,14 +74,12 @@ export default function init() {
   //Add toggle button function to part test (triangle)
 
   function rotateTheParts() { 
-    part1.rotation += 1;
-    part2.rotation -= 3;
+    part1.facing += 1;
+    part2.facing -= 3;
   }
   Director.addCreatorsFunction(rotateTheParts);
   Director.run();
 }
-
-
 function rnd(min, max) {
   return Math.floor(min + Math.random() * (Math.abs(max) - min));
 }

@@ -38,7 +38,7 @@ export default function init() {
       let speed = 0// + Math.random() * 15;
       a.velocity = Point.zero();
       a.bounceCoefficient = Math.random();
-      a.setLabel(name, new Point(0, 0), 1);
+      a.setLabel(name, new Point(0, 0),a.appearance, 1);
       Director.addActor(a);
       Director.addFieldToActor(a, -a.mass() * 10);
       count++;
