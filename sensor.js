@@ -41,7 +41,7 @@ export default class Sensor {
     let sensorBoundry = new Boundry(cx - this.range, cy - this.range, cx + this.range, cy + this.range);
     let foundActors = Director.quadtree.findInRange(sensorBoundry);
 
-    console.log(foundActors);
+    //console.log(foundActors);
 
     let results = this.#examineCandidates(foundActors);
     this.#moveSensor(delta);
@@ -73,7 +73,7 @@ export default class Sensor {
     Director.addForegroundEffect(sensorRay);
   }
   #drawAttempt(p1, p2) {
-    let sensorRay = new LineEffect(p1, p2, 1, new Color(15, 0, 0, 1), 2)
+    let sensorRay = new LineEffect(p1, p2, 1, new Color(15, 0, 0,0.2), 2)
     Director.addForegroundEffect(sensorRay);
   }
   #examineCandidates(foundActors) {
