@@ -22,11 +22,7 @@ export default class ParticleEffect {
     Point.add(this.position, scaledVelocity);
   }
   draw(context, delta) {
-    let tp = Point.from(this.position); //The point is fixed in world coordinates, but screen moves so, tp = temporaty point ie. where the screen put you.
     let screenPoint = Transpose.worldToScreen (this.position);
-    //Point.sub(tp, Director.view.camera);
-    //Point.scale(tp, Director.view.camera.zoom);
-    //Point.add(tp, Director.view.screenCenter);
     if (!context || isNaN(delta)) throw (`LineEffect.draw: bad params context ${context}, delta ${delta}`);
     let color = this.color.withOpacity(this.life / this.duration);
     context.fillStyle = color.asHex();
