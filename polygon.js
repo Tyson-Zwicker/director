@@ -1,5 +1,5 @@
 import Point from './point.js';
-
+import Director from './director.js';
 export default class Polygon {
   points = [];
   drawnPoints = [];
@@ -18,14 +18,14 @@ export default class Polygon {
       }
     }
   }
-  draw(view, origin, rotation, appearance) {
+  draw(origin, rotation, appearance) {
     this.drawnPoints = [];
     let path = new Path2D();
     let first = true;
     for (let point of this.points) {
       let vertex = Point.from(point);
       Point.rotate(vertex, rotation);
-      Point.scale(vertex, view.camera.zoom);
+      Point.scale(vertex, Director.view.camera.zoom);
       Point.add(vertex, origin);
       this.drawnPoints.push(vertex);
       if (first) {
@@ -36,11 +36,11 @@ export default class Polygon {
       }
     }
     path.closePath();
-    view.context.fillStyle = appearance.fill;
-    view.context.strokeStyle = appearance.stroke;
-    view.context.lineWidth = appearance.width;
-    view.context.fill(path);
-    view.context.stroke(path);
+    Director.view.context.fillStyle = appearance.fill;
+    Director.view.context.strokeStyle = appearance.stroke;
+    Director.view.context.lineWidth = appearance.width;
+    Director.view.context.fill(path);
+    Director.view.context.stroke(path);
   }
   isPointIn(p) {
     //Trace the line that goes from the point to the right and count how many times it crosses the polygon

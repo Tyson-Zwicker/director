@@ -52,7 +52,7 @@ export default class Actor {
     Point.scale(origin, view.camera.zoom);
     Point.add(origin, view.screenCenter);
     let appearance = this.#drawChooseAppearance();
-    this.polygon.draw(view, origin, this.facing, appearance);
+    this.polygon.draw(origin, this.facing, appearance);
 
     this.#drawParts(view);
     this.#drawLabel(view);
@@ -71,7 +71,7 @@ export default class Actor {
     for (let part of this.parts) {      
       let partOrigin = part.getScreenCoordinates ();      
       let appearance = (part.appearance) ? part.appearance : this.appearance;
-      part.polygon.draw(view, partOrigin, part.facing + this.facing, appearance);
+      part.polygon.draw(partOrigin, part.facing + this.facing, appearance);
     }
   }
   #drawLabel() {
