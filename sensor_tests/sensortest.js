@@ -19,10 +19,10 @@ export default function init() {
   a.spin = 5;
   a.rotation = 90;
   a.appearance = new Appearance('#066', '#06f', '#fff');
-  let part1 = new Part('box', -25, -20, Polygon.rectangle(15, 5), 0);
+  let part1 = new Part('box', -25, -20, Polygon.rectangle(15, 5), 0,a);
   part1.appearance = new Appearance('#ff0', '#f00', '#fff');
   a.attachPart(part1);
-  let part2 = new Part('box', -25, 20, Polygon.rectangle(15, 5), 0);
+  let part2 = new Part('box', -25, 20, Polygon.rectangle(15, 5), 0,a);
   part2.appearance = new Appearance('#0f7', '#0ff', '#fff');
   a.attachPart(part2);
   Director.addActor(a);

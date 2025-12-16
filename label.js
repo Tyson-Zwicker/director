@@ -13,25 +13,6 @@ export default class Label {
     this.appearance = appearance;
     this.text = text;
   }
-  /*
-    #drawLabels(view) {
-      if (this.#label) {
-        //{ "text": text, "offset": offset ,"emSize":size};    
-        let labelOrigin = Point.from(this.#label.offset);
-        Point.add(labelOrigin, this.position);
-        //make "paint" subroutine for this..
-        Point.sub(labelOrigin, view.camera);
-        Point.scale(labelOrigin, view.camera.zoom);
-        Point.add(labelOrigin, view.screenCenter);
-        let appearance = (this.#label.appearance) ? this.#label.appearance : this.appearance;
-        view.context.fillStyle = appearance.text;
-        view.context.textBaseline = "middle";
-        view.context.textAlign = "center";
-        view.context.font = (this.#label.emSize) ? `${this.#label.emSize}em monospace` : '0.75em monospace';
-        view.context.fillText(this.#label.text, labelOrigin.x, labelOrigin.y);
-      }
-    }
-  */
   draw() {
     let screenPosition = Point.from(this.parent.position);
     let labelOffset = Point.from(this.position);
