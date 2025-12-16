@@ -5,8 +5,8 @@ import Point from './point.js';
 export default class LineEffect {
   constructor(p1, p2, w, colorOrGradient, durationInSeconds) {
     if (!Point.isPointy(p1) || !Point.isPointy(p2)) throw new Error(`LineEffect.constructor: Bad Point: p1(${p1}), p2(${p2})`)
-    if (!(typeof w === 'number') || w<0) throw new Error(`Width must be a number >0 [${w}]`);
-    if (!(typeof w === 'durationInSeconds') || w<0) throw new Error(`Duration must be a number >0 [${durationInSeconds}]`);
+    if (typeof w !== 'number' || w<0) throw new Error(`Width must be a number >0 [${w}]`);
+    if (typeof durationInSeconds !== 'number' || durationInSeconds<0) throw new Error(`Duration must be a number >0 [${durationInSeconds}]`);
     this.p1 = p1;
     this.p2 = p2;
     this.w = w;
