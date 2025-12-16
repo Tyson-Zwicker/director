@@ -36,22 +36,6 @@ export default class Part {
       this.particleGenerator.setFacing(this.parent.facing + this.facing);
     }
   }
-/*  
-  getWorldCoordinates() {
-    let origin = Point.from(this.actor.position);
-    let partOrigin = Point.from(this.position);
-    Point.rotate(partOrigin, this.actor.facing);
-    Point.add(partOrigin, origin);   
-    return partOrigin;
-  }
-  getScreenCoordinates(){
-    let partOrigin = this.getWorldCoordinates();
-    Point.sub(partOrigin, Director.view.camera);
-    Point.scale(partOrigin, Director.view.camera.zoom);
-    Point.add(partOrigin, Director.view.screenCenter);
-    return partOrigin;
-  }
-  */
   isPart() {
     return true;
   }
