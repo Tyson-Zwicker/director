@@ -25,16 +25,23 @@ export default class Transpose {
   }
   //UNLIKE POINTS.. children have a facing.  THis moves the point, but it considers the child's facing as well.
   //The "child" is the object that owns the "point" being drawn.
+  //Think: world position of a point in a part
   static childToWorld(point, child, parent) {
     let childOrigin = Transpose.pointToWorld(child.position, parent);
     let p = Point.from(point);
-    let angle = child.facing + parent.facing;
-    Point.rotate(p, angle);
+    Point.rotate(p, child.facing + parent.facing);
     Point.add(p, childOrigin);
     return p;
   }
+  //returns a point in a child object, accounting
+  //for both objects facing in SCREEN coordinates.
+  //Think:Screen position of a point in a part.
   static childToScreen(point, child, parent) {
-    //TODO:  (See: Polygon.draw) 2025-12-15:23:30
     
+    let p = Point.from (point);
+    Point.rotate (p, parent.facing+child.facing);
+    Point.scale (p, Director.view.camera.zoom);
+    Point.add (p,childToWorld (point, child.parent));
+    return p;
   }
 }
