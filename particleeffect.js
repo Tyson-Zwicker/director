@@ -1,7 +1,7 @@
 import Point from './point.js';
 import Color from './color.js';
 import Director from './director.js';
-
+import Transpose from './transpose.js';
 export default class ParticleEffect {
   constructor(position, velocity, color, size, durationInSeconds) {
     if (!Point.isPointy(position)) throw new Error(`ParticleEffect.constructor: position should be a point: ${position}`);
@@ -23,16 +23,17 @@ export default class ParticleEffect {
   }
   draw(context, delta) {
     let tp = Point.from(this.position); //The point is fixed in world coordinates, but screen moves so, tp = temporaty point ie. where the screen put you.
-    Point.sub(tp, Director.view.camera);
-    Point.scale(tp, Director.view.camera.zoom);
-    Point.add(tp, Director.view.screenCenter);
+    let screenPoint = Transpose.worldToScreen (this.position);
+    //Point.sub(tp, Director.view.camera);
+    //Point.scale(tp, Director.view.camera.zoom);
+    //Point.add(tp, Director.view.screenCenter);
     if (!context || isNaN(delta)) throw (`LineEffect.draw: bad params context ${context}, delta ${delta}`);
     let color = this.color.withOpacity(this.life / this.duration);
     context.fillStyle = color.asHex();
     let particleSize = this.size * Director.view.camera.zoom;
     context.fillRect(
-      tp.x - particleSize / 2,
-      tp.y - particleSize / 2,
+      screenPoint.x - particleSize / 2,
+      screenPoint.y - particleSize / 2,
       particleSize, particleSize
     );
     context.fillStyle = color.asHex();
