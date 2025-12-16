@@ -27,7 +27,7 @@ export default class Part {
   updateParticleGenerator() {
     if (this.particleGenerator) {
       let worldCoords = this.getWorldCoordinates();
-      this.particleGenerator.setOrigin(worldCoords);
+      this.particleGenerator.setPosition(worldCoords);
       this.particleGenerator.setFacing(this.actor.facing + this.facing);
     }
   }

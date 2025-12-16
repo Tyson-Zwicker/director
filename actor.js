@@ -1,5 +1,6 @@
 import Point from './point.js';
 import EventTracker from './eventtracker.js';
+import Label from './label.js';
 export default class Actor {
   _mass = undefined;
   appearance = undefined;
@@ -23,6 +24,9 @@ export default class Actor {
     this.polygon = polygon;
     this.appearance = appearance;
     this._mass = mass;
+  }
+  setLabel(text, position, appearance, size) {
+    this.#label = new Label (this, position, appearance, size, text);
   }
   attachButton(b) {
     this.button = b;
@@ -51,7 +55,7 @@ export default class Actor {
     this.polygon.draw(view, origin, this.facing, appearance);
 
     this.#drawParts(view);
-    this.#drawLabels(view);
+    this.#drawLabel(view);
   }
   #drawChooseAppearance() {
     let appearance = this.appearance;
@@ -70,21 +74,9 @@ export default class Actor {
       part.polygon.draw(view, partOrigin, part.facing + this.facing, appearance);
     }
   }
-  #drawLabels(view) {
+  #drawLabel() {
     if (this.#label) {
-      //{ "text": text, "offset": offset ,"emSize":size};    
-      let labelOrigin = Point.from(this.#label.offset);
-      Point.add(labelOrigin, this.position);
-      //make "paint" subroutine for this..
-      Point.sub(labelOrigin, view.camera);
-      Point.scale(labelOrigin, view.camera.zoom);
-      Point.add(labelOrigin, view.screenCenter);
-      let appearance = (this.#label.appearance) ? this.#label.appearance : this.appearance;
-      view.context.fillStyle = appearance.text;
-      view.context.textBaseline = "middle";
-      view.context.textAlign = "center";
-      view.context.font = (this.#label.emSize) ? `${this.#label.emSize}em monospace` : '0.75em monospace';
-      view.context.fillText(this.#label.text, labelOrigin.x, labelOrigin.y);
+      this.#label.draw();
     }
   }
   mass() {
@@ -108,10 +100,6 @@ export default class Actor {
   }
   radius() {
     return this.polygon.radius;
-  }
-  setLabel(text, offset, emSize) {
-    let size = (emSize) ? emSize : 1;
-    this.#label = { "text": text, "offset": offset, "emSize": size };
   }
   toString() {
     return `[${this.name}], contains [${this.parts.length}] parts, label [${this.#label?.text}]`;

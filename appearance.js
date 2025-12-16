@@ -22,7 +22,7 @@ export default class Appearance {
   set stroke(value) {
     this._stroke = Color.fromHex(value);
   }
-  get _text() {
+  get text() {
     return this._text.asHex();
   }
   set text(value) {
