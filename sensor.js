@@ -39,10 +39,17 @@ export default class Sensor {
     let cy = this.actor.position.y;
     let sensorBoundry = new Boundry(cx - this.range, cy - this.range, cx + this.range, cy + this.range);
     let foundActors = Director.quadtree.findInRange(sensorBoundry);
+
+    console.log(foundActors);
+
     let results = this.#examineCandidates(foundActors);
     this.#moveSensor(delta);
+    let worldAngle = this.actor.facing + this.centerAngle + this.currentOffset;
+    let p2 = Point.fromPolar(worldAngle, this.range);
+    this.#drawAttempt(this.actor.position, p2);
     if (results.locationOfResponse !== undefined) {          //We're drawing the "bounce back" so if nothing is seen, nothing gets drawn.
-      this.#draw(results.closestPoint)
+      console.log (results.locationOfResponse);
+      this.#draw(results.locationOfResponse)
     }
     return results;
   }
@@ -60,18 +67,23 @@ export default class Sensor {
     }
   }
   #draw(closestPoint) {
-    let sensorRay = new LineEffect(this.actor.position, closestPoint, 2, new Color(15, 0, 0, .5), this.fieldOfView / 3);
+    //only happens if a sensor returns a "blip"
+    let sensorRay = new LineEffect(this.actor.position, closestPoint, 2, new Color(0, 15, 0, 1), 2);
+    Director.addForegroundEffect(sensorRay);
+  }
+  #drawAttempt(p1, p2) {
+    let sensorRay = new LineEffect(p1, p2, 1, new Color(15, 0, 0, 1), 2)
     Director.addForegroundEffect(sensorRay);
   }
   #examineCandidates(foundActors) {
-    let worldAngle = this.actor.rotation + this.centerAngle + this.currentOffset;
+    let worldAngle = this.actor.facing + this.centerAngle + this.currentOffset;
     let response = new SensorResponse(
       Director.lastFrameTime,
       this,
       this.actor,
       Point.from(this.actor.position),
       worldAngle,
-      this.actor.rotation,
+      this.actor.facing,
       this.currentOffset
     );
     for (let actor of foundActors) {
@@ -86,15 +98,47 @@ export default class Sensor {
           //connect all but last point to next point
           barrierPoint1 = points[i]; barrierPoint2 = points[i + 1];
         }
-        let result = this.#rayCast(this.actor.position, worldAngle, this.range, barrierPoint1, barrierPoint2);
+
+        //! the barrierPoints need to translated to world coordinates...
+        //! false detections due to barrier points be very close to origin all the time..
+
+        let result = this.#rayCast(Point.from (this.actor.position), worldAngle, this.range, Point.from(barrierPoint1), Point.from(barrierPoint2));
         if (result !== false && result.distance < response.distance && result.distance < this.range) {
+          console.log (result);
           response.setResponse(result.point, result.distance, actor);
         }
       }
     }
     return response;
   }
-  #rayCast(originPoint, direction, range, barrierPoint1, barrierPoint2) {
+  #rayCast (originPoint, direction, range, barrierPoint1, barrierPoint2){
+    //Where the math came from:
+    //https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect/565282#565282
+
+    let p = originPoint;
+    let r = Point.fromPolar (direction, range);
+    let q = barrierPoint1;
+    let s = barrierPoint2;
+    Point.sub (s,barrierPoint1);
+
+    //REMEMBER: ORDER OF CROSSING IS IMPORTANT,
+    //AND IN 2D YIELDS A SCALAR VALUE (SIGNED AREA OF PARALLELAGRAM DRAWN BY INTERSECTION..)
+
+    //t = (q-p) cross s/(r cross s)
+    let qp = Point.from (q);
+    qp = Point.sub (qp,p);
+    let tnum = Point.cross (qp,s);
+    let tden = Point.cross (r,s);
+    //u = (p-q) cross r/ (s croos r)
+    let pq = Point.from (p);
+    Point.sub (pq,q);
+    let unum = Point.cross (qp,r);
+    let uden = Point.cross (s,r);
+    let u = unum/uden;
+
+
+  }
+  #rayCast2(originPoint, direction, range, barrierPoint1, barrierPoint2) {
     const x1 = barrierPoint1.x;
     const y1 = barrierPoint1.y;
     const x2 = barrierPoint2.x;
@@ -111,7 +155,7 @@ export default class Sensor {
     const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
     const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
 
-    if (t > 0 && t < 1 && u > 0) {
+    if (t > 0 && t < 1 && u > 0 && u<1) {
       let x = x1 + t * (x2 - x1)
       let y = y1 + t * (y2 - y1);
       const p = new Point(x, y);

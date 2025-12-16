@@ -7,16 +7,16 @@ export default class SensorResponse {
   locationOfResponse = undefined; //Where the sensor pinged back from.
   detectedActor = undefined;      //Who the sensor pinged back from.
   worldAngle = undefined;         //Angle (in world space) the sensor was looking.
-  actorOrientation = undefined;   //heading of sensor owner
-  offsetAngle = undefined;        //sensor offset at the time.
+  actorFacing = undefined;        //which way owner of sensor was facing when ping happened.
+  offsetAngle = undefined;        //sensor offset at the time of ping.
 
-  constructor(time, sensor, actor, locationOfOrigin, worldAngle, actorOrientation, offsetAngle) {
+  constructor(time, sensor, actor, locationOfOrigin, worldAngle, actorFacing, offsetAngle) {
     this.time = time;
     this.sensor = sensor;
     this.actor = actor;
     this.locationOfOrigin = locationOfOrigin;
     this.worldAngle = worldAngle;
-    this.actorOrientation = actorOrientation;
+    this.actorFacing = actorFacing;
     this.offsetAngle = offsetAngle;
   }
   setResponse (locationOfResponse, distance, detectedActor){

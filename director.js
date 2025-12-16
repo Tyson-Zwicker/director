@@ -212,7 +212,7 @@ export default class Director {
     Director.applyActorField(delta);
     Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.
     //BROKEN: Director.removeOldSensorData(currentTime);
-    //BROKEN: Director.sensing(delta, currentTime); //<- do this before draw, as it may add effects..
+    Director.sensing(delta, currentTime); //<- do this before draw, as it may add effects..
     Director.runParticleGenerators(currentTime);
     Director.draw(delta);
     Director.collisions(delta);
