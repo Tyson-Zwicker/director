@@ -22,12 +22,11 @@ export default class Transpose {
   //UNLIKE POINTS.. children have a facing.  THis moves the point, but it considers the child's facing as well.
   //The "child" is the object that owns the "point" being drawn.
   //Think: world position of a point in a part
-  static childToWorld(point, child, parent) {
-    let childOrigin = Transpose.pointToWorld(child.position, parent);
-    let p = Point.from(point);
-    Point.rotate(p, child.facing + parent.facing);
-    Point.add(p, childOrigin);
-    return p;
+  static childToWorld(child, parent) {
+    let childOrigin = Point.from (child.position)
+    Point.rotate(childOrigin, parent.facing);
+    Point.add(childOrigin, parent.position);
+    return childOrigin;
   }
   //returns a point in a child object, accounting
   //for both objects facing in SCREEN coordinates.
@@ -35,8 +34,8 @@ export default class Transpose {
   //Returns a point in a child object, accounting
   //for both objects facing in SCREEN coordinates.
   //Think: Screen position of a point in a part.
-  static childToScreen(point, child, parent) {
-    let worldCoords = Transpose.childToWorld(point, child, parent);
-    return Transpose.worldToScreen(worldCoords);
+  static childToScreen(child, parent) {
+    let childWorldCoords = Transpose.childToWorld(child, parent);
+    return Transpose.worldToScreen(childWorldCoords);
   }
 }

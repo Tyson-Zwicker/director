@@ -1,6 +1,7 @@
 import Point from './point.js';
 import EventTracker from './eventtracker.js';
 import Label from './label.js';
+import Transpose from './transpose.js';
 export default class Actor {
   _mass = undefined;
   appearance = undefined;
@@ -19,7 +20,7 @@ export default class Actor {
   spin = 0; // Defined in degrees per second.
   velocity = new Point(0, 0); // Point used as a component vector because they are the same thing.
   #label = undefined;
-  //branchtest
+  
   constructor(name, polygon, appearance, mass) {
     this.name = name;
     this.polygon = polygon;
@@ -48,13 +49,9 @@ export default class Actor {
   }
   draw(view) {
     let origin = Point.from(this.position);
-    //Move the origin to the center of the screen, and scale it by the camera zoom
-    Point.sub(origin, view.camera);
-    Point.scale(origin, view.camera.zoom);
-    Point.add(origin, view.screenCenter);
+    
     let appearance = this.#drawChooseAppearance();
-    this.polygon.draw(origin, this.facing, appearance);
-
+    this.polygon.draw (Transpose.worldToScreen (this.position),this.facing, appearance);
     this.#drawParts(view);
     this.#drawLabel(view);
   }
@@ -68,11 +65,9 @@ export default class Actor {
     return appearance;
   }
   #drawParts(view) {
-    let origin = Point.from(this.position);
     for (let part of this.parts) {      
-      let partOrigin = part.getScreenCoordinates ();      
       let appearance = (part.appearance) ? part.appearance : this.appearance;
-      part.polygon.draw(partOrigin, part.facing + this.facing, appearance);
+      part.polygon.draw (Transpose.childToScreen (part, this), part.facing+this.facing, appearance);
     }
   }
   #drawLabel() {

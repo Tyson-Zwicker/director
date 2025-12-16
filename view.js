@@ -25,7 +25,8 @@ export default class View {
     this.canvas.style.margin = 0;
     this.canvas.style.padding = 0;
     this.canvas.id = 'canvas';
-    this.canvas.onwheel = this.handleWheel;
+    //this.canvas.onwheel = this.handleWheel;
+       this.canvas.addEventListener('wheel', this.handleWheel, { passive: false });
     this.canvas.onmousemove = this.handleMouseMove;
     this.canvas.onmousedown = this.handleMouseDown;
     this.canvas.onmouseup = this.handleMouseUp;
