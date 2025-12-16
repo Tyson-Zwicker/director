@@ -19,6 +19,7 @@ export default class Actor {
   spin = 0; // Defined in degrees per second.
   velocity = new Point(0, 0); // Point used as a component vector because they are the same thing.
   #label = undefined;
+  //branchtest
   constructor(name, polygon, appearance, mass) {
     this.name = name;
     this.polygon = polygon;
