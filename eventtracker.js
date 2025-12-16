@@ -19,9 +19,24 @@ export default class EventTracker {
     }
     return null;
   }
-  
-  //TODO: This badly needs a getEventsAfter /getEventsBefore method...
-
+  getEventsBefore (time){
+    let i = 0;
+    while (time<this.sortedTimes[i] && i<this.sortedTimes.length) i++;     
+    let result = [];
+    for (let eventIndex =i; i>=0;i--){
+      result.push (map.get (this.sortedTimes[eventIndex]));
+    } 
+    return events;
+  }
+  getEventsAfter (time){
+    let i = 0;
+    while (time<=this.sortedTimes[i] && i<this.sortedTimes.length) i++;     
+    let result = [];
+    for (let eventIndex =i; i<this.sortedTimes.length;i++){
+      result.push (map.get (this.sortedTimes[eventIndex]));
+    } 
+    return events;
+  }
   removeAt(time, index) {
     if (this.map.has(time)) {
       let events = this.map.get(time);
