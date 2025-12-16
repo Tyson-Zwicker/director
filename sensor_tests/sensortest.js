@@ -14,9 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 export default function init() {
-  let a = new Actor(`Scout Craft`, Polygon.triangle(50, 100));
-  a.position = new Point(0, 0);
-  a.spin = 5;
+  let a = new Actor(`ScoutCraft`, Polygon.triangle(50, 100));
+  a.position = new Point(50, 50);
+  a.spin = 0;
   a.facing = 90;
   a.appearance = new Appearance('#066', '#06f', '#fff');
   let part1 = new Part('box', -25, -20, Polygon.rectangle(15, 5), 0,a);
@@ -40,14 +40,14 @@ export default function init() {
   a.attachButton(sensorToggleButton);
 
   let b = new Actor(`BigRed`, Polygon.makeIrregular(70, 500, 700));
-  b.position = new Point(1500, 0);
+  b.position = new Point(1500, 1500);
   b.spin = 2;
   b.facing = 30;
   b.appearance = new Appearance('#f06', '#f00', '#f72');
   Director.addActor(b);
 
   let c = new Actor(`BigBlue`, Polygon.makeRegular(30, 1500));
-  c.position = new Point(-3000, -3000);
+  c.position = new Point(-1500, -1500);
   c.spin = 3;
   c.facing = 60;
   c.appearance = new Appearance('#03F', '#09f', '#0af');
@@ -60,6 +60,44 @@ export default function init() {
   d.appearance = new Appearance('#b0d', '#f0f', '#f0f');
   Director.addActor(d);
 
+
+  
+    // Get the actor we want to control (A1)
+    let controlledActor = Director.actors.get('ScoutCraft');
+  
+    // W key - increase velocity
+    Director.keyboard.setKeyFunction('w', () => {
+      if (controlledActor) {
+        let thrustMagnitude = 300; // Adjust this for more/less thrust
+        let thrustVector = Point.fromPolar(controlledActor.facing, thrustMagnitude);
+        controlledActor.velocity.x += thrustVector.x / 60; // Divide by 60 to normalize per frame
+        controlledActor.velocity.y += thrustVector.y / 60;
+      }
+    });
+  
+    // A key - rotate left (steer)
+    Director.keyboard.setKeyFunction('a', () => {
+      if (controlledActor) {
+        controlledActor.spin -= 5; // Rotate 5 degrees left
+      }
+    });
+  
+    // S key - decrease velocity (reverse/brake)
+    Director.keyboard.setKeyFunction('s', () => {
+      if (controlledActor) {
+        let brakeMagnitude = 150;
+        let brakeVector = Point.fromPolar(controlledActor.facing + 180, brakeMagnitude);
+        controlledActor.velocity.x += brakeVector.x / 60;
+        controlledActor.velocity.y += brakeVector.y / 60;
+      }
+    });
+  
+    // D key - rotate right (steer)
+    Director.keyboard.setKeyFunction('d', () => {
+      if (controlledActor) {
+        controlledActor.spin += 5; // Rotate 5 degrees right
+      }
+    });
   function runTheTest() {
     if (sensorA.active) part1.facing += 5;
     if (sensorB.active) part2.facing -= 5;
