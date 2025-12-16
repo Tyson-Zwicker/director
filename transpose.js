@@ -37,11 +37,10 @@ export default class Transpose {
   //for both objects facing in SCREEN coordinates.
   //Think:Screen position of a point in a part.
   static childToScreen(point, child, parent) {
-    
     let p = Point.from (point);
     Point.rotate (p, parent.facing+child.facing);
     Point.scale (p, Director.view.camera.zoom);
-    Point.add (p,childToWorld (point, child.parent));
+    Point.add (p,Transpose.childToWorld (point, child.parent));
     return p;
   }
 }
