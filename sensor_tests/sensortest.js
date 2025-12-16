@@ -68,13 +68,8 @@ export default function init() {
     sensorB.active = !sensorB.active;
   }
   Director.addCreatorsFunction(runTheTest);
-
-  /*
-                  Don't forget to change back to run() at some point...
-  */
-
   Director.run();
-  //---
+  
 }
 
 
