@@ -1,7 +1,6 @@
-import Point from './point.js';
 import Color from './color.js';
 import Director from './director.js';
-
+import Transpose from './transpose.js';
 export default class LineEffect {
   constructor(p1, p2, w, colorOrGradient, durationInSeconds) {
     this.p1 = p1;
@@ -12,17 +11,10 @@ export default class LineEffect {
     this.life = durationInSeconds;
   }
   draw(context, delta) {
-    let tp1 = Point.from(this.p1); //The point is fixed in world coordinates, but screen moves so, tp = temporaty point ie. where the screen put you.
-    Point.sub(tp1, Director.view.camera);
-    Point.scale(tp1, Director.view.camera.zoom);
-    Point.add(tp1, Director.view.screenCenter);
-    let tp2 = Point.from(this.p2); //The point is fixed in world coordinates, but screen moves so, tp = temporaty point ie. where the screen put you.
-    Point.sub(tp2, Director.view.camera);
-    Point.scale(tp2, Director.view.camera.zoom);
-    Point.add(tp2, Director.view.screenCenter);
+   let screenPoint1 = Transpose.worldToScreen (this.p1);
+   let screenPoint2 = Transpose.worldToScreen (this.p2);
     if (!context || isNaN(delta)) throw (`LineEffect.draw: bad params context ${context}, delta ${delta}`);
     if (this.colorOrGradient instanceof Color) {
-      //let color = this.colorOrGradient.changeBrightness(this.life / this.duration);
       let color = this.colorOrGradient.withOpacity(this.life / this.duration);
       context.strokeStyle = color.asHex();
     } else {
@@ -30,8 +22,8 @@ export default class LineEffect {
     }
     context.lineWidth = this.w *Director.view.camera.zoom;
     context.beginPath();
-    context.moveTo(tp1.x, tp1.y);
-    context.lineTo(tp2.x, tp2.y);
+    context.moveTo(screenPoint1.x, screenPoint1.y);
+    context.lineTo(screenPoint2.x, screenPoint2.y);
     context.stroke();
     this.life -= delta;
     return (this.life > 0);
