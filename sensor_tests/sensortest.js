@@ -28,8 +28,8 @@ export default function init() {
   Director.addActor(a);
   let hovered = new Appearance('#ff9', '#f00', '#fff', 2);
   let pressed = new Appearance('#6ff', '#f82', '#fff', 3);
-  let sensorA = new Sensor("SensorA", 90, 10, 1, 60000, true);
-  let sensorB = new Sensor("SensorB", 270, 10, 1, 6000, true);
+  let sensorA = new Sensor("SensorA", 90, 10, 1, 3000, true);
+  let sensorB = new Sensor("SensorB", 270, 10, 1, 3000, true);
   a.attachSensor(sensorA);
   a.attachSensor(sensorB);
   let sensorToggleButton = new Button(hovered, pressed);
