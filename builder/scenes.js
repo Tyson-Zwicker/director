@@ -22,6 +22,12 @@ const removeButton = document.getElementById('removeAppearance');
 const appearanceList = document.getElementById('appearanceList');
 const actorAppearanceDropdown = document.getElementById('actorAppearance');
 const actorMass = document.getElementById('actorMass');
+const addPolygonButton = document.getElementById('addPolygon');
+const removePolygonButton = document.getElementById('removePolygon');
+const polygonList = document.getElementById('polygonList');
+
+let polygons = [];
+let selectedPolygonIndex = -1;
 
 // Validate mass input to only accept non-negative numbers
 actorMass.addEventListener('input', (e) => {
@@ -195,6 +201,43 @@ function loadAppearance(index) {
 // Add event listeners for buttons
 addButton.addEventListener('click', addAppearance);
 removeButton.addEventListener('click', removeAppearance);
+
+// Polygon management functions
+function addPolygon() {
+    const name = `Polygon ${polygons.length + 1}`;
+    polygons.push({ name: name });
+    renderPolygonList();
+}
+
+function removePolygon() {
+    if (selectedPolygonIndex >= 0 && selectedPolygonIndex < polygons.length) {
+        polygons.splice(selectedPolygonIndex, 1);
+        selectedPolygonIndex = -1;
+        renderPolygonList();
+    }
+}
+
+function renderPolygonList() {
+    polygonList.innerHTML = '';
+    
+    polygons.forEach((polygon, index) => {
+        const item = document.createElement('div');
+        item.className = 'polygon-item';
+        if (index === selectedPolygonIndex) {
+            item.classList.add('selected');
+        }
+        item.textContent = polygon.name;
+        item.addEventListener('click', () => {
+            selectedPolygonIndex = index;
+            renderPolygonList();
+        });
+        polygonList.appendChild(item);
+    });
+}
+
+// Add event listeners for polygon buttons
+addPolygonButton.addEventListener('click', addPolygon);
+removePolygonButton.addEventListener('click', removePolygon);
 
 // Initialize the canvas
 function initCanvas() {

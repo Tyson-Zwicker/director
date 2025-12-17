@@ -73,6 +73,39 @@
             flex-direction: column;
         }
         
+        .polygon-content {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .polygon-list-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .polygon-list {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #404040;
+            background-color: #2d2d2d;
+        }
+        
+        .polygon-item {
+            padding: 8px;
+            cursor: pointer;
+            border-bottom: 1px solid #404040;
+            color: #e0e0e0;
+        }
+        
+        .polygon-item:hover {
+            background-color: #3d3d3d;
+        }
+        
+        .polygon-item.selected {
+            background-color: #4a90e2;
+        }
+        
         .control-group {
             margin-bottom: 15px;
         }
@@ -280,7 +313,18 @@
             
             <div class="section">
                 <h3>Polygons</h3>
-                <div id="polygonsContent"></div>
+                <div class="polygon-content">
+                    <div class="polygon-list-container">
+                        <div class="polygon-list" id="polygonList"></div>
+                    </div>
+                    
+                    <div class="polygon-list-container">
+                        <div class="button-group">
+                            <button id="addPolygon">Add</button>
+                            <button id="removePolygon">Remove</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="section">
