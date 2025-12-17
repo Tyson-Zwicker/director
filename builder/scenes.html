@@ -58,8 +58,45 @@
             margin-bottom: 10px;
         }
         
+        .appearance-content {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .appearance-controls {
+            flex: 1;
+        }
+        
+        .appearance-list-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
         .control-group {
             margin-bottom: 15px;
+        }
+        
+        .control-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .control-row .control-group {
+            margin-bottom: 0;
+        }
+        
+        .control-row .control-group:nth-child(1) {
+            flex: 8;
+        }
+        
+        .control-row .control-group:nth-child(2) {
+            flex: 2;
+        }
+        
+        .control-row.equal .control-group {
+            flex: 1;
         }
         
         .control-group label {
@@ -75,6 +112,25 @@
             border: 1px solid #404040;
             color: #e0e0e0;
             border-radius: 3px;
+        }
+        
+        .control-group input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            color: #e0e0e0;
+            border-radius: 3px;
+        }
+        
+        .control-group select {
+            width: 100%;
+            padding: 5px;
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            color: #e0e0e0;
+            border-radius: 3px;
+            cursor: pointer;
         }
         
         .radio-group {
@@ -132,16 +188,56 @@
             border: 1px solid #404040;
             background-color: #000;
             margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 12px;
+            font-family: monospace;
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
         }
         
-        .color-preview-container input[type="text"] {
-            width: 100%;
-            padding: 5px;
-            background-color: #2d2d2d;
-            border: 1px solid #404040;
-            color: #e0e0e0;
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .button-group button {
+            flex: 1;
+            padding: 8px;
+            background-color: #4a90e2;
+            border: none;
+            color: #ffffff;
             border-radius: 3px;
-            font-size: 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .button-group button:hover {
+            background-color: #357abd;
+        }
+        
+        .appearance-list {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #404040;
+            background-color: #2d2d2d;
+        }
+        
+        .appearance-item {
+            padding: 8px;
+            cursor: pointer;
+            border-bottom: 1px solid #404040;
+            color: #e0e0e0;
+        }
+        
+        .appearance-item:hover {
+            background-color: #3d3d3d;
+        }
+        
+        .appearance-item.selected {
+            background-color: #4a90e2;
         }
         
         #mapCanvas {
@@ -155,6 +251,30 @@
         <div class="column">
             <div class="section">
                 <h3>Actors</h3>
+                <div class="control-row">
+                    <div class="control-group">
+                        <label for="actorName">Name:</label>
+                        <input type="text" id="actorName" placeholder="Enter actor name">
+                    </div>
+                    <div class="control-group">
+                        <label for="actorMass">Mass:</label>
+                        <input type="number" id="actorMass" min="0" step="any" placeholder="Mass">
+                    </div>
+                </div>
+                <div class="control-row equal">
+                    <div class="control-group">
+                        <label for="actorPolygon">Polygon:</label>
+                        <select id="actorPolygon">
+                            <option value="">Select polygon...</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="actorAppearance">Appearance:</label>
+                        <select id="actorAppearance">
+                            <option value="">Select appearance...</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="actorsContent"></div>
             </div>
             
@@ -165,60 +285,70 @@
             
             <div class="section">
                 <h3>Appearance</h3>
-                <div class="control-group">
-                    <label for="appearanceName">Name:</label>
-                    <input type="text" id="appearanceName" placeholder="Enter name">
-                </div>
-                
-                <div class="radio-group">
-                    <label>
-                        <input type="radio" name="colorType" value="fill" checked>
-                        Fill
-                    </label>
-                    <label>
-                        <input type="radio" name="colorType" value="stroke">
-                        Stroke
-                    </label>
-                    <label>
-                        <input type="radio" name="colorType" value="text">
-                        Text
-                    </label>
-                </div>
-                
-                <div class="slider-group">
-                    <label for="redSlider">Red:</label>
-                    <input type="range" id="redSlider" min="0" max="15" value="0">
-                    <span id="redValue">0</span>
-                </div>
-                
-                <div class="slider-group">
-                    <label for="greenSlider">Green:</label>
-                    <input type="range" id="greenSlider" min="0" max="15" value="0">
-                    <span id="greenValue">0</span>
-                </div>
-                
-                <div class="slider-group">
-                    <label for="blueSlider">Blue:</label>
-                    <input type="range" id="blueSlider" min="0" max="15" value="0">
-                    <span id="blueValue">0</span>
-                </div>
-                
-                <div class="color-preview-container">
-                    <label>Fill:</label>
-                    <div id="fillPreview"></div>
-                    <input type="text" id="fillHex" readonly>
-                </div>
-                
-                <div class="color-preview-container">
-                    <label>Stroke:</label>
-                    <div id="strokePreview"></div>
-                    <input type="text" id="strokeHex" readonly>
-                </div>
-                
-                <div class="color-preview-container">
-                    <label>Text:</label>
-                    <div id="textPreview"></div>
-                    <input type="text" id="textHex" readonly>
+                <div class="appearance-content">
+                    <div class="appearance-controls">
+                        <div class="control-group">
+                            <label for="appearanceName">Name:</label>
+                            <input type="text" id="appearanceName" placeholder="Enter name">
+                        </div>
+                        
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="colorType" value="fill" checked>
+                                Fill
+                            </label>
+                            <label>
+                                <input type="radio" name="colorType" value="stroke">
+                                Stroke
+                            </label>
+                            <label>
+                                <input type="radio" name="colorType" value="text">
+                                Text
+                            </label>
+                        </div>
+                        
+                        <div class="slider-group">
+                            <label for="redSlider">Red:</label>
+                            <input type="range" id="redSlider" min="0" max="15" value="0">
+                            <span id="redValue">0</span>
+                        </div>
+                        
+                        <div class="slider-group">
+                            <label for="greenSlider">Green:</label>
+                            <input type="range" id="greenSlider" min="0" max="15" value="0">
+                            <span id="greenValue">0</span>
+                        </div>
+                        
+                        <div class="slider-group">
+                            <label for="blueSlider">Blue:</label>
+                            <input type="range" id="blueSlider" min="0" max="15" value="0">
+                            <span id="blueValue">0</span>
+                        </div>
+                        
+                        <div class="color-preview-container">
+                            <label>Fill:</label>
+                            <div id="fillPreview"></div>
+                        </div>
+                        
+                        <div class="color-preview-container">
+                            <label>Stroke:</label>
+                            <div id="strokePreview"></div>
+                        </div>
+                        
+                        <div class="color-preview-container">
+                            <label>Text:</label>
+                            <div id="textPreview"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="appearance-list-container">
+                        <div class="button-group">
+                            <button id="addAppearance">Add</button>
+                            <button id="removeAppearance">Remove</button>
+                        </div>
+                        
+                        <div class="appearance-list" id="appearanceList"></div>
+                    </div>
                 </div>
             </div>
         </div>

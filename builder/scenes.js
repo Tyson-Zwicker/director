@@ -15,10 +15,20 @@ const blueValue = document.getElementById('blueValue');
 const fillPreview = document.getElementById('fillPreview');
 const strokePreview = document.getElementById('strokePreview');
 const textPreview = document.getElementById('textPreview');
-const fillHex = document.getElementById('fillHex');
-const strokeHex = document.getElementById('strokeHex');
-const textHex = document.getElementById('textHex');
 const colorTypeRadios = document.querySelectorAll('input[name="colorType"]');
+const appearanceName = document.getElementById('appearanceName');
+const addButton = document.getElementById('addAppearance');
+const removeButton = document.getElementById('removeAppearance');
+const appearanceList = document.getElementById('appearanceList');
+const actorAppearanceDropdown = document.getElementById('actorAppearance');
+const actorMass = document.getElementById('actorMass');
+
+// Validate mass input to only accept non-negative numbers
+actorMass.addEventListener('input', (e) => {
+    if (e.target.value !== '' && parseFloat(e.target.value) < 0) {
+        e.target.value = 0;
+    }
+});
 
 // Store color values for each type
 const colors = {
@@ -28,6 +38,8 @@ const colors = {
 };
 
 let currentColorType = 'fill';
+let appearances = [];
+let selectedAppearanceIndex = -1;
 
 // Update color preview for specific type
 function updateColorPreview(type) {
@@ -36,13 +48,13 @@ function updateColorPreview(type) {
     
     if (type === 'fill') {
         fillPreview.style.backgroundColor = hexColor;
-        fillHex.value = hexColor;
+        fillPreview.textContent = hexColor;
     } else if (type === 'stroke') {
         strokePreview.style.backgroundColor = hexColor;
-        strokeHex.value = hexColor;
+        strokePreview.textContent = hexColor;
     } else if (type === 'text') {
         textPreview.style.backgroundColor = hexColor;
-        textHex.value = hexColor;
+        textPreview.textContent = hexColor;
     }
 }
 
@@ -92,6 +104,97 @@ colorTypeRadios.forEach(radio => {
 
 // Initialize all color previews
 updateAllPreviews();
+
+// Add appearance to list
+function addAppearance() {
+    const name = appearanceName.value.trim() || `Appearance ${appearances.length + 1}`;
+    
+    const newAppearance = {
+        name: name,
+        fill: { ...colors.fill },
+        stroke: { ...colors.stroke },
+        text: { ...colors.text }
+    };
+    
+    appearances.push(newAppearance);
+    renderAppearanceList();
+}
+
+// Remove selected appearance from list
+function removeAppearance() {
+    if (selectedAppearanceIndex >= 0 && selectedAppearanceIndex < appearances.length) {
+        appearances.splice(selectedAppearanceIndex, 1);
+        selectedAppearanceIndex = -1;
+        renderAppearanceList();
+    }
+}
+
+// Render the appearance list
+function renderAppearanceList() {
+    appearanceList.innerHTML = '';
+    
+    appearances.forEach((appearance, index) => {
+        const item = document.createElement('div');
+        item.className = 'appearance-item';
+        if (index === selectedAppearanceIndex) {
+            item.classList.add('selected');
+        }
+        item.textContent = appearance.name;
+        item.addEventListener('click', () => loadAppearance(index));
+        appearanceList.appendChild(item);
+    });
+    
+    // Update actor appearance dropdown
+    updateActorAppearanceDropdown();
+}
+
+// Update the actor appearance dropdown with current appearances
+function updateActorAppearanceDropdown() {
+    // Save current selection
+    const currentSelection = actorAppearanceDropdown.value;
+    
+    // Clear and rebuild dropdown
+    actorAppearanceDropdown.innerHTML = '<option value="">Select appearance...</option>';
+    
+    appearances.forEach((appearance, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = appearance.name;
+        actorAppearanceDropdown.appendChild(option);
+    });
+    
+    // Restore selection if it still exists
+    if (currentSelection !== '') {
+        actorAppearanceDropdown.value = currentSelection;
+    }
+}
+
+// Load appearance into controls
+function loadAppearance(index) {
+    selectedAppearanceIndex = index;
+    const appearance = appearances[index];
+    
+    // Update name
+    appearanceName.value = appearance.name;
+    
+    // Update colors
+    colors.fill = { ...appearance.fill };
+    colors.stroke = { ...appearance.stroke };
+    colors.text = { ...appearance.text };
+    
+    // Update sliders to current color type
+    loadSlidersFromCurrentType();
+    
+    // Update all previews
+    updateAllPreviews();
+    
+    // Update selected state in list
+    renderAppearanceList();
+}
+
+// Add event listeners for buttons
+addButton.addEventListener('click', addAppearance);
+removeButton.addEventListener('click', removeAppearance);
 
 // Initialize the canvas
 function initCanvas() {
