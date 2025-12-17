@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scene Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+        
+        .column {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 2px solid #4a90e2;
+        }
+        
+        .column:last-child {
+            border-right: none;
+        }
+        
+        .column h2 {
+            margin-bottom: 15px;
+            font-size: 24px;
+            color: #ffffff;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #404040;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        .section h3 {
+            font-size: 18px;
+            color: #4a90e2;
+            margin-bottom: 10px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #e0e0e0;
+        }
+        
+        .control-group input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            color: #e0e0e0;
+            border-radius: 3px;
+        }
+        
+        .radio-group {
+            margin-bottom: 15px;
+        }
+        
+        .radio-group label {
+            display: inline-block;
+            margin-right: 15px;
+            color: #e0e0e0;
+            cursor: pointer;
+        }
+        
+        .radio-group input[type="radio"] {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        
+        .slider-group {
+            margin-bottom: 10px;
+        }
+        
+        .slider-group label {
+            display: inline-block;
+            width: 60px;
+            color: #e0e0e0;
+        }
+        
+        .slider-group input[type="range"] {
+            width: calc(100% - 140px);
+            vertical-align: middle;
+        }
+        
+        .slider-group span {
+            display: inline-block;
+            width: 30px;
+            text-align: right;
+            color: #e0e0e0;
+            margin-left: 10px;
+        }
+        
+        .color-preview-container {
+            margin-top: 15px;
+        }
+        
+        .color-preview-container label {
+            display: block;
+            margin-bottom: 5px;
+            color: #e0e0e0;
+        }
+        
+        .color-preview-container div {
+            width: 100%;
+            height: 30px;
+            border: 1px solid #404040;
+            background-color: #000;
+            margin-bottom: 5px;
+        }
+        
+        .color-preview-container input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            color: #e0e0e0;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        #mapCanvas {
+            display: block;
+            background-color: #2d2d2d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column">
+            <div class="section">
+                <h3>Actors</h3>
+                <div id="actorsContent"></div>
+            </div>
+            
+            <div class="section">
+                <h3>Polygons</h3>
+                <div id="polygonsContent"></div>
+            </div>
+            
+            <div class="section">
+                <h3>Appearance</h3>
+                <div class="control-group">
+                    <label for="appearanceName">Name:</label>
+                    <input type="text" id="appearanceName" placeholder="Enter name">
+                </div>
+                
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="colorType" value="fill" checked>
+                        Fill
+                    </label>
+                    <label>
+                        <input type="radio" name="colorType" value="stroke">
+                        Stroke
+                    </label>
+                    <label>
+                        <input type="radio" name="colorType" value="text">
+                        Text
+                    </label>
+                </div>
+                
+                <div class="slider-group">
+                    <label for="redSlider">Red:</label>
+                    <input type="range" id="redSlider" min="0" max="15" value="0">
+                    <span id="redValue">0</span>
+                </div>
+                
+                <div class="slider-group">
+                    <label for="greenSlider">Green:</label>
+                    <input type="range" id="greenSlider" min="0" max="15" value="0">
+                    <span id="greenValue">0</span>
+                </div>
+                
+                <div class="slider-group">
+                    <label for="blueSlider">Blue:</label>
+                    <input type="range" id="blueSlider" min="0" max="15" value="0">
+                    <span id="blueValue">0</span>
+                </div>
+                
+                <div class="color-preview-container">
+                    <label>Fill:</label>
+                    <div id="fillPreview"></div>
+                    <input type="text" id="fillHex" readonly>
+                </div>
+                
+                <div class="color-preview-container">
+                    <label>Stroke:</label>
+                    <div id="strokePreview"></div>
+                    <input type="text" id="strokeHex" readonly>
+                </div>
+                
+                <div class="color-preview-container">
+                    <label>Text:</label>
+                    <div id="textPreview"></div>
+                    <input type="text" id="textHex" readonly>
+                </div>
+            </div>
+        </div>
+        
+        <div class="column">
+            <h2>Scene</h2>
+            <div id="sceneContent"></div>
+        </div>
+        
+        <div class="column">
+            <h2>Map View</h2>
+            <canvas id="mapCanvas" width="400" height="600"></canvas>
+        </div>
+    </div>
+    
+    <script type="module" src="scenes.js"></script>
+</body>
+</html>
