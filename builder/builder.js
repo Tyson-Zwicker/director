@@ -5,6 +5,7 @@ const polygonBtn = document.getElementById('polygonBtn');
 const symmetryBtn = document.getElementById('symmetryBtn');
 const clearBtn = document.getElementById('clearBtn');
 const gridSizeInput = document.getElementById('gridSize');
+const outputBox = document.getElementById('outputBox');
 
 let dots = [];
 const DOT_RADIUS = 5;
@@ -178,12 +179,12 @@ endBtn.addEventListener('click', () => {
 // Polygon button - show coordinates
 polygonBtn.addEventListener('click', () => {
   if (dots.length === 0) {
-    alert('No dots to display');
+    outputBox.value = 'No dots to display';
     return;
   }
   
-  const coordString = dots.map(dot => `(${dot.x},${dot.y})`).join(',');
-  alert(coordString);
+  const coordString = dots.map(dot => `new Point(${dot.x},${dot.y})`).join(', ');
+  outputBox.value = `[${coordString}]`;
 });
 
 // Symmetry button - toggle symmetry mode
