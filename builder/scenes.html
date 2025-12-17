@@ -27,7 +27,7 @@
         
         .column {
             flex: 1;
-            padding: 20px;
+            padding: 5px 20px;
             overflow-y: auto;
             border-right: 2px solid #4a90e2;
         }
@@ -37,14 +37,14 @@
         }
         
         .column h2 {
-            margin-bottom: 15px;
+            margin-bottom: 4px;
             font-size: 24px;
             color: #ffffff;
         }
         
         .section {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
             border-bottom: 1px solid #404040;
         }
         
@@ -55,14 +55,14 @@
         .section h3 {
             font-size: 18px;
             color: #4a90e2;
-            margin-bottom: 10px;
+            margin-bottom: 3px;
         }
         
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 3px;
         }
         
         .section-header h3 {
@@ -75,7 +75,7 @@
         }
         
         .section-header-buttons button {
-            padding: 6px 16px;
+            padding: 2px 16px;
             font-size: 16px;
             min-width: 80px;
             background-color: #4a90e2;
@@ -162,8 +162,8 @@
         
         .modal-content {
             background-color: #2d2d2d;
-            margin: 10% auto;
-            padding: 20px;
+            margin: 2.5% auto;
+            padding: 5px 20px;
             border: 2px solid #4a90e2;
             border-radius: 8px;
             width: 400px;
@@ -180,7 +180,7 @@
             overflow-y: auto;
             border: 1px solid #404040;
             background-color: #1e1e1e;
-            margin: 15px 0;
+            margin: 4px 0;
         }
         
         .polygon-select-item {
@@ -204,18 +204,18 @@
         }
         
         .modal-buttons button {
-            padding: 12px 30px;
+            padding: 3px 30px;
             font-size: 20px;
         }
         
         .control-group {
-            margin-bottom: 15px;
+            margin-bottom: 4px;
         }
         
         .control-row {
             display: flex;
             gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 4px;
         }
         
         .control-row .control-group {
@@ -236,7 +236,7 @@
         
         .control-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 1px;
             color: #e0e0e0;
         }
         
@@ -269,7 +269,7 @@
         }
         
         .radio-group {
-            margin-bottom: 15px;
+            margin-bottom: 4px;
         }
         
         .radio-group label {
@@ -285,7 +285,7 @@
         }
         
         .slider-group {
-            margin-bottom: 10px;
+            margin-bottom: 3px;
         }
         
         .slider-group label {
@@ -308,12 +308,12 @@
         }
         
         .color-preview-container {
-            margin-top: 15px;
+            margin-top: 4px;
         }
         
         .color-preview-container label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 1px;
             color: #e0e0e0;
         }
         
@@ -322,7 +322,7 @@
             height: 30px;
             border: 1px solid #404040;
             background-color: #000;
-            margin-bottom: 5px;
+            margin-bottom: 1px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -335,12 +335,12 @@
         .button-group {
             display: flex;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 3px;
         }
         
         .button-group button {
             flex: 1;
-            padding: 8px;
+            padding: 2px;
             background-color: #4a90e2;
             border: none;
             color: #ffffff;
@@ -435,6 +435,11 @@
                         <label for="actorSpin">Spin:</label>
                         <input type="number" id="actorSpin" step="any" value="0">
                     </div>
+                </div>
+                <div class="button-group">
+                    <button id="addActor">Add</button>
+                    <button id="removeActor">Remove</button>
+                    <button id="importActor">Import</button>
                 </div>
                 <div class="control-row">
                     <div class="control-group" style="flex: 1;">
@@ -557,6 +562,17 @@
             <div class="modal-buttons">
                 <button id="modalAddPolygonBtn">Add</button>
                 <button id="modalCancelPolygonBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="actorImportModal" class="modal">
+        <div class="modal-content">
+            <h2>Select Actor to Import</h2>
+            <div id="actorImportList" class="polygon-select-list"></div>
+            <div class="modal-buttons">
+                <button id="modalImportActorBtn">Import</button>
+                <button id="modalCancelActorBtn">Cancel</button>
             </div>
         </div>
     </div>

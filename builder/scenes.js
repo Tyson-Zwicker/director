@@ -29,14 +29,22 @@ const actorXVel = document.getElementById('actorXVel');
 const actorYVel = document.getElementById('actorYVel');
 const actorFacing = document.getElementById('actorFacing');
 const actorSpin = document.getElementById('actorSpin');
+const actorName = document.getElementById('actorName');
+const actorList = document.getElementById('actorList');
+const addActorButton = document.getElementById('addActor');
+const removeActorButton = document.getElementById('removeActor');
+const importActorButton = document.getElementById('importActor');
 const addPolygonButton = document.getElementById('addPolygon');
 const removePolygonButton = document.getElementById('removePolygon');
+const createPolygonButton = document.getElementById('createPolygonBtn');
 const polygonList = document.getElementById('polygonList');
 const polygonCanvas = document.getElementById('polygonCanvas');
 const polygonCtx = polygonCanvas.getContext('2d');
 
 let polygons = [];
 let selectedPolygonIndex = -1;
+let actors = [];
+let selectedActorIndex = -1;
 
 // Validate number inputs for position and velocity fields
 function validateNumberInput(inputElement) {
@@ -236,6 +244,195 @@ function loadAppearance(index) {
 addButton.addEventListener('click', addAppearance);
 removeButton.addEventListener('click', removeAppearance);
 
+// Actor management functions
+function addActor() {
+    const name = actorName.value.trim() || `Actor ${actors.length + 1}`;
+    const mass = parseFloat(actorMass.value) || 1;
+    const polygonIndex = actorPolygonDropdown.value;
+    const appearanceIndex = actorAppearanceDropdown.value;
+    const xPos = parseFloat(actorXPos.value) || 0;
+    const yPos = parseFloat(actorYPos.value) || 0;
+    const xVel = parseFloat(actorXVel.value) || 0;
+    const yVel = parseFloat(actorYVel.value) || 0;
+    const facing = parseFloat(actorFacing.value) || 0;
+    const spin = parseFloat(actorSpin.value) || 0;
+    
+    const actor = {
+        name,
+        mass,
+        polygonIndex,
+        appearanceIndex,
+        xPos,
+        yPos,
+        xVel,
+        yVel,
+        facing,
+        spin
+    };
+    
+    actors.push(actor);
+    saveActorsToLocalStorage();
+    renderActorList();
+}
+
+function removeActor() {
+    if (selectedActorIndex >= 0 && selectedActorIndex < actors.length) {
+        actors.splice(selectedActorIndex, 1);
+        selectedActorIndex = -1;
+        saveActorsToLocalStorage();
+        renderActorList();
+    }
+}
+
+function renderActorList() {
+    actorList.innerHTML = '';
+    
+    actors.forEach((actor, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = actor.name;
+        actorList.appendChild(option);
+    });
+}
+
+function saveActorsToLocalStorage() {
+    try {
+        localStorage.setItem('sceneBuilderActors', JSON.stringify(actors));
+    } catch (error) {
+        console.error('Error saving actors to localStorage:', error);
+    }
+}
+
+function loadActorsFromLocalStorage() {
+    try {
+        const storedActors = localStorage.getItem('sceneBuilderActors');
+        if (storedActors) {
+            actors = JSON.parse(storedActors);
+            renderActorList();
+        }
+    } catch (error) {
+        console.error('Error loading actors from localStorage:', error);
+    }
+}
+
+// Actor listbox selection
+actorList.addEventListener('change', (e) => {
+    selectedActorIndex = parseInt(e.target.value);
+    if (selectedActorIndex >= 0 && selectedActorIndex < actors.length) {
+        const actor = actors[selectedActorIndex];
+        actorName.value = actor.name;
+        actorMass.value = actor.mass;
+        actorPolygonDropdown.value = actor.polygonIndex;
+        actorAppearanceDropdown.value = actor.appearanceIndex;
+        actorXPos.value = actor.xPos;
+        actorYPos.value = actor.yPos;
+        actorXVel.value = actor.xVel;
+        actorYVel.value = actor.yVel;
+        actorFacing.value = actor.facing;
+        actorSpin.value = actor.spin;
+    }
+});
+
+// Import actor modal
+const actorImportModal = document.getElementById('actorImportModal');
+const actorImportList = document.getElementById('actorImportList');
+const modalImportActorBtn = document.getElementById('modalImportActorBtn');
+const modalCancelActorBtn = document.getElementById('modalCancelActorBtn');
+let selectedImportActorIndex = null;
+
+function importActor() {
+    try {
+        const storedActors = localStorage.getItem('sceneBuilderActors');
+        
+        if (!storedActors) {
+            alert('No saved actors found.');
+            return;
+        }
+        
+        const actorsData = JSON.parse(storedActors);
+        
+        if (actorsData.length === 0) {
+            alert('No saved actors found.');
+            return;
+        }
+        
+        // Show modal and populate list
+        selectedImportActorIndex = null;
+        actorImportList.innerHTML = '';
+        
+        actorsData.forEach((actor, index) => {
+            const item = document.createElement('div');
+            item.className = 'polygon-select-item';
+            item.textContent = actor.name;
+            item.addEventListener('click', () => {
+                // Remove previous selection
+                document.querySelectorAll('#actorImportList .polygon-select-item').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                // Select this item
+                item.classList.add('selected');
+                selectedImportActorIndex = index;
+            });
+            actorImportList.appendChild(item);
+        });
+        
+        actorImportModal.style.display = 'block';
+    } catch (error) {
+        alert('Error loading actors: ' + error.message);
+    }
+}
+
+// Modal import button
+modalImportActorBtn.addEventListener('click', () => {
+    if (selectedImportActorIndex === null) {
+        alert('Please select an actor to import');
+        return;
+    }
+    
+    try {
+        const storedActors = localStorage.getItem('sceneBuilderActors');
+        const actorsData = JSON.parse(storedActors);
+        const importedActor = actorsData[selectedImportActorIndex];
+        
+        // Populate fields with imported actor data
+        actorName.value = importedActor.name;
+        actorMass.value = importedActor.mass;
+        actorPolygonDropdown.value = importedActor.polygonIndex;
+        actorAppearanceDropdown.value = importedActor.appearanceIndex;
+        actorXPos.value = importedActor.xPos;
+        actorYPos.value = importedActor.yPos;
+        actorXVel.value = importedActor.xVel;
+        actorYVel.value = importedActor.yVel;
+        actorFacing.value = importedActor.facing;
+        actorSpin.value = importedActor.spin;
+        
+        // Add to current actors list
+        actors.push({ ...importedActor });
+        renderActorList();
+        
+        actorImportModal.style.display = 'none';
+    } catch (error) {
+        alert('Error importing actor: ' + error.message);
+    }
+});
+
+// Modal cancel button
+modalCancelActorBtn.addEventListener('click', () => {
+    actorImportModal.style.display = 'none';
+});
+
+// Close modal when clicking outside
+actorImportModal.addEventListener('click', (e) => {
+    if (e.target === actorImportModal) {
+        actorImportModal.style.display = 'none';
+    }
+});
+
+// Add event listeners for actor buttons
+addActorButton.addEventListener('click', addActor);
+removeActorButton.addEventListener('click', removeActor);
+importActorButton.addEventListener('click', importActor);
+
 // Update the actor polygon dropdown with current polygons
 function updateActorPolygonDropdown() {
     // Save current selection
@@ -280,6 +477,8 @@ function renderPolygonList() {
             selectedPolygonIndex = index;
             renderPolygonList();
             drawPolygonPreview(polygon);
+            // Update the actor polygon dropdown to select this polygon
+            actorPolygonDropdown.value = index;
         });
         polygonList.appendChild(item);
     });
@@ -429,6 +628,14 @@ function clearPolygonCanvas() {
 // Add event listeners for polygon buttons
 addPolygonButton.addEventListener('click', addPolygon);
 removePolygonButton.addEventListener('click', removePolygon);
+
+// Create button - navigate to builder page
+createPolygonButton.addEventListener('click', () => {
+    // Set flag in localStorage to indicate we're coming from scenes page
+    localStorage.setItem('returnToScenes', 'true');
+    // Navigate to builder page
+    window.location.href = 'builder.html';
+});
 
 // Modal elements for polygon selection
 const polygonSelectModal = document.getElementById('polygonSelectModal');
@@ -582,3 +789,31 @@ window.addEventListener('resize', initCanvas);
 
 // Initialize polygon canvas
 clearPolygonCanvas();
+
+// Load actors from localStorage on page load
+loadActorsFromLocalStorage();
+
+// Load polygons from localStorage when coming back from builder
+function loadPolygonsFromStorage() {
+    try {
+        const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+        if (storedPolygons) {
+            const polygonsData = JSON.parse(storedPolygons);
+            // Check which polygons are not already in the list
+            Object.keys(polygonsData).forEach(name => {
+                const exists = polygons.some(p => p.name === name);
+                if (!exists) {
+                    polygons.push({
+                        name: name,
+                        points: polygonsData[name]
+                    });
+                }
+            });
+            renderPolygonList();
+        }
+    } catch (error) {
+        console.error('Error loading polygons:', error);
+    }
+}
+
+loadPolygonsFromStorage();

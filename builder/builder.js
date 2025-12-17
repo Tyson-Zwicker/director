@@ -250,6 +250,13 @@ exportBtn.addEventListener('click', () => {
     // Save back to localStorage
     localStorage.setItem('polygonBuilderPolygons', JSON.stringify(polygons));
     alert(`Exported "${polygonName}" with ${dots.length} dot(s) to storage`);
+    
+    // Check if we should return to scenes page
+    const returnToScenes = localStorage.getItem('returnToScenes');
+    if (returnToScenes === 'true') {
+      localStorage.removeItem('returnToScenes');
+      window.location.href = 'scenes.html';
+    }
   } catch (error) {
     alert('Error exporting: ' + error.message);
   }
