@@ -2,12 +2,15 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const endBtn = document.getElementById('endBtn');
 const polygonBtn = document.getElementById('polygonBtn');
+const symmetryBtn = document.getElementById('symmetryBtn');
 const clearBtn = document.getElementById('clearBtn');
 const gridSizeInput = document.getElementById('gridSize');
 
 let dots = [];
 const DOT_RADIUS = 5;
 let gridSize = 20;
+let symmetryMode = false;
+let symmetryDots = []; // Track dots added during symmetry mode
 
 // Draw grid
 function drawGrid() {
@@ -87,6 +90,13 @@ function redraw() {
   // Draw grid
   drawGrid();
   
+  // Dim bottom half if symmetry mode is active
+  if (symmetryMode) {
+    const centerY = canvas.height / 2;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(0, centerY, canvas.width, canvas.height / 2);
+  }
+  
   // Draw dots
   dots.forEach(dot => {
     drawDot(dot.x, dot.y);
@@ -115,9 +125,23 @@ canvas.addEventListener('mousedown', (e) => {
   const y = e.clientY - rect.top;
   
   if (e.button === 0) { // Left click - add dot
+    const centerY = canvas.height / 2;
+    
+    // In symmetry mode, don't allow dots in bottom half
+    if (symmetryMode && y > centerY) {
+      return;
+    }
+    
     const snappedX = snapToGrid(x, canvas.width / 2);
     const snappedY = snapToGrid(y, canvas.height / 2);
-    dots.push({ x: snappedX, y: snappedY });
+    const newDot = { x: snappedX, y: snappedY };
+    dots.push(newDot);
+    
+    // Track dots added during symmetry mode
+    if (symmetryMode) {
+      symmetryDots.push(newDot);
+    }
+    
     redraw();
   } else if (e.button === 2) { // Right click - remove dot
     const index = findDotAt(x, y);
@@ -160,6 +184,31 @@ polygonBtn.addEventListener('click', () => {
   
   const coordString = dots.map(dot => `(${dot.x},${dot.y})`).join(',');
   alert(coordString);
+});
+
+// Symmetry button - toggle symmetry mode
+symmetryBtn.addEventListener('click', () => {
+  symmetryMode = !symmetryMode;
+  
+  if (symmetryMode) {
+    // Entering symmetry mode
+    symmetryDots = [];
+    symmetryBtn.style.backgroundColor = '#FF6347';
+    symmetryBtn.textContent = 'Symmetry (ON)';
+  } else {
+    // Exiting symmetry mode - mirror symmetry dots to bottom half in REVERSE order
+    const centerY = canvas.height / 2;
+    for (let i = symmetryDots.length - 1; i >= 0; i--) {
+      const dot = symmetryDots[i];
+      const mirrorY = 2 * centerY - dot.y;
+      dots.push({ x: dot.x, y: mirrorY });
+    }
+    symmetryDots = [];
+    symmetryBtn.style.backgroundColor = '#4CAF50';
+    symmetryBtn.textContent = 'Symmetry';
+  }
+  
+  redraw();
 });
 
 // Clear button - remove all dots
