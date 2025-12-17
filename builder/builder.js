@@ -6,6 +6,8 @@ const symmetryBtn = document.getElementById('symmetryBtn');
 const clearBtn = document.getElementById('clearBtn');
 const gridSizeInput = document.getElementById('gridSize');
 const outputBox = document.getElementById('outputBox');
+const exportBtn = document.getElementById('exportBtn');
+const importBtn = document.getElementById('importBtn');
 
 let dots = [];
 const DOT_RADIUS = 5;
@@ -19,7 +21,7 @@ function drawGrid() {
   const centerY = canvas.height / 2;
   
   if (gridSize > 0) {
-    ctx.strokeStyle = '#E0E0E0';
+    ctx.strokeStyle = '#404040';
     ctx.lineWidth = 1;
     
     // Vertical lines
@@ -52,7 +54,7 @@ function drawGrid() {
   }
   
   // Draw axes (x=0 and y=0)
-  ctx.strokeStyle = '#000000';
+  ctx.strokeStyle = '#888';
   ctx.lineWidth = 2;
   
   // Y-axis (x=0)
@@ -78,7 +80,7 @@ function snapToGrid(value, center) {
 
 // Draw a single dot
 function drawDot(x, y) {
-  ctx.fillStyle = '#FF0000';
+  ctx.fillStyle = '#FF6B6B';
   ctx.beginPath();
   ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
   ctx.fill();
@@ -94,7 +96,7 @@ function redraw() {
   // Dim bottom half if symmetry mode is active
   if (symmetryMode) {
     const centerY = canvas.height / 2;
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.fillRect(0, centerY, canvas.width, canvas.height / 2);
   }
   
@@ -162,7 +164,7 @@ canvas.addEventListener('contextmenu', (e) => {
 endBtn.addEventListener('click', () => {
   if (dots.length < 2) return;
   
-  ctx.strokeStyle = '#0000FF';
+  ctx.strokeStyle = '#4a90e2';
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(dots[0].x, dots[0].y);
@@ -194,7 +196,7 @@ symmetryBtn.addEventListener('click', () => {
   if (symmetryMode) {
     // Entering symmetry mode
     symmetryDots = [];
-    symmetryBtn.style.backgroundColor = '#FF6347';
+    symmetryBtn.style.backgroundColor = '#FF6B6B';
     symmetryBtn.textContent = 'Symmetry (ON)';
   } else {
     // Exiting symmetry mode - mirror symmetry dots to bottom half in REVERSE order
@@ -205,7 +207,7 @@ symmetryBtn.addEventListener('click', () => {
       dots.push({ x: dot.x, y: mirrorY });
     }
     symmetryDots = [];
-    symmetryBtn.style.backgroundColor = '#4CAF50';
+    symmetryBtn.style.backgroundColor = '#4a90e2';
     symmetryBtn.textContent = 'Symmetry';
   }
   
@@ -222,6 +224,129 @@ clearBtn.addEventListener('click', () => {
 gridSizeInput.addEventListener('input', (e) => {
   gridSize = parseInt(e.target.value) || 0;
   redraw();
+});
+
+// Export button - save dots to localStorage
+exportBtn.addEventListener('click', () => {
+  if (dots.length === 0) {
+    alert('No dots to export');
+    return;
+  }
+  
+  const polygonName = prompt('Enter a name for this polygon:', `Polygon ${new Date().getTime()}`);
+  
+  if (!polygonName) {
+    return; // User cancelled
+  }
+  
+  try {
+    // Get existing polygons
+    const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+    const polygons = storedPolygons ? JSON.parse(storedPolygons) : {};
+    
+    // Add new polygon
+    polygons[polygonName] = dots;
+    
+    // Save back to localStorage
+    localStorage.setItem('polygonBuilderPolygons', JSON.stringify(polygons));
+    alert(`Exported "${polygonName}" with ${dots.length} dot(s) to storage`);
+  } catch (error) {
+    alert('Error exporting: ' + error.message);
+  }
+});
+
+// Import button - show modal with list of stored polygons
+const importModal = document.getElementById('importModal');
+const polygonListModal = document.getElementById('polygonListModal');
+const modalImportBtn = document.getElementById('modalImportBtn');
+const modalCancelBtn = document.getElementById('modalCancelBtn');
+let selectedPolygonName = null;
+
+importBtn.addEventListener('click', () => {
+  try {
+    const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+    
+    if (!storedPolygons) {
+      alert('No saved polygons found in storage');
+      return;
+    }
+    
+    const polygons = JSON.parse(storedPolygons);
+    const polygonNames = Object.keys(polygons);
+    
+    if (polygonNames.length === 0) {
+      alert('No saved polygons found in storage');
+      return;
+    }
+    
+    // Show modal and populate list
+    selectedPolygonName = null;
+    polygonListModal.innerHTML = '';
+    
+    polygonNames.forEach(name => {
+      const item = document.createElement('div');
+      item.className = 'polygon-list-item';
+      item.textContent = `${name} (${polygons[name].length} dots)`;
+      item.addEventListener('click', () => {
+        // Remove previous selection
+        document.querySelectorAll('.polygon-list-item').forEach(el => {
+          el.classList.remove('selected');
+        });
+        // Select this item
+        item.classList.add('selected');
+        selectedPolygonName = name;
+      });
+      polygonListModal.appendChild(item);
+    });
+    
+    importModal.style.display = 'block';
+  } catch (error) {
+    alert('Error loading polygons: ' + error.message);
+  }
+});
+
+// Modal import button
+modalImportBtn.addEventListener('click', () => {
+  if (!selectedPolygonName) {
+    alert('Please select a polygon to import');
+    return;
+  }
+  
+  try {
+    const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+    const polygons = JSON.parse(storedPolygons);
+    const loadedDots = polygons[selectedPolygonName];
+    
+    if (!Array.isArray(loadedDots) || loadedDots.length === 0) {
+      alert('Invalid polygon data');
+      return;
+    }
+    
+    // Replace all current data with imported data
+    dots = loadedDots;
+    symmetryDots = [];
+    symmetryMode = false;
+    symmetryBtn.style.backgroundColor = '#4a90e2';
+    symmetryBtn.textContent = 'Symmetry';
+    
+    redraw();
+    importModal.style.display = 'none';
+    alert(`Imported "${selectedPolygonName}" with ${dots.length} dot(s)`);
+  } catch (error) {
+    alert('Error importing: ' + error.message);
+  }
+});
+
+// Modal cancel button
+modalCancelBtn.addEventListener('click', () => {
+  importModal.style.display = 'none';
+});
+
+// Close modal when clicking outside
+importModal.addEventListener('click', (e) => {
+  if (e.target === importModal) {
+    importModal.style.display = 'none';
+  }
 });
 
 // Initialize

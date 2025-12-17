@@ -10,11 +10,17 @@
       flex-direction: column;
       align-items: center;
       margin: 20px;
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+    }
+    h1 {
+      color: #ffffff;
     }
     canvas {
-      border: 2px solid #333;
+      border: 2px solid #4a90e2;
       cursor: crosshair;
       margin-bottom: 10px;
+      background-color: #2d2d2d;
     }
     .controls {
       display: flex;
@@ -23,15 +29,15 @@
     }
     button {
       padding: 10px 20px;
-      font-size: 16px;
+      font-size: 18px;
       cursor: pointer;
-      background-color: #4CAF50;
+      background-color: #4a90e2;
       color: white;
       border: none;
       border-radius: 4px;
     }
     button:hover {
-      background-color: #45a049;
+      background-color: #357abd;
     }
     .grid-control {
       display: flex;
@@ -40,11 +46,16 @@
     }
     .grid-control label {
       font-weight: bold;
+      color: #e0e0e0;
     }
     .grid-control input {
       width: 60px;
       padding: 5px;
       font-size: 14px;
+      background-color: #2d2d2d;
+      border: 1px solid #404040;
+      color: #e0e0e0;
+      border-radius: 3px;
     }
     .output-section {
       margin-top: 20px;
@@ -52,15 +63,79 @@
     }
     .output-section h3 {
       margin-bottom: 5px;
+      color: #ffffff;
+    }
+    .output-container {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .button-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+    .modal-content {
+      background-color: #2d2d2d;
+      margin: 10% auto;
+      padding: 20px;
+      border: 2px solid #4a90e2;
+      border-radius: 8px;
+      width: 400px;
+      color: #e0e0e0;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      color: #ffffff;
+    }
+    .polygon-list-modal {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #404040;
+      background-color: #1e1e1e;
+      margin: 15px 0;
+    }
+    .polygon-list-item {
+      padding: 10px;
+      border-bottom: 1px solid #404040;
+      cursor: pointer;
+    }
+    .polygon-list-item:hover {
+      background-color: #3d3d3d;
+    }
+    .polygon-list-item.selected {
+      background-color: #4a90e2;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .modal-buttons button {
+      padding: 12px 30px;
+      font-size: 20px;
     }
     .output-section textarea {
-      width: 100%;
+      flex: 1;
       height: 100px;
       font-family: monospace;
       font-size: 14px;
       padding: 10px;
       box-sizing: border-box;
       resize: vertical;
+      background-color: #2d2d2d;
+      border: 1px solid #404040;
+      color: #e0e0e0;
     }
   </style>
 </head>
@@ -80,7 +155,24 @@
   </div>
   <div class="output-section">
     <h3>Output:</h3>
-    <textarea id="outputBox" readonly></textarea>
+    <div class="output-container">
+      <textarea id="outputBox" readonly></textarea>
+      <div class="button-column">
+        <button id="exportBtn">Export</button>
+        <button id="importBtn">Import</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="importModal" class="modal">
+    <div class="modal-content">
+      <h2>Select Polygon to Import</h2>
+      <div id="polygonListModal" class="polygon-list-modal"></div>
+      <div class="modal-buttons">
+        <button id="modalImportBtn">Import</button>
+        <button id="modalCancelBtn">Cancel</button>
+      </div>
+    </div>
   </div>
 </body>
 

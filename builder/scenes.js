@@ -21,20 +21,54 @@ const addButton = document.getElementById('addAppearance');
 const removeButton = document.getElementById('removeAppearance');
 const appearanceList = document.getElementById('appearanceList');
 const actorAppearanceDropdown = document.getElementById('actorAppearance');
+const actorPolygonDropdown = document.getElementById('actorPolygon');
 const actorMass = document.getElementById('actorMass');
+const actorXPos = document.getElementById('actorXPos');
+const actorYPos = document.getElementById('actorYPos');
+const actorXVel = document.getElementById('actorXVel');
+const actorYVel = document.getElementById('actorYVel');
+const actorFacing = document.getElementById('actorFacing');
+const actorSpin = document.getElementById('actorSpin');
 const addPolygonButton = document.getElementById('addPolygon');
 const removePolygonButton = document.getElementById('removePolygon');
 const polygonList = document.getElementById('polygonList');
+const polygonCanvas = document.getElementById('polygonCanvas');
+const polygonCtx = polygonCanvas.getContext('2d');
 
 let polygons = [];
 let selectedPolygonIndex = -1;
 
-// Validate mass input to only accept non-negative numbers
-actorMass.addEventListener('input', (e) => {
-    if (e.target.value !== '' && parseFloat(e.target.value) < 0) {
-        e.target.value = 0;
+// Validate number inputs for position and velocity fields
+function validateNumberInput(inputElement) {
+    const value = inputElement.value.trim();
+    
+    if (value === '') {
+        inputElement.style.backgroundColor = '';
+        inputElement.style.color = '';
+        return;
     }
-});
+    
+    if (isNaN(value) || value === '') {
+        inputElement.style.backgroundColor = '#8B0000';
+        inputElement.style.color = '#ffffff';
+        // Prevent the invalid value from being set
+        setTimeout(() => {
+            inputElement.value = '';
+            inputElement.style.backgroundColor = '';
+            inputElement.style.color = '';
+        }, 500);
+    } else {
+        inputElement.style.backgroundColor = '';
+        inputElement.style.color = '';
+    }
+}
+
+actorMass.addEventListener('input', (e) => validateNumberInput(e.target));
+actorXPos.addEventListener('input', (e) => validateNumberInput(e.target));
+actorYPos.addEventListener('input', (e) => validateNumberInput(e.target));
+actorXVel.addEventListener('input', (e) => validateNumberInput(e.target));
+actorYVel.addEventListener('input', (e) => validateNumberInput(e.target));
+actorSpin.addEventListener('input', (e) => validateNumberInput(e.target));
 
 // Store color values for each type
 const colors = {
@@ -202,13 +236,28 @@ function loadAppearance(index) {
 addButton.addEventListener('click', addAppearance);
 removeButton.addEventListener('click', removeAppearance);
 
-// Polygon management functions
-function addPolygon() {
-    const name = `Polygon ${polygons.length + 1}`;
-    polygons.push({ name: name });
-    renderPolygonList();
+// Update the actor polygon dropdown with current polygons
+function updateActorPolygonDropdown() {
+    // Save current selection
+    const currentSelection = actorPolygonDropdown.value;
+    
+    // Clear and rebuild dropdown
+    actorPolygonDropdown.innerHTML = '<option value="">Select polygon...</option>';
+    
+    polygons.forEach((polygon, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = polygon.name;
+        actorPolygonDropdown.appendChild(option);
+    });
+    
+    // Restore selection if it still exists
+    if (currentSelection !== '') {
+        actorPolygonDropdown.value = currentSelection;
+    }
 }
 
+// Polygon management functions
 function removePolygon() {
     if (selectedPolygonIndex >= 0 && selectedPolygonIndex < polygons.length) {
         polygons.splice(selectedPolygonIndex, 1);
@@ -230,14 +279,244 @@ function renderPolygonList() {
         item.addEventListener('click', () => {
             selectedPolygonIndex = index;
             renderPolygonList();
+            drawPolygonPreview(polygon);
         });
         polygonList.appendChild(item);
     });
+    
+    // Update actor polygon dropdown
+    updateActorPolygonDropdown();
+    
+    // Clear canvas if no polygon selected
+    if (selectedPolygonIndex === -1) {
+        clearPolygonCanvas();
+    }
+}
+
+// Draw selected polygon on canvas
+function drawPolygonPreview(polygon) {
+    if (!polygon.points || polygon.points.length === 0) {
+        clearPolygonCanvas();
+        return;
+    }
+    
+    // Clear canvas
+    polygonCtx.clearRect(0, 0, polygonCanvas.width, polygonCanvas.height);
+    
+    // Draw grid
+    polygonCtx.strokeStyle = '#404040';
+    polygonCtx.lineWidth = 1;
+    const centerX = polygonCanvas.width / 2;
+    const centerY = polygonCanvas.height / 2;
+    
+    // Vertical lines
+    for (let x = 0; x <= polygonCanvas.width; x += 50) {
+        polygonCtx.beginPath();
+        polygonCtx.moveTo(x, 0);
+        polygonCtx.lineTo(x, polygonCanvas.height);
+        polygonCtx.stroke();
+    }
+    
+    // Horizontal lines
+    for (let y = 0; y <= polygonCanvas.height; y += 50) {
+        polygonCtx.beginPath();
+        polygonCtx.moveTo(0, y);
+        polygonCtx.lineTo(polygonCanvas.width, y);
+        polygonCtx.stroke();
+    }
+    
+    // Draw axes
+    polygonCtx.strokeStyle = '#888';
+    polygonCtx.lineWidth = 2;
+    polygonCtx.beginPath();
+    polygonCtx.moveTo(centerX, 0);
+    polygonCtx.lineTo(centerX, polygonCanvas.height);
+    polygonCtx.stroke();
+    
+    polygonCtx.beginPath();
+    polygonCtx.moveTo(0, centerY);
+    polygonCtx.lineTo(polygonCanvas.width, centerY);
+    polygonCtx.stroke();
+    
+    // Calculate scaling to fit polygon in canvas
+    const points = polygon.points;
+    const padding = 40;
+    const maxDim = Math.max(polygonCanvas.width, polygonCanvas.height) - padding * 2;
+    
+    // Find bounds
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    points.forEach(point => {
+        minX = Math.min(minX, point.x);
+        maxX = Math.max(maxX, point.x);
+        minY = Math.min(minY, point.y);
+        maxY = Math.max(maxY, point.y);
+    });
+    
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const scale = Math.min(maxDim / Math.max(width, height, 1), 1);
+    
+    // Draw polygon
+    polygonCtx.strokeStyle = '#4a90e2';
+    polygonCtx.fillStyle = 'rgba(74, 144, 226, 0.2)';
+    polygonCtx.lineWidth = 2;
+    
+    polygonCtx.beginPath();
+    points.forEach((point, index) => {
+        // Center the polygon in the canvas
+        const x = centerX + (point.x - (minX + maxX) / 2) * scale;
+        const y = centerY + (point.y - (minY + maxY) / 2) * scale;
+        
+        if (index === 0) {
+            polygonCtx.moveTo(x, y);
+        } else {
+            polygonCtx.lineTo(x, y);
+        }
+    });
+    polygonCtx.closePath();
+    polygonCtx.fill();
+    polygonCtx.stroke();
+    
+    // Draw vertices
+    polygonCtx.fillStyle = '#FF6B6B';
+    points.forEach(point => {
+        const x = centerX + (point.x - (minX + maxX) / 2) * scale;
+        const y = centerY + (point.y - (minY + maxY) / 2) * scale;
+        polygonCtx.beginPath();
+        polygonCtx.arc(x, y, 4, 0, Math.PI * 2);
+        polygonCtx.fill();
+    });
+}
+
+// Clear polygon canvas
+function clearPolygonCanvas() {
+    polygonCtx.clearRect(0, 0, polygonCanvas.width, polygonCanvas.height);
+    
+    // Draw grid
+    polygonCtx.strokeStyle = '#404040';
+    polygonCtx.lineWidth = 1;
+    const centerX = polygonCanvas.width / 2;
+    const centerY = polygonCanvas.height / 2;
+    
+    for (let x = 0; x <= polygonCanvas.width; x += 50) {
+        polygonCtx.beginPath();
+        polygonCtx.moveTo(x, 0);
+        polygonCtx.lineTo(x, polygonCanvas.height);
+        polygonCtx.stroke();
+    }
+    
+    for (let y = 0; y <= polygonCanvas.height; y += 50) {
+        polygonCtx.beginPath();
+        polygonCtx.moveTo(0, y);
+        polygonCtx.lineTo(polygonCanvas.width, y);
+        polygonCtx.stroke();
+    }
+    
+    // Draw axes
+    polygonCtx.strokeStyle = '#888';
+    polygonCtx.lineWidth = 2;
+    polygonCtx.beginPath();
+    polygonCtx.moveTo(centerX, 0);
+    polygonCtx.lineTo(centerX, polygonCanvas.height);
+    polygonCtx.stroke();
+    
+    polygonCtx.beginPath();
+    polygonCtx.moveTo(0, centerY);
+    polygonCtx.lineTo(polygonCanvas.width, centerY);
+    polygonCtx.stroke();
 }
 
 // Add event listeners for polygon buttons
 addPolygonButton.addEventListener('click', addPolygon);
 removePolygonButton.addEventListener('click', removePolygon);
+
+// Modal elements for polygon selection
+const polygonSelectModal = document.getElementById('polygonSelectModal');
+const polygonSelectList = document.getElementById('polygonSelectList');
+const modalAddPolygonBtn = document.getElementById('modalAddPolygonBtn');
+const modalCancelPolygonBtn = document.getElementById('modalCancelPolygonBtn');
+let selectedStoredPolygonName = null;
+
+// Update addPolygon to show modal with stored polygons
+function addPolygon() {
+    try {
+        const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+        
+        if (!storedPolygons) {
+            alert('No saved polygons found. Use the Builder page to create polygons.');
+            return;
+        }
+        
+        const polygonsData = JSON.parse(storedPolygons);
+        const polygonNames = Object.keys(polygonsData);
+        
+        if (polygonNames.length === 0) {
+            alert('No saved polygons found. Use the Builder page to create polygons.');
+            return;
+        }
+        
+        // Show modal and populate list
+        selectedStoredPolygonName = null;
+        polygonSelectList.innerHTML = '';
+        
+        polygonNames.forEach(name => {
+            const item = document.createElement('div');
+            item.className = 'polygon-select-item';
+            item.textContent = `${name} (${polygonsData[name].length} points)`;
+            item.addEventListener('click', () => {
+                // Remove previous selection
+                document.querySelectorAll('.polygon-select-item').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                // Select this item
+                item.classList.add('selected');
+                selectedStoredPolygonName = name;
+            });
+            polygonSelectList.appendChild(item);
+        });
+        
+        polygonSelectModal.style.display = 'block';
+    } catch (error) {
+        alert('Error loading polygons: ' + error.message);
+    }
+}
+
+// Modal add button
+modalAddPolygonBtn.addEventListener('click', () => {
+    if (!selectedStoredPolygonName) {
+        alert('Please select a polygon to add');
+        return;
+    }
+    
+    try {
+        const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+        const polygonsData = JSON.parse(storedPolygons);
+        const polygonPoints = polygonsData[selectedStoredPolygonName];
+        
+        // Add polygon to list with its data
+        polygons.push({ 
+            name: selectedStoredPolygonName,
+            points: polygonPoints
+        });
+        
+        renderPolygonList();
+        polygonSelectModal.style.display = 'none';
+    } catch (error) {
+        alert('Error adding polygon: ' + error.message);
+    }
+});
+
+// Modal cancel button
+modalCancelPolygonBtn.addEventListener('click', () => {
+    polygonSelectModal.style.display = 'none';
+});
+
+// Close modal when clicking outside
+polygonSelectModal.addEventListener('click', (e) => {
+    if (e.target === polygonSelectModal) {
+        polygonSelectModal.style.display = 'none';
+    }
+});
 
 // Initialize the canvas
 function initCanvas() {
@@ -300,3 +579,6 @@ function drawMapView() {
 // Initialize when page loads
 window.addEventListener('load', initCanvas);
 window.addEventListener('resize', initCanvas);
+
+// Initialize polygon canvas
+clearPolygonCanvas();
