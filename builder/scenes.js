@@ -50,11 +50,29 @@ const panRightBtn = document.getElementById('panRightBtn');
 const panCenterBtn = document.getElementById('panCenterBtn');
 const partPolygonDropdown = document.getElementById('partPolygon');
 const partAppearanceDropdown = document.getElementById('partAppearance');
+const partName = document.getElementById('partName');
+const partXPos = document.getElementById('partXPos');
+const partYPos = document.getElementById('partYPos');
+const partFacing = document.getElementById('partFacing');
+const partList = document.getElementById('partList');
+const addPartButton = document.getElementById('addPart');
+const removePartButton = document.getElementById('removePart');
+const actorPartsList = document.getElementById('actorPartsList');
+const addActorPartButton = document.getElementById('addActorPart');
+const removeActorPartButton = document.getElementById('removeActorPart');
+const partSelectModal = document.getElementById('partSelectModal');
+const partSelectList = document.getElementById('partSelectList');
+const modalAddPartBtn = document.getElementById('modalAddPartBtn');
+const modalCancelPartBtn = document.getElementById('modalCancelPartBtn');
 
 let polygons = [];
 let selectedPolygonIndex = -1;
 let actors = [];
 let selectedActorIndex = -1;
+let parts = [];
+let selectedPartIndex = -1;
+let actorParts = []; // Parts associated with current actor
+let selectedPartForActor = null;
 let panOffsetX = 0;
 let panOffsetY = 0;
 
@@ -1222,3 +1240,144 @@ loadPolygonsFromStorage();
 // Initialize part dropdowns
 updatePartPolygonDropdown();
 updatePartAppearanceDropdown();
+
+// Add part to list
+function addPart() {
+    const name = partName.value.trim();
+    
+    if (!name) {
+        alert('Part must have a name.');
+        return;
+    }
+    
+    const appearanceIndex = partAppearanceDropdown.value;
+    if (!appearanceIndex || appearanceIndex === '') {
+        alert('Part must have an appearance selected.');
+        return;
+    }
+    
+    const polygonIndex = partPolygonDropdown.value;
+    const xPos = parseFloat(partXPos.value) || 0;
+    const yPos = parseFloat(partYPos.value) || 0;
+    const facing = parseFloat(partFacing.value) || 0;
+    
+    const part = {
+        name,
+        polygonIndex,
+        appearanceIndex,
+        xPos,
+        yPos,
+        facing
+    };
+    
+    parts.push(part);
+    renderPartList();
+}
+
+// Remove selected part from list
+function removePart() {
+    if (selectedPartIndex >= 0 && selectedPartIndex < parts.length) {
+        parts.splice(selectedPartIndex, 1);
+        selectedPartIndex = -1;
+        renderPartList();
+    }
+}
+
+// Render the part list
+function renderPartList() {
+    partList.innerHTML = '';
+    
+    parts.forEach((part, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = part.name;
+        partList.appendChild(option);
+    });
+}
+
+// Part listbox selection
+partList.addEventListener('change', (e) => {
+    selectedPartIndex = parseInt(e.target.value);
+    if (selectedPartIndex >= 0 && selectedPartIndex < parts.length) {
+        const part = parts[selectedPartIndex];
+        partName.value = part.name;
+        partPolygonDropdown.value = part.polygonIndex;
+        partAppearanceDropdown.value = part.appearanceIndex;
+        partXPos.value = part.xPos;
+        partYPos.value = part.yPos;
+        partFacing.value = part.facing;
+    }
+});
+
+// Add event listeners for part buttons
+addPartButton.addEventListener('click', addPart);
+removePartButton.addEventListener('click', removePart);
+
+// Add Part button - show part selection modal
+addActorPartButton.addEventListener('click', () => {
+    if (parts.length === 0) {
+        alert('No parts available. Please create parts first.');
+        return;
+    }
+    
+    // Show modal and populate with parts
+    selectedPartForActor = null;
+    partSelectList.innerHTML = '';
+    
+    parts.forEach((part, index) => {
+        const item = document.createElement('div');
+        item.className = 'polygon-select-item';
+        item.textContent = part.name;
+        item.addEventListener('click', () => {
+            // Remove previous selection
+            document.querySelectorAll('#partSelectList .polygon-select-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            // Select this item
+            item.classList.add('selected');
+            selectedPartForActor = index;
+        });
+        partSelectList.appendChild(item);
+    });
+    
+    partSelectModal.style.display = 'block';
+});
+
+// Modal Add Part button
+modalAddPartBtn.addEventListener('click', () => {
+    if (selectedPartForActor === null) {
+        alert('Please select a part to add');
+        return;
+    }
+    
+    const part = parts[selectedPartForActor];
+    actorParts.push(part);
+    renderActorPartsList();
+    partSelectModal.style.display = 'none';
+});
+
+// Modal Cancel Part button
+modalCancelPartBtn.addEventListener('click', () => {
+    partSelectModal.style.display = 'none';
+});
+
+// Remove Part button
+removeActorPartButton.addEventListener('click', () => {
+    const selectedIndex = actorPartsList.selectedIndex;
+    if (selectedIndex >= 0 && selectedIndex < actorParts.length) {
+        actorParts.splice(selectedIndex, 1);
+        renderActorPartsList();
+    }
+});
+
+// Render actor parts list
+function renderActorPartsList() {
+    actorPartsList.innerHTML = '';
+    
+    actorParts.forEach((part, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = part.name;
+        actorPartsList.appendChild(option);
+    });
+}

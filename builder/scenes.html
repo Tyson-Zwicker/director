@@ -465,6 +465,17 @@
                     </div>
                 </div>
                 <div class="button-group">
+                    <button id="addActorPart">Add Part</button>
+                    <button id="removeActorPart">Remove Part</button>
+                </div>
+                <div class="control-row">
+                    <div class="control-group" style="flex: 1;">
+                        <label for="actorPartsList">Parts:</label>
+                        <select id="actorPartsList" size="3" style="width: 100%; padding: 5px; background-color: #2d2d2d; border: 1px solid #404040; color: #e0e0e0; border-radius: 3px;">
+                        </select>
+                    </div>
+                </div>
+                <div class="button-group">
                     <button id="addActor">Add</button>
                     <button id="removeActor">Remove</button>
                     <button id="importActor">Import</button>
@@ -513,6 +524,10 @@
                             <option value="">Select appearance...</option>
                         </select>
                     </div>
+                </div>
+                <div class="button-group">
+                    <button id="addPart">Add</button>
+                    <button id="removePart">Remove</button>
                 </div>
                 <div class="control-row">
                     <div class="control-group" style="flex: 1;">
@@ -703,6 +718,17 @@
                 <button id="modalRenamePolygonBtn">Rename</button>
                 <button id="modalDeletePolygonBtn">Delete</button>
                 <button id="modalCloseManageBtn">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="partSelectModal" class="modal">
+        <div class="modal-content">
+            <h2>Select Part to Add</h2>
+            <div id="partSelectList" class="polygon-select-list"></div>
+            <div class="modal-buttons">
+                <button id="modalAddPartBtn">Add</button>
+                <button id="modalCancelPartBtn">Cancel</button>
             </div>
         </div>
     </div>
