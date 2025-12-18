@@ -645,6 +645,15 @@ function drawPolygonPreview(polygon) {
         polygonCtx.beginPath();
         polygonCtx.arc(x, y, 4, 0, Math.PI * 2);
         polygonCtx.fill();
+        
+        // Draw world coordinates next to each vertex
+        polygonCtx.fillStyle = '#e0e0e0';
+        polygonCtx.font = '10px monospace';
+        polygonCtx.textAlign = 'left';
+        polygonCtx.textBaseline = 'middle';
+        const coordText = `(${Math.round(point.x)},${Math.round(point.y)})`;
+        polygonCtx.fillText(coordText, x + 6, y);
+        polygonCtx.fillStyle = '#FF6B6B';
     });
 }
 
