@@ -166,7 +166,7 @@
             padding: 5px 20px;
             border: 2px solid #4a90e2;
             border-radius: 8px;
-            width: 400px;
+            width: 500px;
             color: #e0e0e0;
         }
         
@@ -200,12 +200,21 @@
         .modal-buttons {
             display: flex;
             gap: 10px;
-            justify-content: flex-end;
+            justify-content: center;
         }
         
         .modal-buttons button {
             padding: 3px 30px;
             font-size: 20px;
+            background-color: #4a90e2;
+            color: #ffffff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .modal-buttons button:hover {
+            background-color: #357abd;
         }
         
         .control-group {
@@ -573,6 +582,18 @@
             <div class="modal-buttons">
                 <button id="modalImportActorBtn">Import</button>
                 <button id="modalCancelActorBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="managePolygonModal" class="modal">
+        <div class="modal-content">
+            <h2>Manage Polygons</h2>
+            <div id="managePolygonList" class="polygon-select-list"></div>
+            <div class="modal-buttons">
+                <button id="modalRenamePolygonBtn">Rename</button>
+                <button id="modalDeletePolygonBtn">Delete</button>
+                <button id="modalCloseManageBtn">Close</button>
             </div>
         </div>
     </div>

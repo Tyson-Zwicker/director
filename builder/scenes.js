@@ -37,6 +37,7 @@ const importActorButton = document.getElementById('importActor');
 const addPolygonButton = document.getElementById('addPolygon');
 const removePolygonButton = document.getElementById('removePolygon');
 const createPolygonButton = document.getElementById('createPolygonBtn');
+const managePolygonButton = document.getElementById('managePolygonBtn');
 const polygonList = document.getElementById('polygonList');
 const polygonCanvas = document.getElementById('polygonCanvas');
 const polygonCtx = polygonCanvas.getContext('2d');
@@ -635,6 +636,171 @@ createPolygonButton.addEventListener('click', () => {
     localStorage.setItem('returnToScenes', 'true');
     // Navigate to builder page
     window.location.href = 'builder.html';
+});
+
+// Manage button - show manage polygon modal
+const managePolygonModal = document.getElementById('managePolygonModal');
+const managePolygonList = document.getElementById('managePolygonList');
+const modalRenamePolygonBtn = document.getElementById('modalRenamePolygonBtn');
+const modalDeletePolygonBtn = document.getElementById('modalDeletePolygonBtn');
+const modalCloseManageBtn = document.getElementById('modalCloseManageBtn');
+let selectedManagePolygonName = null;
+
+managePolygonButton.addEventListener('click', () => {
+    try {
+        const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+        
+        if (!storedPolygons) {
+            alert('No saved polygons found.');
+            return;
+        }
+        
+        const polygonsData = JSON.parse(storedPolygons);
+        const polygonNames = Object.keys(polygonsData);
+        
+        if (polygonNames.length === 0) {
+            alert('No saved polygons found.');
+            return;
+        }
+        
+        // Show modal and populate list
+        selectedManagePolygonName = null;
+        managePolygonList.innerHTML = '';
+        
+        polygonNames.forEach(name => {
+            const item = document.createElement('div');
+            item.className = 'polygon-select-item';
+            item.textContent = `${name} (${polygonsData[name].length} points)`;
+            item.addEventListener('click', () => {
+                // Remove previous selection
+                document.querySelectorAll('#managePolygonList .polygon-select-item').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                // Select this item
+                item.classList.add('selected');
+                selectedManagePolygonName = name;
+            });
+            managePolygonList.appendChild(item);
+        });
+        
+        managePolygonModal.style.display = 'block';
+    } catch (error) {
+        alert('Error loading polygons: ' + error.message);
+    }
+});
+
+// Rename polygon button
+modalRenamePolygonBtn.addEventListener('click', () => {
+    if (!selectedManagePolygonName) {
+        alert('Please select a polygon to rename');
+        return;
+    }
+    
+    const newName = prompt('Enter new name for polygon:', selectedManagePolygonName);
+    
+    if (!newName || newName === selectedManagePolygonName) {
+        return;
+    }
+    
+    try {
+        const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+        const polygonsData = JSON.parse(storedPolygons);
+        
+        // Check if new name already exists
+        if (polygonsData[newName]) {
+            alert('A polygon with that name already exists.');
+            return;
+        }
+        
+        // Rename the polygon
+        polygonsData[newName] = polygonsData[selectedManagePolygonName];
+        delete polygonsData[selectedManagePolygonName];
+        
+        // Save back to localStorage
+        localStorage.setItem('polygonBuilderPolygons', JSON.stringify(polygonsData));
+        
+        // Update local polygons array
+        const polygonIndex = polygons.findIndex(p => p.name === selectedManagePolygonName);
+        if (polygonIndex !== -1) {
+            polygons[polygonIndex].name = newName;
+        }
+        
+        // Refresh the manage list
+        selectedManagePolygonName = newName;
+        managePolygonButton.click();
+        managePolygonModal.style.display = 'block';
+        
+        // Update the polygon list display
+        renderPolygonList();
+        updateActorPolygonDropdown();
+        
+    } catch (error) {
+        alert('Error renaming polygon: ' + error.message);
+    }
+});
+
+// Delete polygon button
+modalDeletePolygonBtn.addEventListener('click', () => {
+    if (!selectedManagePolygonName) {
+        alert('Please select a polygon to delete');
+        return;
+    }
+    
+    if (!confirm(`Are you sure you want to delete "${selectedManagePolygonName}"?`)) {
+        return;
+    }
+    
+    try {
+        const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+        const polygonsData = JSON.parse(storedPolygons);
+        
+        // Delete the polygon
+        delete polygonsData[selectedManagePolygonName];
+        
+        // Save back to localStorage
+        localStorage.setItem('polygonBuilderPolygons', JSON.stringify(polygonsData));
+        
+        // Update local polygons array
+        const polygonIndex = polygons.findIndex(p => p.name === selectedManagePolygonName);
+        if (polygonIndex !== -1) {
+            polygons.splice(polygonIndex, 1);
+            if (selectedPolygonIndex === polygonIndex) {
+                selectedPolygonIndex = -1;
+            } else if (selectedPolygonIndex > polygonIndex) {
+                selectedPolygonIndex--;
+            }
+        }
+        
+        // Refresh the manage list
+        selectedManagePolygonName = null;
+        
+        // Close modal if no more polygons
+        if (Object.keys(polygonsData).length === 0) {
+            managePolygonModal.style.display = 'none';
+        } else {
+            managePolygonButton.click();
+            managePolygonModal.style.display = 'block';
+        }
+        
+        // Update the polygon list display
+        renderPolygonList();
+        updateActorPolygonDropdown();
+        
+    } catch (error) {
+        alert('Error deleting polygon: ' + error.message);
+    }
+});
+
+// Close manage modal button
+modalCloseManageBtn.addEventListener('click', () => {
+    managePolygonModal.style.display = 'none';
+});
+
+// Close modal when clicking outside
+managePolygonModal.addEventListener('click', (e) => {
+    if (e.target === managePolygonModal) {
+        managePolygonModal.style.display = 'none';
+    }
 });
 
 // Modal elements for polygon selection
