@@ -41,6 +41,7 @@ const managePolygonButton = document.getElementById('managePolygonBtn');
 const polygonList = document.getElementById('polygonList');
 const polygonCanvas = document.getElementById('polygonCanvas');
 const polygonCtx = polygonCanvas.getContext('2d');
+const zoomLevel = document.getElementById('zoomLevel');
 
 let polygons = [];
 let selectedPolygonIndex = -1;
@@ -274,6 +275,7 @@ function addActor() {
     actors.push(actor);
     saveActorsToLocalStorage();
     renderActorList();
+    drawMapView();
 }
 
 function removeActor() {
@@ -282,6 +284,7 @@ function removeActor() {
         selectedActorIndex = -1;
         saveActorsToLocalStorage();
         renderActorList();
+        drawMapView();
     }
 }
 
@@ -310,6 +313,7 @@ function loadActorsFromLocalStorage() {
         if (storedActors) {
             actors = JSON.parse(storedActors);
             renderActorList();
+            drawMapView();
         }
     } catch (error) {
         console.error('Error loading actors from localStorage:', error);
@@ -909,6 +913,11 @@ function initCanvas() {
 function drawMapView() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
+    const zoomValue = parseFloat(zoomLevel.value) || 1.0;
+    const zoom = 1 / zoomValue; // Invert zoom so higher values zoom out
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    
     // Draw grid
     ctx.strokeStyle = '#404040';
     ctx.lineWidth = 1;
@@ -930,9 +939,6 @@ function drawMapView() {
     }
     
     // Draw axes
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    
     ctx.strokeStyle = '#888';
     ctx.lineWidth = 2;
     
@@ -947,11 +953,74 @@ function drawMapView() {
     ctx.moveTo(0, centerY);
     ctx.lineTo(canvas.width, centerY);
     ctx.stroke();
+    
+    // Draw actors
+    actors.forEach((actor, index) => {
+        // Convert world coordinates to screen coordinates
+        const screenX = centerX + (actor.xPos * zoom);
+        const screenY = centerY - (actor.yPos * zoom); // Negate Y for screen coordinates
+        
+        // Get polygon and appearance
+        const polygon = polygons[actor.polygonIndex];
+        const appearance = appearances[actor.appearanceIndex];
+        
+        if (!polygon || !polygon.points || polygon.points.length === 0) {
+            // Draw a simple circle if no polygon
+            ctx.fillStyle = appearance ? `#${appearance.fill.r.toString(16)}${appearance.fill.g.toString(16)}${appearance.fill.b.toString(16)}` : '#4a90e2';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 5 * zoom, 0, Math.PI * 2);
+            ctx.fill();
+            return;
+        }
+        
+        // Draw polygon at actor position with rotation
+        ctx.save();
+        ctx.translate(screenX, screenY);
+        ctx.rotate(actor.facing || 0);
+        ctx.scale(zoom, zoom);
+        
+        // Set colors from appearance
+        if (appearance) {
+            ctx.fillStyle = `#${appearance.fill.r.toString(16)}${appearance.fill.g.toString(16)}${appearance.fill.b.toString(16)}`;
+            ctx.strokeStyle = `#${appearance.stroke.r.toString(16)}${appearance.stroke.g.toString(16)}${appearance.stroke.b.toString(16)}`;
+        } else {
+            ctx.fillStyle = 'rgba(74, 144, 226, 0.5)';
+            ctx.strokeStyle = '#4a90e2';
+        }
+        
+        ctx.lineWidth = 2 / zoom;
+        
+        // Draw polygon
+        ctx.beginPath();
+        polygon.points.forEach((point, i) => {
+            if (i === 0) {
+                ctx.moveTo(point.x, point.y);
+            } else {
+                ctx.lineTo(point.x, point.y);
+            }
+        });
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.restore();
+        
+        // Draw actor name
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `${12}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.fillText(actor.name, screenX, screenY - (20 * zoom));
+    });
 }
 
 // Initialize when page loads
 window.addEventListener('load', initCanvas);
 window.addEventListener('resize', initCanvas);
+
+// Zoom level change listener
+zoomLevel.addEventListener('change', () => {
+    drawMapView();
+});
 
 // Initialize polygon canvas
 clearPolygonCanvas();

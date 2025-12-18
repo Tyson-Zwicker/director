@@ -88,19 +88,26 @@ function drawGrid() {
   ctx.stroke();
 }
 
-// Snap coordinate to grid
+// Snap coordinate to grid and convert to world coordinates
 function snapToGrid(value, center) {
-  if (gridSize <= 0) return value;
+  if (gridSize <= 0) {
+    return value - center; // Convert to world coordinates
+  }
   const offset = value - center;
   const snapped = Math.round(offset / gridSize) * gridSize;
-  return center + snapped;
+  return snapped; // Return world coordinate
 }
 
-// Draw a single dot
-function drawDot(x, y) {
+// Draw a single dot (converts world coords to screen coords)
+function drawDot(worldX, worldY) {
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  const screenX = centerX + worldX;
+  const screenY = centerY - worldY; // Negate Y for screen coordinates
+  
   ctx.fillStyle = '#FF6B6B';
   ctx.beginPath();
-  ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
+  ctx.arc(screenX, screenY, DOT_RADIUS, 0, Math.PI * 2);
   ctx.fill();
 }
 
@@ -124,12 +131,18 @@ function redraw() {
   });
 }
 
-// Check if click is near a dot
-function findDotAt(x, y) {
+// Find dot at screen position
+function findDotAt(screenX, screenY) {
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  
   for (let i = 0; i < dots.length; i++) {
     const dot = dots[i];
-    const dx = dot.x - x;
-    const dy = dot.y - y;
+    // Convert world coords to screen coords for comparison
+    const dotScreenX = centerX + dot.x;
+    const dotScreenY = centerY - dot.y;
+    const dx = dotScreenX - screenX;
+    const dy = dotScreenY - screenY;
     const distance = Math.sqrt(dx * dx + dy * dy);
     
     if (distance <= DOT_RADIUS + 5) { // 5px tolerance
@@ -142,20 +155,21 @@ function findDotAt(x, y) {
 // Handle canvas clicks
 canvas.addEventListener('mousedown', (e) => {
   const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  const screenX = e.clientX - rect.left;
+  const screenY = e.clientY - rect.top;
   
   if (e.button === 0) { // Left click - add dot
     const centerY = canvas.height / 2;
     
     // In symmetry mode, don't allow dots in bottom half
-    if (symmetryMode && y > centerY) {
+    if (symmetryMode && screenY > centerY) {
       return;
     }
     
-    const snappedX = snapToGrid(x, canvas.width / 2);
-    const snappedY = snapToGrid(y, canvas.height / 2);
-    const newDot = { x: snappedX, y: snappedY };
+    const worldX = snapToGrid(screenX, canvas.width / 2);
+    const worldY = snapToGrid(screenY, canvas.height / 2);
+    // Negate Y to convert from screen to world coordinates
+    const newDot = { x: worldX, y: -worldY };
     dots.push(newDot);
     
     // Track dots added during symmetry mode
@@ -166,7 +180,7 @@ canvas.addEventListener('mousedown', (e) => {
     redraw();
     updateBackButtonVisibility();
   } else if (e.button === 2) { // Right click - remove dot
-    const index = findDotAt(x, y);
+    const index = findDotAt(screenX, screenY);
     if (index !== -1) {
       dots.splice(index, 1);
       redraw();
@@ -183,17 +197,21 @@ canvas.addEventListener('contextmenu', (e) => {
 endBtn.addEventListener('click', () => {
   if (dots.length < 2) return;
   
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  
   ctx.strokeStyle = '#4a90e2';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(dots[0].x, dots[0].y);
+  // Convert world coords to screen coords
+  ctx.moveTo(centerX + dots[0].x, centerY - dots[0].y);
   
   for (let i = 1; i < dots.length; i++) {
-    ctx.lineTo(dots[i].x, dots[i].y);
+    ctx.lineTo(centerX + dots[i].x, centerY - dots[i].y);
   }
   
   // Connect back to first dot
-  ctx.lineTo(dots[0].x, dots[0].y);
+  ctx.lineTo(centerX + dots[0].x, centerY - dots[0].y);
   ctx.stroke();
 });
 
@@ -270,8 +288,6 @@ exportBtn.addEventListener('click', () => {
     // Save back to localStorage
     localStorage.setItem('polygonBuilderPolygons', JSON.stringify(polygons));
     alert(`Exported "${polygonName}" with ${dots.length} dot(s) to storage`);
-    
-    lastSavedDotsCount = dots.length;
     
     // Check if we should return to scenes page
     const returnToScenes = localStorage.getItem('returnToScenes');
