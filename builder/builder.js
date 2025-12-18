@@ -86,6 +86,28 @@ function drawGrid() {
   ctx.moveTo(0, centerY);
   ctx.lineTo(canvas.width, centerY);
   ctx.stroke();
+  
+  // Draw coordinate labels at axis edges
+  ctx.fillStyle = '#888';
+  ctx.font = '12px monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  // Left edge (negative X)
+  const leftX = -centerX;
+  ctx.fillText(Math.round(leftX).toString(), 30, centerY - 10);
+  
+  // Right edge (positive X)
+  const rightX = canvas.width - centerX;
+  ctx.fillText(Math.round(rightX).toString(), canvas.width - 30, centerY - 10);
+  
+  // Top edge (positive Y)
+  const topY = centerY;
+  ctx.fillText(Math.round(topY).toString(), centerX + 10, 15);
+  
+  // Bottom edge (negative Y)
+  const bottomY = -(canvas.height - centerY);
+  ctx.fillText(Math.round(bottomY).toString(), centerX + 10, canvas.height - 15);
 }
 
 // Snap coordinate to grid and convert to world coordinates
@@ -236,12 +258,11 @@ symmetryBtn.addEventListener('click', () => {
     symmetryBtn.style.backgroundColor = '#FF6B6B';
     symmetryBtn.textContent = 'Symmetry (ON)';
   } else {
-    // Exiting symmetry mode - mirror symmetry dots to bottom half in REVERSE order
-    const centerY = canvas.height / 2;
+    // Exiting symmetry mode - mirror symmetry dots across x-axis (negate Y) in REVERSE order
     for (let i = symmetryDots.length - 1; i >= 0; i--) {
       const dot = symmetryDots[i];
-      const mirrorY = 2 * centerY - dot.y;
-      dots.push({ x: dot.x, y: mirrorY });
+      // Mirror across x-axis by negating the Y world coordinate
+      dots.push({ x: dot.x, y: -dot.y });
     }
     symmetryDots = [];
     symmetryBtn.style.backgroundColor = '#4a90e2';
