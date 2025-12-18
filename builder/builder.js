@@ -9,12 +9,15 @@ const gridSizeInput = document.getElementById('gridSize');
 const outputBox = document.getElementById('outputBox');
 const exportBtn = document.getElementById('exportBtn');
 const importBtn = document.getElementById('importBtn');
+const mouseCoordsField = document.getElementById('mouseCoords');
+const zoomLevel = document.getElementById('zoomLevel');
 
 let dots = [];
 const DOT_RADIUS = 5;
 let gridSize = 20;
 let symmetryMode = false;
 let symmetryDots = []; // Track dots added during symmetry mode
+let snapIndicator = null; // Track snap indicator position
 
 // Update back button visibility
 function updateBackButtonVisibility() {
@@ -37,19 +40,21 @@ backBtn.addEventListener('click', () => {
 function drawGrid() {
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
+  const zoom = parseFloat(zoomLevel.value) || 1.0;
+  const scaledGridSize = gridSize * zoom;
   
   if (gridSize > 0) {
     ctx.strokeStyle = '#404040';
     ctx.lineWidth = 1;
     
     // Vertical lines
-    for (let x = centerX; x <= canvas.width; x += gridSize) {
+    for (let x = centerX; x <= canvas.width; x += scaledGridSize) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, canvas.height);
       ctx.stroke();
     }
-    for (let x = centerX - gridSize; x >= 0; x -= gridSize) {
+    for (let x = centerX - scaledGridSize; x >= 0; x -= scaledGridSize) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, canvas.height);
@@ -57,13 +62,13 @@ function drawGrid() {
     }
     
     // Horizontal lines
-    for (let y = centerY; y <= canvas.height; y += gridSize) {
+    for (let y = centerY; y <= canvas.height; y += scaledGridSize) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(canvas.width, y);
       ctx.stroke();
     }
-    for (let y = centerY - gridSize; y >= 0; y -= gridSize) {
+    for (let y = centerY - scaledGridSize; y >= 0; y -= scaledGridSize) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(canvas.width, y);
@@ -94,38 +99,41 @@ function drawGrid() {
   ctx.textBaseline = 'middle';
   
   // Left edge (negative X)
-  const leftX = -centerX;
+  const leftX = -centerX / zoom;
   ctx.fillText(Math.round(leftX).toString(), 30, centerY - 10);
   
   // Right edge (positive X)
-  const rightX = canvas.width - centerX;
+  const rightX = (canvas.width - centerX) / zoom;
   ctx.fillText(Math.round(rightX).toString(), canvas.width - 30, centerY - 10);
   
   // Top edge (positive Y)
-  const topY = centerY;
+  const topY = centerY / zoom;
   ctx.fillText(Math.round(topY).toString(), centerX + 10, 15);
   
   // Bottom edge (negative Y)
-  const bottomY = -(canvas.height - centerY);
+  const bottomY = -(canvas.height - centerY) / zoom;
   ctx.fillText(Math.round(bottomY).toString(), centerX + 10, canvas.height - 15);
 }
 
 // Snap coordinate to grid and convert to world coordinates
 function snapToGrid(value, center) {
+  const zoom = parseFloat(zoomLevel.value) || 1.0;
   if (gridSize <= 0) {
-    return value - center; // Convert to world coordinates
+    return (value - center) / zoom; // Convert to world coordinates
   }
   const offset = value - center;
-  const snapped = Math.round(offset / gridSize) * gridSize;
-  return snapped; // Return world coordinate
+  const scaledGridSize = gridSize * zoom;
+  const snapped = Math.round(offset / scaledGridSize) * scaledGridSize;
+  return snapped / zoom; // Return world coordinate
 }
 
 // Draw a single dot (converts world coords to screen coords)
 function drawDot(worldX, worldY) {
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
-  const screenX = centerX + worldX;
-  const screenY = centerY - worldY; // Negate Y for screen coordinates
+  const zoom = parseFloat(zoomLevel.value) || 1.0;
+  const screenX = centerX + (worldX * zoom);
+  const screenY = centerY - (worldY * zoom); // Negate Y for screen coordinates
   
   ctx.fillStyle = '#FF6B6B';
   ctx.beginPath();
@@ -151,18 +159,33 @@ function redraw() {
   dots.forEach(dot => {
     drawDot(dot.x, dot.y);
   });
+  
+  // Draw snap indicator
+  if (snapIndicator) {
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const zoom = parseFloat(zoomLevel.value) || 1.0;
+    const screenX = centerX + (snapIndicator.x * zoom);
+    const screenY = centerY - (snapIndicator.y * zoom);
+    
+    ctx.fillStyle = 'rgba(128, 128, 128, 0.5)';
+    ctx.beginPath();
+    ctx.arc(screenX, screenY, DOT_RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }
 
 // Find dot at screen position
 function findDotAt(screenX, screenY) {
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
+  const zoom = parseFloat(zoomLevel.value) || 1.0;
   
   for (let i = 0; i < dots.length; i++) {
     const dot = dots[i];
     // Convert world coords to screen coords for comparison
-    const dotScreenX = centerX + dot.x;
-    const dotScreenY = centerY - dot.y;
+    const dotScreenX = centerX + (dot.x * zoom);
+    const dotScreenY = centerY - (dot.y * zoom);
     const dx = dotScreenX - screenX;
     const dy = dotScreenY - screenY;
     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -215,25 +238,58 @@ canvas.addEventListener('contextmenu', (e) => {
   e.preventDefault();
 });
 
+// Track mouse position and display world coordinates
+canvas.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const screenX = e.clientX - rect.left;
+  const screenY = e.clientY - rect.top;
+  
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  
+  // Calculate snapped position for indicator
+  const snappedX = snapToGrid(screenX, centerX);
+  const snappedY = snapToGrid(screenY, centerY);
+  
+  // Display snapped coordinates
+  mouseCoordsField.value = `(${Math.round(snappedX)}, ${Math.round(-snappedY)})`;
+  
+  // In symmetry mode, don't show indicator in bottom half
+  if (symmetryMode && screenY > centerY) {
+    snapIndicator = null;
+  } else {
+    snapIndicator = { x: snappedX, y: -snappedY };
+  }
+  
+  redraw();
+});
+
+// Clear snap indicator when mouse leaves canvas
+canvas.addEventListener('mouseleave', () => {
+  snapIndicator = null;
+  redraw();
+});
+
 // End button - connect all dots
 endBtn.addEventListener('click', () => {
   if (dots.length < 2) return;
   
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
+  const zoom = parseFloat(zoomLevel.value) || 1.0;
   
   ctx.strokeStyle = '#4a90e2';
   ctx.lineWidth = 2;
   ctx.beginPath();
   // Convert world coords to screen coords
-  ctx.moveTo(centerX + dots[0].x, centerY - dots[0].y);
+  ctx.moveTo(centerX + (dots[0].x * zoom), centerY - (dots[0].y * zoom));
   
   for (let i = 1; i < dots.length; i++) {
-    ctx.lineTo(centerX + dots[i].x, centerY - dots[i].y);
+    ctx.lineTo(centerX + (dots[i].x * zoom), centerY - (dots[i].y * zoom));
   }
   
   // Connect back to first dot
-  ctx.lineTo(centerX + dots[0].x, centerY - dots[0].y);
+  ctx.lineTo(centerX + (dots[0].x * zoom), centerY - (dots[0].y * zoom));
   ctx.stroke();
 });
 
@@ -282,6 +338,11 @@ clearBtn.addEventListener('click', () => {
 // Handle grid size changes
 gridSizeInput.addEventListener('input', (e) => {
   gridSize = parseInt(e.target.value) || 0;
+  redraw();
+});
+
+// Zoom change handler
+zoomLevel.addEventListener('change', () => {
   redraw();
 });
 
