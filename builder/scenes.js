@@ -42,11 +42,18 @@ const polygonList = document.getElementById('polygonList');
 const polygonCanvas = document.getElementById('polygonCanvas');
 const polygonCtx = polygonCanvas.getContext('2d');
 const zoomLevel = document.getElementById('zoomLevel');
+const panUpBtn = document.getElementById('panUpBtn');
+const panDownBtn = document.getElementById('panDownBtn');
+const panLeftBtn = document.getElementById('panLeftBtn');
+const panRightBtn = document.getElementById('panRightBtn');
+const panCenterBtn = document.getElementById('panCenterBtn');
 
 let polygons = [];
 let selectedPolygonIndex = -1;
 let actors = [];
 let selectedActorIndex = -1;
+let panOffsetX = 0;
+let panOffsetY = 0;
 
 // Validate number inputs for position and velocity fields
 function validateNumberInput(inputElement) {
@@ -159,6 +166,12 @@ updateAllPreviews();
 function addAppearance() {
     const name = appearanceName.value.trim() || `Appearance ${appearances.length + 1}`;
     
+    // Check if an appearance with this name already exists
+    if (appearances.some(appearance => appearance.name === name)) {
+        alert(`An appearance with the name "${name}" already exists. Please use a different name.`);
+        return;
+    }
+    
     const newAppearance = {
         name: name,
         fill: { ...colors.fill },
@@ -249,6 +262,13 @@ removeButton.addEventListener('click', removeAppearance);
 // Actor management functions
 function addActor() {
     const name = actorName.value.trim() || `Actor ${actors.length + 1}`;
+    
+    // Check if an actor with this name already exists
+    if (actors.some(actor => actor.name === name)) {
+        alert(`An actor with the name "${name}" already exists. Please use a different name.`);
+        return;
+    }
+    
     const mass = parseFloat(actorMass.value) || 1;
     const polygonIndex = actorPolygonDropdown.value;
     const appearanceIndex = actorAppearanceDropdown.value;
@@ -954,11 +974,33 @@ function drawMapView() {
     ctx.lineTo(canvas.width, centerY);
     ctx.stroke();
     
+    // Draw world coordinate labels on axes
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    
+    // Calculate world coordinates at canvas edges
+    const leftWorldX = Math.round((-centerX - panOffsetX) / zoom);
+    const rightWorldX = Math.round((centerX - panOffsetX) / zoom);
+    const topWorldY = Math.round((centerY - panOffsetY) / zoom);
+    const bottomWorldY = Math.round((-centerY - panOffsetY) / zoom);
+    
+    // X-axis labels (left and right edges)
+    ctx.fillText(leftWorldX.toString(), 30, centerY + 5);
+    ctx.fillText(rightWorldX.toString(), canvas.width - 30, centerY + 5);
+    
+    // Y-axis labels (top and bottom edges)
+    ctx.textBaseline = 'middle';
+    ctx.fillText(topWorldY.toString(), centerX + 5, 20);
+    ctx.fillText(bottomWorldY.toString(), centerX + 5, canvas.height - 20);
+    ctx.stroke();
+    
     // Draw actors
     actors.forEach((actor, index) => {
-        // Convert world coordinates to screen coordinates
-        const screenX = centerX + (actor.xPos * zoom);
-        const screenY = centerY - (actor.yPos * zoom); // Negate Y for screen coordinates
+        // Convert world coordinates to screen coordinates with pan offset
+        const screenX = centerX + (actor.xPos * zoom) + panOffsetX;
+        const screenY = centerY - (actor.yPos * zoom) + panOffsetY; // Negate Y for screen coordinates
         
         // Get polygon and appearance
         const polygon = polygons[actor.polygonIndex];
@@ -1019,6 +1061,35 @@ window.addEventListener('resize', initCanvas);
 
 // Zoom level change listener
 zoomLevel.addEventListener('change', () => {
+    drawMapView();
+});
+
+// Pan button event listeners
+const PAN_STEP = 50;
+
+panUpBtn.addEventListener('click', () => {
+    panOffsetY += PAN_STEP;
+    drawMapView();
+});
+
+panDownBtn.addEventListener('click', () => {
+    panOffsetY -= PAN_STEP;
+    drawMapView();
+});
+
+panLeftBtn.addEventListener('click', () => {
+    panOffsetX -= PAN_STEP;
+    drawMapView();
+});
+
+panRightBtn.addEventListener('click', () => {
+    panOffsetX += PAN_STEP;
+    drawMapView();
+});
+
+panCenterBtn.addEventListener('click', () => {
+    panOffsetX = 0;
+    panOffsetY = 0;
     drawMapView();
 });
 

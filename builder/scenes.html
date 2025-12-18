@@ -602,17 +602,28 @@
                 <div class="control-group" style="margin-top: 10px; flex-shrink: 0;">
                     <label for="zoomLevel">Zoom:</label>
                     <select id="zoomLevel">
-                        <option value="0.5">0.5</option>
-                        <option value="1.0" selected>1.0</option>
-                        <option value="1.5">1.5</option>
-                        <option value="2.0">2.0</option>
-                        <option value="2.5">2.5</option>
-                        <option value="3.0">3.0</option>
-                        <option value="3.5">3.5</option>
-                        <option value="4.0">4.0</option>
-                        <option value="4.5">4.5</option>
-                        <option value="5.0">5.0</option>
+                        <option value="1" selected>1</option>
+                        <option value="2">2</option>
+                        <option value="4">4</option>
+                        <option value="8">8</option>
+                        <option value="16">16</option>
+                        <option value="32">32</option>
+                        <option value="64">64</option>
                     </select>
+                </div>
+                <div style="margin-top: 10px; flex-shrink: 0;">
+                    <label style="display: block; margin-bottom: 5px;">Pan:</label>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 150px;">
+                        <div></div>
+                        <button id="panUpBtn" style="padding: 5px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">↑</button>
+                        <div></div>
+                        <button id="panLeftBtn" style="padding: 5px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">←</button>
+                        <button id="panCenterBtn" style="padding: 5px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">⊙</button>
+                        <button id="panRightBtn" style="padding: 5px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">→</button>
+                        <div></div>
+                        <button id="panDownBtn" style="padding: 5px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">↓</button>
+                        <div></div>
+                    </div>
                 </div>
             </div>
         </div>
