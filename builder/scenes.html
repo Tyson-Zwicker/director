@@ -481,6 +481,49 @@
             </div>
             
             <div class="section">
+                <h3>Parts</h3>
+                <div class="control-row equal">
+                    <div class="control-group" style="flex: 2;">
+                        <label for="partName">Name:</label>
+                        <input type="text" id="partName" placeholder="Enter part name">
+                    </div>
+                    <div class="control-group" style="flex: 1;">
+                        <label for="partXPos">X Position:</label>
+                        <input type="number" id="partXPos" step="any" value="0">
+                    </div>
+                    <div class="control-group" style="flex: 1;">
+                        <label for="partYPos">Y Position:</label>
+                        <input type="number" id="partYPos" step="any" value="0">
+                    </div>
+                    <div class="control-group" style="flex: 1;">
+                        <label for="partFacing">Facing:</label>
+                        <input type="number" id="partFacing" step="any" placeholder="Facing">
+                    </div>
+                </div>
+                <div class="control-row equal">
+                    <div class="control-group">
+                        <label for="partPolygon">Polygon:</label>
+                        <select id="partPolygon">
+                            <option value="">Select polygon...</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="partAppearance">Appearance:</label>
+                        <select id="partAppearance">
+                            <option value="">Select appearance...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="control-row">
+                    <div class="control-group" style="flex: 1;">
+                        <label for="partList">Parts:</label>
+                        <select id="partList" size="5" style="width: 100%; padding: 5px; background-color: #2d2d2d; border: 1px solid #404040; color: #e0e0e0; border-radius: 3px;">
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
                 <div class="section-header">
                     <h3>Polygons</h3>
                     <div class="section-header-buttons">

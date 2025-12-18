@@ -48,6 +48,8 @@ const panDownBtn = document.getElementById('panDownBtn');
 const panLeftBtn = document.getElementById('panLeftBtn');
 const panRightBtn = document.getElementById('panRightBtn');
 const panCenterBtn = document.getElementById('panCenterBtn');
+const partPolygonDropdown = document.getElementById('partPolygon');
+const partAppearanceDropdown = document.getElementById('partAppearance');
 
 let polygons = [];
 let selectedPolygonIndex = -1;
@@ -210,6 +212,9 @@ function renderAppearanceList() {
     
     // Update actor appearance dropdown
     updateActorAppearanceDropdown();
+    
+    // Update part appearance dropdown
+    updatePartAppearanceDropdown();
 }
 
 // Update the actor appearance dropdown with current appearances
@@ -230,6 +235,27 @@ function updateActorAppearanceDropdown() {
     // Restore selection if it still exists
     if (currentSelection !== '') {
         actorAppearanceDropdown.value = currentSelection;
+    }
+}
+
+// Update the part appearance dropdown with current appearances
+function updatePartAppearanceDropdown() {
+    // Save current selection
+    const currentSelection = partAppearanceDropdown.value;
+    
+    // Clear and rebuild dropdown
+    partAppearanceDropdown.innerHTML = '<option value="">Select appearance...</option>';
+    
+    appearances.forEach((appearance, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = appearance.name;
+        partAppearanceDropdown.appendChild(option);
+    });
+    
+    // Restore selection if it still exists
+    if (currentSelection !== '') {
+        partAppearanceDropdown.value = currentSelection;
     }
 }
 
@@ -515,6 +541,27 @@ function updateActorPolygonDropdown() {
     }
 }
 
+// Update the part polygon dropdown with current polygons
+function updatePartPolygonDropdown() {
+    // Save current selection
+    const currentSelection = partPolygonDropdown.value;
+    
+    // Clear and rebuild dropdown
+    partPolygonDropdown.innerHTML = '<option value="">Select polygon...</option>';
+    
+    polygons.forEach((polygon, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = polygon.name;
+        partPolygonDropdown.appendChild(option);
+    });
+    
+    // Restore selection if it still exists
+    if (currentSelection !== '') {
+        partPolygonDropdown.value = currentSelection;
+    }
+}
+
 // Polygon management functions
 function removePolygon() {
     if (selectedPolygonIndex >= 0 && selectedPolygonIndex < polygons.length) {
@@ -546,6 +593,9 @@ function renderPolygonList() {
     
     // Update actor polygon dropdown
     updateActorPolygonDropdown();
+    
+    // Update part polygon dropdown
+    updatePartPolygonDropdown();
     
     // Clear canvas if no polygon selected
     if (selectedPolygonIndex === -1) {
@@ -1168,3 +1218,7 @@ function loadPolygonsFromStorage() {
 }
 
 loadPolygonsFromStorage();
+
+// Initialize part dropdowns
+updatePartPolygonDropdown();
+updatePartAppearanceDropdown();

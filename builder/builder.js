@@ -300,7 +300,7 @@ polygonBtn.addEventListener('click', () => {
     return;
   }
   
-  const coordString = dots.map(dot => `new Point(${dot.x},${dot.y})`).join(', ');
+  const coordString = dots.map(dot => `new Point(${Math.round(dot.x)},${Math.round(dot.y)})`).join(', ');
   outputBox.value = `[${coordString}]`;
 });
 
