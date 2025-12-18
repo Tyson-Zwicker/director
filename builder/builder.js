@@ -1,5 +1,6 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+const backBtn = document.getElementById('backBtn');
 const endBtn = document.getElementById('endBtn');
 const polygonBtn = document.getElementById('polygonBtn');
 const symmetryBtn = document.getElementById('symmetryBtn');
@@ -14,6 +15,23 @@ const DOT_RADIUS = 5;
 let gridSize = 20;
 let symmetryMode = false;
 let symmetryDots = []; // Track dots added during symmetry mode
+
+// Update back button visibility
+function updateBackButtonVisibility() {
+  const returnToScenes = localStorage.getItem('returnToScenes');
+  // Show back button only if we came from scenes AND there are no dots
+  if (returnToScenes === 'true' && dots.length === 0) {
+    backBtn.style.display = 'block';
+  } else {
+    backBtn.style.display = 'none';
+  }
+}
+
+// Back button - return to scenes page
+backBtn.addEventListener('click', () => {
+  localStorage.removeItem('returnToScenes');
+  window.location.href = 'scenes.html';
+});
 
 // Draw grid
 function drawGrid() {
@@ -146,6 +164,7 @@ canvas.addEventListener('mousedown', (e) => {
     }
     
     redraw();
+    updateBackButtonVisibility();
   } else if (e.button === 2) { // Right click - remove dot
     const index = findDotAt(x, y);
     if (index !== -1) {
@@ -218,6 +237,7 @@ symmetryBtn.addEventListener('click', () => {
 clearBtn.addEventListener('click', () => {
   dots = [];
   redraw();
+  updateBackButtonVisibility();
 });
 
 // Handle grid size changes
@@ -250,6 +270,8 @@ exportBtn.addEventListener('click', () => {
     // Save back to localStorage
     localStorage.setItem('polygonBuilderPolygons', JSON.stringify(polygons));
     alert(`Exported "${polygonName}" with ${dots.length} dot(s) to storage`);
+    
+    lastSavedDotsCount = dots.length;
     
     // Check if we should return to scenes page
     const returnToScenes = localStorage.getItem('returnToScenes');
@@ -359,4 +381,5 @@ importModal.addEventListener('click', (e) => {
 // Initialize
 window.addEventListener('load', () => {
   redraw();
+  updateBackButtonVisibility();
 });
