@@ -34,6 +34,7 @@ const actorList = document.getElementById('actorList');
 const addActorButton = document.getElementById('addActor');
 const removeActorButton = document.getElementById('removeActor');
 const importActorButton = document.getElementById('importActor');
+const clearActorButton = document.getElementById('clearActor');
 const addPolygonButton = document.getElementById('addPolygon');
 const removePolygonButton = document.getElementById('removePolygon');
 const createPolygonButton = document.getElementById('createPolygonBtn');
@@ -261,12 +262,30 @@ removeButton.addEventListener('click', removeAppearance);
 
 // Actor management functions
 function addActor() {
-    const name = actorName.value.trim() || `Actor ${actors.length + 1}`;
+    let name = actorName.value.trim() || `Actor ${actors.length + 1}`;
     
     // Check if an actor with this name already exists
-    if (actors.some(actor => actor.name === name)) {
-        alert(`An actor with the name "${name}" already exists. Please use a different name.`);
-        return;
+    const existingIndex = actors.findIndex(actor => actor.name === name);
+    if (existingIndex !== -1) {
+        const replace = confirm(`An actor with the name "${name}" already exists.\n\nClick OK to replace the existing actor, or Cancel to change the name.`);
+        
+        if (replace) {
+            // Remove the existing actor
+            actors.splice(existingIndex, 1);
+        } else {
+            // Prompt for a new name
+            const newName = prompt(`Enter a new name for the actor:`, name);
+            if (!newName || newName.trim() === '') {
+                return; // User cancelled or entered empty name
+            }
+            name = newName.trim();
+            
+            // Check again if the new name also exists
+            if (actors.some(actor => actor.name === name)) {
+                alert(`An actor with the name "${name}" already exists. Please try again.`);
+                return;
+            }
+        }
     }
     
     const mass = parseFloat(actorMass.value) || 1;
@@ -338,6 +357,22 @@ function loadActorsFromLocalStorage() {
     } catch (error) {
         console.error('Error loading actors from localStorage:', error);
     }
+}
+
+// Clear actor form fields
+function clearActorFields() {
+    selectedActorIndex = -1;
+    actorList.selectedIndex = -1;
+    actorName.value = '';
+    actorMass.value = 1;
+    actorPolygonDropdown.value = '';
+    actorAppearanceDropdown.value = '';
+    actorXPos.value = 0;
+    actorYPos.value = 0;
+    actorXVel.value = 0;
+    actorYVel.value = 0;
+    actorFacing.value = '';
+    actorSpin.value = 0;
 }
 
 // Actor listbox selection
@@ -457,6 +492,7 @@ actorImportModal.addEventListener('click', (e) => {
 addActorButton.addEventListener('click', addActor);
 removeActorButton.addEventListener('click', removeActor);
 importActorButton.addEventListener('click', importActor);
+clearActorButton.addEventListener('click', clearActorFields);
 
 // Update the actor polygon dropdown with current polygons
 function updateActorPolygonDropdown() {
