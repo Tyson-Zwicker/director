@@ -47,6 +47,7 @@ export default class Sensor {
     this.#moveSensor(delta);
     let worldAngle = this.actor.facing + this.centerAngle + this.currentOffset;
     let p2 = Point.fromPolar(worldAngle, this.range);
+    Point.add (p2, this.actor.position); //<--- CHANGE
     this.#drawAttempt(this.actor.position, p2);
     if (results.locationOfResponse !== undefined) {          //We're drawing the "bounce back" so if nothing is seen, nothing gets drawn.
       console.log(results.locationOfResponse);
@@ -74,7 +75,7 @@ export default class Sensor {
   }
   #drawAttempt(p1, p2) {
     let sensorRay = new LineEffect(p1, p2, 1, new Color(15, 0, 0,0.2), 2)
-    Director.addForegroundEffect(sensorRay);
+    Director.addBackgroundEffect(sensorRay);
   }
   #examineCandidates(foundActors) {
     let worldAngle = this.actor.facing + this.centerAngle + this.currentOffset;

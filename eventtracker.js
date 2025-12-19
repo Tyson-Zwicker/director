@@ -39,13 +39,11 @@ export default class EventTracker {
   getEventsAfter(time) {
     let i = 0;
     console.log('comparing with ' + this.sortedTimes[i]);
-
     while ( this.sortedTimes[i]<time && i < this.sortedTimes.length) {
       console.log('this is before! ' + this.sortedTimes[i]);
       i++;
       console.log('comparing with ' + this.sortedTimes[i]);
     }
-
     let result = [];
     for (let eventIndex = i; eventIndex < this.sortedTimes.length; eventIndex++) {
       result.push(this.map.get(this.sortedTimes[eventIndex]));
