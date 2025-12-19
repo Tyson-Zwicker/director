@@ -31,9 +31,6 @@ export default class Transpose {
   //returns a point in a child object, accounting
   //for both objects facing in SCREEN coordinates.
   //Think:Screen position of a point in a part.
-  //Returns a point in a child object, accounting
-  //for both objects facing in SCREEN coordinates.
-  //Think: Screen position of a point in a part.
   static childToScreen(child, parent) {
     let childWorldCoords = Transpose.childToWorld(child, parent);
     return Transpose.worldToScreen(childWorldCoords);

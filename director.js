@@ -206,7 +206,6 @@ export default class Director {
   //------------------------- loop
   static loop(currentTime) {
     const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
-    //console.log (`start loop ${delta}`);
     Director.lastFrameTime = currentTime;
     Director.kinematics(delta); //This redraws the entire quadtree.
     Director.applyActorField(delta);
@@ -222,7 +221,6 @@ export default class Director {
     Director.checkUserActorInteraction();
     Director.quadtree.clear();      //QuadTree is cleared (will be recreated begining next loop)
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
-    //console.log (`end loop ${delta}`);
   }
   //------------------------- runners
   static run() {

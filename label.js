@@ -15,14 +15,6 @@ export default class Label {
     this.text = text;
   }
   draw() {
-    /*let screenPosition = Point.from(this.parent.position);
-    let labelOffset = Point.from(this.position);
-    Point.scale(labelOffset, Director.view.camera.zoom);
-    Point.add(screenPosition, labelOffset);
-    Point.sub(screenPosition, Director.view.camera);
-    Point.scale(screenPosition, Director.view.camera.zoom);
-    Point.add(screenPosition, Director.view.screenCenter);
-    */    
     let screenPosition = Transpose.childToScreen (this,this.parent);
     Director.view.context.fillStyle = this.appearance.text;
     Director.view.context.textBaseline = 'middle';
