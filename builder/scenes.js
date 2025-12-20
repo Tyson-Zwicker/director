@@ -36,6 +36,7 @@ const actorList = document.getElementById('actorList');
 const addActorButton = document.getElementById('addActor');
 const removeActorButton = document.getElementById('removeActor');
 const importActorButton = document.getElementById('importActor');
+const exportActorButton = document.getElementById('exportActor');
 const clearActorButton = document.getElementById('clearActor');
 const addPolygonButton = document.getElementById('addPolygon');
 const removePolygonButton = document.getElementById('removePolygon');
@@ -443,28 +444,10 @@ appearanceImportModal.addEventListener('click', (e) => {
 function addActor() {
     let name = actorName.value.trim() || `Actor ${actors.length + 1}`;
     
-    // Check if an actor with this name already exists
-    const existingIndex = actors.findIndex(actor => actor.name === name);
-    if (existingIndex !== -1) {
-        const replace = confirm(`An actor with the name "${name}" already exists.\n\nClick OK to replace the existing actor, or Cancel to change the name.`);
-        
-        if (replace) {
-            // Remove the existing actor
-            actors.splice(existingIndex, 1);
-        } else {
-            // Prompt for a new name
-            const newName = prompt(`Enter a new name for the actor:`, name);
-            if (!newName || newName.trim() === '') {
-                return; // User cancelled or entered empty name
-            }
-            name = newName.trim();
-            
-            // Check again if the new name also exists
-            if (actors.some(actor => actor.name === name)) {
-                alert(`An actor with the name "${name}" already exists. Please try again.`);
-                return;
-            }
-        }
+    // Check if an actor with this name already exists in the listbox
+    if (actors.some(actor => actor.name === name)) {
+        alert(`An actor with the name "${name}" already exists in the listbox. Please use a unique name.`);
+        return;
     }
     
     const mass = parseFloat(actorMass.value) || 1;
@@ -491,7 +474,6 @@ function addActor() {
     };
     
     actors.push(actor);
-    saveActorsToLocalStorage();
     renderActorList();
     drawMapView();
 }
@@ -500,7 +482,6 @@ function removeActor() {
     if (selectedActorIndex >= 0 && selectedActorIndex < actors.length) {
         actors.splice(selectedActorIndex, 1);
         selectedActorIndex = -1;
-        saveActorsToLocalStorage();
         renderActorList();
         drawMapView();
     }
@@ -581,7 +562,7 @@ let selectedImportActorIndex = null;
 
 function importActor() {
     try {
-        const storedActors = localStorage.getItem('sceneBuilderActors');
+        const storedActors = localStorage.getItem('sceneBuilderStoredActors');
         
         if (!storedActors) {
             alert('No saved actors found.');
@@ -589,8 +570,9 @@ function importActor() {
         }
         
         const actorsData = JSON.parse(storedActors);
+        const actorNames = Object.keys(actorsData);
         
-        if (actorsData.length === 0) {
+        if (actorNames.length === 0) {
             alert('No saved actors found.');
             return;
         }
@@ -599,10 +581,10 @@ function importActor() {
         selectedImportActorIndex = null;
         actorImportList.innerHTML = '';
         
-        actorsData.forEach((actor, index) => {
+        actorNames.forEach((name, index) => {
             const item = document.createElement('div');
             item.className = 'polygon-select-item';
-            item.textContent = actor.name;
+            item.textContent = name;
             item.addEventListener('click', () => {
                 // Remove previous selection
                 document.querySelectorAll('#actorImportList .polygon-select-item').forEach(el => {
@@ -610,7 +592,7 @@ function importActor() {
                 });
                 // Select this item
                 item.classList.add('selected');
-                selectedImportActorIndex = index;
+                selectedImportActorIndex = name;
             });
             actorImportList.appendChild(item);
         });
@@ -629,7 +611,7 @@ modalImportActorBtn.addEventListener('click', () => {
     }
     
     try {
-        const storedActors = localStorage.getItem('sceneBuilderActors');
+        const storedActors = localStorage.getItem('sceneBuilderStoredActors');
         const actorsData = JSON.parse(storedActors);
         const importedActor = actorsData[selectedImportActorIndex];
         
@@ -644,10 +626,6 @@ modalImportActorBtn.addEventListener('click', () => {
         actorYVel.value = importedActor.yVel;
         actorFacing.value = importedActor.facing;
         actorSpin.value = importedActor.spin;
-        
-        // Add to current actors list
-        actors.push({ ...importedActor });
-        renderActorList();
         
         actorImportModal.style.display = 'none';
     } catch (error) {
@@ -671,6 +649,40 @@ actorImportModal.addEventListener('click', (e) => {
 addActorButton.addEventListener('click', addActor);
 removeActorButton.addEventListener('click', removeActor);
 importActorButton.addEventListener('click', importActor);
+
+// Export actor to localStorage
+exportActorButton.addEventListener('click', () => {
+    if (selectedActorIndex < 0 || selectedActorIndex >= actors.length) {
+        alert('Please select an actor to export.');
+        return;
+    }
+    
+    const actor = actors[selectedActorIndex];
+    
+    try {
+        // Get existing actors from localStorage
+        const storedActors = localStorage.getItem('sceneBuilderStoredActors');
+        let actorsData = storedActors ? JSON.parse(storedActors) : {};
+        
+        // Check if actor with this name already exists in storage
+        if (actorsData[actor.name]) {
+            const overwrite = confirm(`An actor with the name "${actor.name}" already exists in storage.\n\nClick OK to overwrite it, or Cancel to abort.`);
+            if (!overwrite) {
+                return;
+            }
+        }
+        
+        // Add or update the actor
+        actorsData[actor.name] = actor;
+        
+        // Save back to localStorage
+        localStorage.setItem('sceneBuilderStoredActors', JSON.stringify(actorsData));
+        
+        alert(`Actor "${actor.name}" exported successfully!`);
+    } catch (error) {
+        alert('Error exporting actor: ' + error.message);
+    }
+});
 clearActorButton.addEventListener('click', clearActorFields);
 
 // Update the actor polygon dropdown with current polygons
