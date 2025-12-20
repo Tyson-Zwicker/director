@@ -530,6 +530,20 @@ function loadActorsFromLocalStorage() {
         const storedActors = localStorage.getItem('sceneBuilderActors');
         if (storedActors) {
             actors = JSON.parse(storedActors);
+            
+            // Migrate old format (polygonIndex) to new format (polygonName)
+            actors = actors.map(actor => {
+                if (actor.polygonIndex !== undefined && !actor.polygonName) {
+                    const polygon = polygons[actor.polygonIndex];
+                    return {
+                        ...actor,
+                        polygonName: polygon ? polygon.name : '',
+                        polygonIndex: undefined
+                    };
+                }
+                return actor;
+            });
+            
             renderActorList();
             drawMapView();
         }
@@ -840,7 +854,7 @@ function updatePartPolygonDropdown() {
     
     polygons.forEach((polygon, index) => {
         const option = document.createElement('option');
-        option.value = index;
+        option.value = polygon.name;
         option.textContent = polygon.name;
         partPolygonDropdown.appendChild(option);
     });
@@ -1527,14 +1541,14 @@ function addPart() {
         return;
     }
     
-    const polygonIndex = partPolygonDropdown.value;
+    const polygonName = partPolygonDropdown.value;
     const xPos = parseFloat(partXPos.value) || 0;
     const yPos = parseFloat(partYPos.value) || 0;
     const facing = parseFloat(partFacing.value) || 0;
     
     const part = {
         name,
-        polygonIndex,
+        polygonName,
         appearanceIndex,
         xPos,
         yPos,
@@ -1580,7 +1594,7 @@ partList.addEventListener('change', (e) => {
     if (selectedPartIndex >= 0 && selectedPartIndex < parts.length) {
         const part = parts[selectedPartIndex];
         partName.value = part.name;
-        partPolygonDropdown.value = part.polygonIndex;
+        partPolygonDropdown.value = part.polygonName || '';
         partAppearanceDropdown.value = part.appearanceIndex;
         partXPos.value = part.xPos;
         partYPos.value = part.yPos;
@@ -1690,7 +1704,7 @@ modalImportPartBtn.addEventListener('click', () => {
         
         // Load the part into the form fields
         partName.value = importedPart.name;
-        partPolygonDropdown.value = importedPart.polygonIndex;
+        partPolygonDropdown.value = importedPart.polygonName || importedPart.polygonIndex || '';
         partAppearanceDropdown.value = importedPart.appearanceIndex;
         partXPos.value = importedPart.xPos;
         partYPos.value = importedPart.yPos;
@@ -1903,7 +1917,7 @@ toJSONBtn.addEventListener('click', () => {
             name: part.name,
             position: { x: part.xPos, y: part.yPos },
             facing: part.facing,
-            polygonIndex: part.polygonIndex,
+            polygonName: part.polygonName,
             appearanceName: part.appearanceName
         })),
         polygons: polygons.map(polygon => ({
