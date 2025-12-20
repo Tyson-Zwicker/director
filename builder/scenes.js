@@ -69,6 +69,7 @@ const partSelectModal = document.getElementById('partSelectModal');
 const partSelectList = document.getElementById('partSelectList');
 const modalAddPartBtn = document.getElementById('modalAddPartBtn');
 const modalCancelPartBtn = document.getElementById('modalCancelPartBtn');
+const resetDbBtn = document.getElementById('resetDbBtn');
 
 let polygons = [];
 let selectedPolygonIndex = -1;
@@ -263,7 +264,7 @@ function updateActorAppearanceDropdown() {
     
     appearances.forEach((appearance, index) => {
         const option = document.createElement('option');
-        option.value = index;
+        option.value = appearance.name;
         option.textContent = appearance.name;
         actorAppearanceDropdown.appendChild(option);
     });
@@ -452,7 +453,7 @@ function addActor() {
     
     const mass = parseFloat(actorMass.value) || 1;
     const polygonIndex = actorPolygonDropdown.value;
-    const appearanceIndex = actorAppearanceDropdown.value;
+    const appearanceName = actorAppearanceDropdown.value;
     const xPos = parseFloat(actorXPos.value) || 0;
     const yPos = parseFloat(actorYPos.value) || 0;
     const xVel = parseFloat(actorXVel.value) || 0;
@@ -464,18 +465,23 @@ function addActor() {
         name,
         mass,
         polygonIndex,
-        appearanceIndex,
+        appearanceName,
         xPos,
         yPos,
         xVel,
         yVel,
         facing,
-        spin
+        spin,
+        partNames: actorParts.map(part => part.name)
     };
     
     actors.push(actor);
     renderActorList();
     drawMapView();
+    
+    // Clear actorParts for next actor
+    actorParts = [];
+    renderActorPartsList();
 }
 
 function removeActor() {
@@ -533,6 +539,8 @@ function clearActorFields() {
     actorYVel.value = 0;
     actorFacing.value = '';
     actorSpin.value = 0;
+    actorParts = [];
+    renderActorPartsList();
 }
 
 // Actor listbox selection
@@ -543,13 +551,25 @@ actorList.addEventListener('change', (e) => {
         actorName.value = actor.name;
         actorMass.value = actor.mass;
         actorPolygonDropdown.value = actor.polygonIndex;
-        actorAppearanceDropdown.value = actor.appearanceIndex;
+        actorAppearanceDropdown.value = actor.appearanceName || '';
         actorXPos.value = actor.xPos;
         actorYPos.value = actor.yPos;
         actorXVel.value = actor.xVel;
         actorYVel.value = actor.yVel;
         actorFacing.value = actor.facing;
         actorSpin.value = actor.spin;
+        
+        // Load actor parts by name
+        actorParts = [];
+        if (actor.partNames && Array.isArray(actor.partNames)) {
+            actor.partNames.forEach(partName => {
+                const part = parts.find(p => p.name === partName);
+                if (part) {
+                    actorParts.push(part);
+                }
+            });
+        }
+        renderActorPartsList();
     }
 });
 
@@ -615,17 +635,76 @@ modalImportActorBtn.addEventListener('click', () => {
         const actorsData = JSON.parse(storedActors);
         const importedActor = actorsData[selectedImportActorIndex];
         
+        // Check if the actor has an appearance and if it exists in current appearances
+        if (importedActor.appearanceName) {
+            const existingAppearance = appearances.find(app => app.name === importedActor.appearanceName);
+            
+            if (!existingAppearance) {
+                // Try to import the appearance from localStorage
+                const storedAppearances = localStorage.getItem('sceneBuilderStoredAppearances');
+                if (storedAppearances) {
+                    const appearancesData = JSON.parse(storedAppearances);
+                    
+                    if (appearancesData[importedActor.appearanceName]) {
+                        // Import the appearance
+                        const importedAppearance = appearancesData[importedActor.appearanceName];
+                        appearances.push(importedAppearance);
+                        renderAppearanceList();
+                        updateActorAppearanceDropdown();
+                        
+                        alert(`Automatically imported appearance "${importedActor.appearanceName}" for this actor.`);
+                    } else {
+                        alert(`Warning: The actor requires appearance "${importedActor.appearanceName}" which is not found in storage. Please import or create this appearance manually.`);
+                    }
+                } else {
+                    alert(`Warning: The actor requires appearance "${importedActor.appearanceName}" but no stored appearances exist. Please create this appearance manually.`);
+                }
+            }
+        }
+        
         // Populate fields with imported actor data
         actorName.value = importedActor.name;
         actorMass.value = importedActor.mass;
         actorPolygonDropdown.value = importedActor.polygonIndex;
-        actorAppearanceDropdown.value = importedActor.appearanceIndex;
+        actorAppearanceDropdown.value = importedActor.appearanceName || '';
         actorXPos.value = importedActor.xPos;
         actorYPos.value = importedActor.yPos;
         actorXVel.value = importedActor.xVel;
         actorYVel.value = importedActor.yVel;
         actorFacing.value = importedActor.facing;
         actorSpin.value = importedActor.spin;
+        
+        // Load actor parts by name and auto-import if needed
+        actorParts = [];
+        if (importedActor.partNames && Array.isArray(importedActor.partNames)) {
+            const storedParts = localStorage.getItem('sceneBuilderStoredParts');
+            const partsData = storedParts ? JSON.parse(storedParts) : {};
+            const missingParts = [];
+            
+            importedActor.partNames.forEach(partName => {
+                let part = parts.find(p => p.name === partName);
+                
+                if (!part && partsData[partName]) {
+                    // Auto-import the part from storage
+                    part = partsData[partName];
+                    parts.push(part);
+                    renderPartList();
+                    updatePartPolygonDropdown();
+                    updatePartAppearanceDropdown();
+                }
+                
+                if (part) {
+                    actorParts.push(part);
+                } else {
+                    missingParts.push(partName);
+                }
+            });
+            
+            if (missingParts.length > 0) {
+                alert(`Warning: The following parts could not be found or imported: ${missingParts.join(', ')}. Please create or import these parts manually.`);
+            }
+        }
+        renderActorPartsList();
         
         actorImportModal.style.display = 'none';
     } catch (error) {
@@ -1264,7 +1343,7 @@ function drawMapView() {
         
         // Get polygon and appearance
         const polygon = polygons[actor.polygonIndex];
-        const appearance = appearances[actor.appearanceIndex];
+        const appearance = appearances.find(app => app.name === actor.appearanceName);
         
         if (!polygon || !polygon.points || polygon.points.length === 0) {
             // Draw a simple circle if no polygon
@@ -1659,3 +1738,68 @@ function renderActorPartsList() {
         actorPartsList.appendChild(option);
     });
 }
+
+// Reset DB button - clear all localStorage
+resetDbBtn.addEventListener('click', () => {
+    const confirmed = confirm('Are you sure you want to clear all stored data?\n\nThis will delete all saved actors, appearances, parts, and polygons from localStorage.\n\nThis action cannot be undone.');
+    
+    if (confirmed) {
+        localStorage.clear();
+        
+        // Clear all arrays
+        actors = [];
+        parts = [];
+        polygons = [];
+        appearances = [];
+        actorParts = [];
+        
+        // Reset selected indices
+        selectedActorIndex = -1;
+        selectedPartIndex = -1;
+        selectedPolygonIndex = -1;
+        selectedAppearanceIndex = -1;
+        
+        // Clear all actor fields
+        clearActorFields();
+        
+        // Clear all part fields
+        partName.value = '';
+        partXPos.value = 0;
+        partYPos.value = 0;
+        partFacing.value = 0;
+        partPolygonDropdown.value = '';
+        partAppearanceDropdown.value = '';
+        
+        // Clear all appearance fields
+        appearanceName.value = '';
+        redSlider.value = 0;
+        greenSlider.value = 0;
+        blueSlider.value = 0;
+        redValue.textContent = 0;
+        greenValue.textContent = 0;
+        blueValue.textContent = 0;
+        colors.fill = { r: 0, g: 0, b: 0 };
+        colors.stroke = { r: 0, g: 0, b: 0 };
+        colors.text = { r: 0, g: 0, b: 0 };
+        
+        // Update all lists and dropdowns
+        renderActorList();
+        renderPartList();
+        renderPolygonList();
+        renderAppearanceList();
+        renderActorPartsList();
+        updateActorPolygonDropdown();
+        updateActorAppearanceDropdown();
+        updatePartPolygonDropdown();
+        updatePartAppearanceDropdown();
+        updateAllPreviews();
+        
+        // Clear polygon canvas
+        polygonCtx.clearRect(0, 0, polygonCanvas.width, polygonCanvas.height);
+        
+        // Clear map view
+        drawMapView();
+        
+        alert('All stored data has been cleared.');
+    }
+});
