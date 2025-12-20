@@ -529,6 +529,8 @@
                 <div class="button-group">
                     <button id="addPart">Add</button>
                     <button id="removePart">Remove</button>
+                    <button id="importPart">Import</button>
+                    <button id="exportPart">Export</button>
                 </div>
                 <div class="control-row">
                     <div class="control-group" style="flex: 1;">
@@ -746,6 +748,17 @@
             <div class="modal-buttons">
                 <button id="modalImportAppearanceBtn">Import</button>
                 <button id="modalCancelAppearanceBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="partImportModal" class="modal">
+        <div class="modal-content">
+            <h2>Select Part to Import</h2>
+            <div id="partImportList" class="polygon-select-list"></div>
+            <div class="modal-buttons">
+                <button id="modalImportPartBtn">Import</button>
+                <button id="modalCancelPartImportBtn">Cancel</button>
             </div>
         </div>
     </div>

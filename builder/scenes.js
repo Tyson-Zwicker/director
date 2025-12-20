@@ -59,6 +59,8 @@ const partFacing = document.getElementById('partFacing');
 const partList = document.getElementById('partList');
 const addPartButton = document.getElementById('addPart');
 const removePartButton = document.getElementById('removePart');
+const exportPartButton = document.getElementById('exportPart');
+const importPartButton = document.getElementById('importPart');
 const actorPartsList = document.getElementById('actorPartsList');
 const addActorPartButton = document.getElementById('addActorPart');
 const removeActorPartButton = document.getElementById('removeActorPart');
@@ -1453,6 +1455,129 @@ partList.addEventListener('change', (e) => {
 // Add event listeners for part buttons
 addPartButton.addEventListener('click', addPart);
 removePartButton.addEventListener('click', removePart);
+
+// Export part to localStorage
+exportPartButton.addEventListener('click', () => {
+    if (selectedPartIndex < 0 || selectedPartIndex >= parts.length) {
+        alert('Please select a part to export.');
+        return;
+    }
+    
+    const part = parts[selectedPartIndex];
+    
+    try {
+        // Get existing parts from localStorage
+        const storedParts = localStorage.getItem('sceneBuilderStoredParts');
+        let partsData = storedParts ? JSON.parse(storedParts) : {};
+        
+        // Add or update the part
+        partsData[part.name] = part;
+        
+        // Save back to localStorage
+        localStorage.setItem('sceneBuilderStoredParts', JSON.stringify(partsData));
+        
+        alert(`Part "${part.name}" exported successfully!`);
+    } catch (error) {
+        alert('Error exporting part: ' + error.message);
+    }
+});
+
+// Import part modal
+const partImportModal = document.getElementById('partImportModal');
+const partImportList = document.getElementById('partImportList');
+const modalImportPartBtn = document.getElementById('modalImportPartBtn');
+const modalCancelPartImportBtn = document.getElementById('modalCancelPartImportBtn');
+let selectedImportPartName = null;
+
+importPartButton.addEventListener('click', () => {
+    try {
+        const storedParts = localStorage.getItem('sceneBuilderStoredParts');
+        
+        if (!storedParts) {
+            alert('No saved parts found.');
+            return;
+        }
+        
+        const partsData = JSON.parse(storedParts);
+        const partNames = Object.keys(partsData);
+        
+        if (partNames.length === 0) {
+            alert('No saved parts found.');
+            return;
+        }
+        
+        // Show modal and populate list
+        selectedImportPartName = null;
+        partImportList.innerHTML = '';
+        
+        partNames.forEach(name => {
+            const item = document.createElement('div');
+            item.className = 'polygon-select-item';
+            item.textContent = name;
+            item.addEventListener('click', () => {
+                // Remove previous selection
+                document.querySelectorAll('#partImportList .polygon-select-item').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                // Select this item
+                item.classList.add('selected');
+                selectedImportPartName = name;
+            });
+            partImportList.appendChild(item);
+        });
+        
+        partImportModal.style.display = 'block';
+    } catch (error) {
+        alert('Error loading parts: ' + error.message);
+    }
+});
+
+// Modal import part button
+modalImportPartBtn.addEventListener('click', () => {
+    if (selectedImportPartName === null) {
+        alert('Please select a part to import');
+        return;
+    }
+    
+    try {
+        const storedParts = localStorage.getItem('sceneBuilderStoredParts');
+        const partsData = JSON.parse(storedParts);
+        const importedPart = partsData[selectedImportPartName];
+        
+        // Add to parts list
+        parts.push(importedPart);
+        renderPartList();
+        
+        // Select the imported part
+        selectedPartIndex = parts.length - 1;
+        partList.selectedIndex = selectedPartIndex;
+        
+        // Load the part into the form fields
+        partName.value = importedPart.name;
+        partPolygonDropdown.value = importedPart.polygonIndex;
+        partAppearanceDropdown.value = importedPart.appearanceIndex;
+        partXPos.value = importedPart.xPos;
+        partYPos.value = importedPart.yPos;
+        partFacing.value = importedPart.facing;
+        
+        partImportModal.style.display = 'none';
+        alert(`Part "${selectedImportPartName}" imported successfully!`);
+    } catch (error) {
+        alert('Error importing part: ' + error.message);
+    }
+});
+
+// Modal cancel part button
+modalCancelPartImportBtn.addEventListener('click', () => {
+    partImportModal.style.display = 'none';
+});
+
+// Close modal when clicking outside
+partImportModal.addEventListener('click', (e) => {
+    if (e.target === partImportModal) {
+        partImportModal.style.display = 'none';
+    }
+});
 
 // Add Part button - show part selection modal
 addActorPartButton.addEventListener('click', () => {
