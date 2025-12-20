@@ -20,6 +20,8 @@ const appearanceName = document.getElementById('appearanceName');
 const addButton = document.getElementById('addAppearance');
 const removeButton = document.getElementById('removeAppearance');
 const appearanceList = document.getElementById('appearanceList');
+const exportAppearanceButton = document.getElementById('exportAppearance');
+const importAppearanceButton = document.getElementById('importAppearance');
 const actorAppearanceDropdown = document.getElementById('actorAppearance');
 const actorPolygonDropdown = document.getElementById('actorPolygon');
 const actorMass = document.getElementById('actorMass');
@@ -202,6 +204,19 @@ function addAppearance() {
     
     appearances.push(newAppearance);
     renderAppearanceList();
+    
+    // Clear the form fields after adding
+    appearanceName.value = '';
+    colors.fill = { r: 0, g: 0, b: 0 };
+    colors.stroke = { r: 0, g: 0, b: 0 };
+    colors.text = { r: 0, g: 0, b: 0 };
+    redSlider.value = 0;
+    greenSlider.value = 0;
+    blueSlider.value = 0;
+    redValue.textContent = 0;
+    greenValue.textContent = 0;
+    blueValue.textContent = 0;
+    updateAllPreviews();
 }
 
 // Remove selected appearance from list
@@ -303,6 +318,124 @@ function loadAppearance(index) {
 // Add event listeners for buttons
 addButton.addEventListener('click', addAppearance);
 removeButton.addEventListener('click', removeAppearance);
+
+// Export appearance to localStorage
+exportAppearanceButton.addEventListener('click', () => {
+    const name = appearanceName.value.trim();
+    
+    if (!name) {
+        alert('Please enter a name for the appearance before exporting.');
+        return;
+    }
+    
+    const appearanceData = {
+        name: name,
+        fill: { ...colors.fill },
+        stroke: { ...colors.stroke },
+        text: { ...colors.text }
+    };
+    
+    try {
+        // Get existing appearances from localStorage
+        const storedAppearances = localStorage.getItem('sceneBuilderStoredAppearances');
+        let appearancesData = storedAppearances ? JSON.parse(storedAppearances) : {};
+        
+        // Add or update the appearance
+        appearancesData[name] = appearanceData;
+        
+        // Save back to localStorage
+        localStorage.setItem('sceneBuilderStoredAppearances', JSON.stringify(appearancesData));
+        
+        alert(`Appearance "${name}" exported successfully!`);
+    } catch (error) {
+        alert('Error exporting appearance: ' + error.message);
+    }
+});
+
+// Import appearance modal
+const appearanceImportModal = document.getElementById('appearanceImportModal');
+const appearanceImportList = document.getElementById('appearanceImportList');
+const modalImportAppearanceBtn = document.getElementById('modalImportAppearanceBtn');
+const modalCancelAppearanceBtn = document.getElementById('modalCancelAppearanceBtn');
+let selectedImportAppearanceName = null;
+
+importAppearanceButton.addEventListener('click', () => {
+    try {
+        const storedAppearances = localStorage.getItem('sceneBuilderStoredAppearances');
+        
+        if (!storedAppearances) {
+            alert('No saved appearances found.');
+            return;
+        }
+        
+        const appearancesData = JSON.parse(storedAppearances);
+        const appearanceNames = Object.keys(appearancesData);
+        
+        if (appearanceNames.length === 0) {
+            alert('No saved appearances found.');
+            return;
+        }
+        
+        // Show modal and populate list
+        selectedImportAppearanceName = null;
+        appearanceImportList.innerHTML = '';
+        
+        appearanceNames.forEach(name => {
+            const item = document.createElement('div');
+            item.className = 'polygon-select-item';
+            item.textContent = name;
+            item.addEventListener('click', () => {
+                // Remove previous selection
+                document.querySelectorAll('#appearanceImportList .polygon-select-item').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                // Select this item
+                item.classList.add('selected');
+                selectedImportAppearanceName = name;
+            });
+            appearanceImportList.appendChild(item);
+        });
+        
+        appearanceImportModal.style.display = 'block';
+    } catch (error) {
+        alert('Error loading appearances: ' + error.message);
+    }
+});
+
+// Modal import appearance button
+modalImportAppearanceBtn.addEventListener('click', () => {
+    if (selectedImportAppearanceName === null) {
+        alert('Please select an appearance to import');
+        return;
+    }
+    
+    try {
+        const storedAppearances = localStorage.getItem('sceneBuilderStoredAppearances');
+        const appearancesData = JSON.parse(storedAppearances);
+        const importedAppearance = appearancesData[selectedImportAppearanceName];
+        
+        // Add to appearances list
+        appearances.push(importedAppearance);
+        renderAppearanceList();
+        
+        appearanceImportModal.style.display = 'none';
+        alert(`Appearance "${selectedImportAppearanceName}" imported successfully!`);
+    } catch (error) {
+        alert('Error importing appearance: ' + error.message);
+    }
+});
+
+// Modal cancel appearance button
+modalCancelAppearanceBtn.addEventListener('click', () => {
+    appearanceImportModal.style.display = 'none';
+});
+
+// Close modal when clicking outside
+appearanceImportModal.addEventListener('click', (e) => {
+    if (e.target === appearanceImportModal) {
+        appearanceImportModal.style.display = 'none';
+    }
+});
 
 // Actor management functions
 function addActor() {
@@ -1272,6 +1405,14 @@ function addPart() {
     
     parts.push(part);
     renderPartList();
+    
+    // Clear the form fields after adding
+    partName.value = '';
+    partPolygonDropdown.value = '';
+    partAppearanceDropdown.value = '';
+    partXPos.value = 0;
+    partYPos.value = 0;
+    partFacing.value = '';
 }
 
 // Remove selected part from list

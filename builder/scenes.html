@@ -421,8 +421,9 @@
                     </div>
                     <div class="control-group">
                         <label for="actorMass">Mass:</label>
-                        <input type="number" id="actorMass" min="0" step="any" value="1">
+                        <input type="number" id="actorMass" min="1" step="any" value="1">
                     </div>
+                    <button id="clearActor" style="padding: 5px 15px; font-size: 16px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer; align-self: flex-end; margin-bottom: 3px;">Clear</button>
                 </div>
                 <div class="control-row equal">
                     <div class="control-group">
@@ -479,7 +480,7 @@
                     <button id="addActor">Add</button>
                     <button id="removeActor">Remove</button>
                     <button id="importActor">Import</button>
-                    <button id="clearActor">Clear</button>
+                    <button id="exportActor">Export</button>
                 </div>
                 <div class="control-row">
                     <div class="control-group" style="flex: 1;">
@@ -626,6 +627,11 @@
                         </div>
                         
                         <div class="appearance-list" id="appearanceList"></div>
+                        
+                        <div class="button-group">
+                            <button id="importAppearance">Import</button>
+                            <button id="exportAppearance">Export</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -729,6 +735,17 @@
             <div class="modal-buttons">
                 <button id="modalAddPartBtn">Add</button>
                 <button id="modalCancelPartBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="appearanceImportModal" class="modal">
+        <div class="modal-content">
+            <h2>Select Appearance to Import</h2>
+            <div id="appearanceImportList" class="polygon-select-list"></div>
+            <div class="modal-buttons">
+                <button id="modalImportAppearanceBtn">Import</button>
+                <button id="modalCancelAppearanceBtn">Cancel</button>
             </div>
         </div>
     </div>
