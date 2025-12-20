@@ -70,6 +70,11 @@ const partSelectList = document.getElementById('partSelectList');
 const modalAddPartBtn = document.getElementById('modalAddPartBtn');
 const modalCancelPartBtn = document.getElementById('modalCancelPartBtn');
 const resetDbBtn = document.getElementById('resetDbBtn');
+const sceneName = document.getElementById('sceneName');
+const sceneShortDesc = document.getElementById('sceneShortDesc');
+const sceneMissionText = document.getElementById('sceneMissionText');
+const sceneOutput = document.getElementById('sceneOutput');
+const toJSONBtn = document.getElementById('toJSONBtn');
 
 let polygons = [];
 let selectedPolygonIndex = -1;
@@ -445,14 +450,22 @@ appearanceImportModal.addEventListener('click', (e) => {
 function addActor() {
     let name = actorName.value.trim() || `Actor ${actors.length + 1}`;
     
-    // Check if an actor with this name already exists in the listbox
-    if (actors.some(actor => actor.name === name)) {
-        alert(`An actor with the name "${name}" already exists in the listbox. Please use a unique name.`);
-        return;
+    // Check if an actor with this name already exists in the listbox and prompt for new name
+    while (actors.some(actor => actor.name === name)) {
+        const promptResult = prompt(`An actor with the name "${name}" already exists in the list.\n\nEnter a new name for this actor, or click Cancel to abort:`, name);
+        if (promptResult === null) {
+            // User cancelled
+            return;
+        }
+        name = promptResult.trim();
+        if (!name) {
+            alert('Actor name cannot be empty.');
+            return;
+        }
     }
     
     const mass = parseFloat(actorMass.value) || 1;
-    const polygonIndex = actorPolygonDropdown.value;
+    const polygonName = actorPolygonDropdown.value;
     const appearanceName = actorAppearanceDropdown.value;
     const xPos = parseFloat(actorXPos.value) || 0;
     const yPos = parseFloat(actorYPos.value) || 0;
@@ -464,7 +477,7 @@ function addActor() {
     const actor = {
         name,
         mass,
-        polygonIndex,
+        polygonName,
         appearanceName,
         xPos,
         yPos,
@@ -550,7 +563,7 @@ actorList.addEventListener('change', (e) => {
         const actor = actors[selectedActorIndex];
         actorName.value = actor.name;
         actorMass.value = actor.mass;
-        actorPolygonDropdown.value = actor.polygonIndex;
+        actorPolygonDropdown.value = actor.polygonName || '';
         actorAppearanceDropdown.value = actor.appearanceName || '';
         actorXPos.value = actor.xPos;
         actorYPos.value = actor.yPos;
@@ -635,6 +648,28 @@ modalImportActorBtn.addEventListener('click', () => {
         const actorsData = JSON.parse(storedActors);
         const importedActor = actorsData[selectedImportActorIndex];
         
+        // Check if actor with this name already exists
+        let newActorName = importedActor.name;
+        console.log('Checking for duplicate actor name:', newActorName);
+        console.log('Current actors:', actors.map(a => a.name));
+        
+        while (actors.some(actor => actor.name === newActorName)) {
+            console.log('Duplicate found, prompting for new name');
+            const promptResult = prompt(`An actor with the name "${newActorName}" already exists in the list.\n\nEnter a new name for this actor, or click Cancel to abort the import:`, newActorName);
+            if (promptResult === null) {
+                // User cancelled
+                console.log('User cancelled import');
+                return;
+            }
+            newActorName = promptResult.trim();
+            if (!newActorName) {
+                alert('Actor name cannot be empty.');
+                return;
+            }
+        }
+        
+        console.log('Using actor name:', newActorName);
+        
         // Check if the actor has an appearance and if it exists in current appearances
         if (importedActor.appearanceName) {
             const existingAppearance = appearances.find(app => app.name === importedActor.appearanceName);
@@ -661,18 +696,6 @@ modalImportActorBtn.addEventListener('click', () => {
                 }
             }
         }
-        
-        // Populate fields with imported actor data
-        actorName.value = importedActor.name;
-        actorMass.value = importedActor.mass;
-        actorPolygonDropdown.value = importedActor.polygonIndex;
-        actorAppearanceDropdown.value = importedActor.appearanceName || '';
-        actorXPos.value = importedActor.xPos;
-        actorYPos.value = importedActor.yPos;
-        actorXVel.value = importedActor.xVel;
-        actorYVel.value = importedActor.yVel;
-        actorFacing.value = importedActor.facing;
-        actorSpin.value = importedActor.spin;
         
         // Load actor parts by name and auto-import if needed
         actorParts = [];
@@ -704,7 +727,29 @@ modalImportActorBtn.addEventListener('click', () => {
                 alert(`Warning: The following parts could not be found or imported: ${missingParts.join(', ')}. Please create or import these parts manually.`);
             }
         }
-        renderActorPartsList();
+        
+        // Create actor object with (possibly renamed) name
+        const newActor = {
+            name: newActorName,
+            mass: importedActor.mass,
+            polygonName: importedActor.polygonName || importedActor.polygonIndex || '',
+            appearanceName: importedActor.appearanceName || '',
+            xPos: importedActor.xPos,
+            yPos: importedActor.yPos,
+            xVel: importedActor.xVel,
+            yVel: importedActor.yVel,
+            facing: importedActor.facing,
+            spin: importedActor.spin,
+            partNames: actorParts.map(part => part.name)
+        };
+        
+        // Add to actors list
+        actors.push(newActor);
+        renderActorList();
+        drawMapView();
+        
+        // Clear fields and parts for next actor
+        clearActorFields();
         
         actorImportModal.style.display = 'none';
     } catch (error) {
@@ -774,7 +819,7 @@ function updateActorPolygonDropdown() {
     
     polygons.forEach((polygon, index) => {
         const option = document.createElement('option');
-        option.value = index;
+        option.value = polygon.name;
         option.textContent = polygon.name;
         actorPolygonDropdown.appendChild(option);
     });
@@ -1342,7 +1387,7 @@ function drawMapView() {
         const screenY = centerY - (actor.yPos * zoom) + panOffsetY; // Negate Y for screen coordinates
         
         // Get polygon and appearance
-        const polygon = polygons[actor.polygonIndex];
+        const polygon = polygons.find(p => p.name === actor.polygonName);
         const appearance = appearances.find(app => app.name === actor.appearanceName);
         
         if (!polygon || !polygon.points || polygon.points.length === 0) {
@@ -1802,4 +1847,76 @@ resetDbBtn.addEventListener('click', () => {
         
         alert('All stored data has been cleared.');
     }
+});
+
+// To JSON button - generate scene JSON
+toJSONBtn.addEventListener('click', () => {
+    // Validate required fields
+    const errors = [];
+    
+    if (!sceneName.value.trim()) {
+        errors.push('Scene name is missing');
+    }
+    
+    if (!sceneShortDesc.value.trim()) {
+        errors.push('Scene description is missing');
+    }
+    
+    if (!sceneMissionText.value.trim()) {
+        errors.push('Mission text is missing');
+    }
+    
+    if (actors.length === 0) {
+        errors.push('No actors defined');
+    }
+    
+    if (polygons.length === 0) {
+        errors.push('No polygons defined');
+    }
+    
+    if (appearances.length === 0) {
+        errors.push('No appearances defined');
+    }
+    
+    if (errors.length > 0) {
+        alert('Cannot generate JSON. The following issues were found:\n\n' + errors.join('\n'));
+        return;
+    }
+    
+    // Generate JSON
+    const sceneData = {
+        name: sceneName.value.trim(),
+        shortDescription: sceneShortDesc.value.trim(),
+        missionText: sceneMissionText.value.trim(),
+        actors: actors.map(actor => ({
+            name: actor.name,
+            mass: actor.mass,
+            polygonName: actor.polygonName,
+            appearanceName: actor.appearanceName,
+            position: { x: actor.xPos, y: actor.yPos },
+            velocity: { x: actor.xVel, y: actor.yVel },
+            facing: actor.facing,
+            spin: actor.spin,
+            partNames: actor.partNames || []
+        })),
+        parts: parts.map(part => ({
+            name: part.name,
+            position: { x: part.xPos, y: part.yPos },
+            facing: part.facing,
+            polygonIndex: part.polygonIndex,
+            appearanceName: part.appearanceName
+        })),
+        polygons: polygons.map(polygon => ({
+            name: polygon.name,
+            points: polygon.points || polygon.dots || []
+        })),
+        appearances: appearances.map(appearance => ({
+            name: appearance.name,
+            fill: appearance.fill,
+            stroke: appearance.stroke,
+            text: appearance.text
+        }))
+    };
+    
+    sceneOutput.value = JSON.stringify(sceneData, null, 2);
 });
