@@ -75,6 +75,12 @@ const sceneShortDesc = document.getElementById('sceneShortDesc');
 const sceneMissionText = document.getElementById('sceneMissionText');
 const sceneOutput = document.getElementById('sceneOutput');
 const toJSONBtn = document.getElementById('toJSONBtn');
+const importSceneBtn = document.getElementById('importSceneBtn');
+const exportSceneBtn = document.getElementById('exportSceneBtn');
+const sceneImportModal = document.getElementById('sceneImportModal');
+const sceneImportList = document.getElementById('sceneImportList');
+const modalImportSceneBtn = document.getElementById('modalImportSceneBtn');
+const modalCancelSceneImportBtn = document.getElementById('modalCancelSceneImportBtn');
 
 let polygons = [];
 let selectedPolygonIndex = -1;
@@ -467,6 +473,16 @@ function addActor() {
     const mass = parseFloat(actorMass.value) || 1;
     const polygonName = actorPolygonDropdown.value;
     const appearanceName = actorAppearanceDropdown.value;
+    
+    // Validate that polygon and appearance are selected
+    if (!polygonName || polygonName === '') {
+        alert('Please select a polygon for the actor.');
+        return;
+    }
+    if (!appearanceName || appearanceName === '') {
+        alert('Please select an appearance for the actor.');
+        return;
+    }
     const xPos = parseFloat(actorXPos.value) || 0;
     const yPos = parseFloat(actorYPos.value) || 0;
     const xVel = parseFloat(actorXVel.value) || 0;
@@ -1542,6 +1558,10 @@ function addPart() {
     }
     
     const polygonName = partPolygonDropdown.value;
+    if (!polygonName || polygonName === '') {
+        alert('Part must have a polygon selected.');
+        return;
+    }
     const xPos = parseFloat(partXPos.value) || 0;
     const yPos = parseFloat(partYPos.value) || 0;
     const facing = parseFloat(partFacing.value) || 0;
@@ -1933,4 +1953,191 @@ toJSONBtn.addEventListener('click', () => {
     };
     
     sceneOutput.value = JSON.stringify(sceneData, null, 2);
+});
+
+// Export Scene button - save to local storage
+exportSceneBtn.addEventListener('click', () => {
+    // Validate required fields
+    const errors = [];
+    
+    if (!sceneName.value.trim()) {
+        errors.push('Scene name is missing');
+    }
+    
+    if (!sceneShortDesc.value.trim()) {
+        errors.push('Scene description is missing');
+    }
+    
+    if (!sceneMissionText.value.trim()) {
+        errors.push('Mission text is missing');
+    }
+    
+    if (actors.length === 0) {
+        errors.push('No actors defined');
+    }
+    
+    if (polygons.length === 0) {
+        errors.push('No polygons defined');
+    }
+    
+    if (appearances.length === 0) {
+        errors.push('No appearances defined');
+    }
+    
+    if (errors.length > 0) {
+        alert('Cannot export scene. The following issues were found:\n\n' + errors.join('\n'));
+        return;
+    }
+    
+    // Generate scene data
+    const sceneData = {
+        name: sceneName.value.trim(),
+        shortDescription: sceneShortDesc.value.trim(),
+        missionText: sceneMissionText.value.trim(),
+        actors: actors.map(actor => ({
+            name: actor.name,
+            mass: actor.mass,
+            polygonName: actor.polygonName,
+            appearanceName: actor.appearanceName,
+            position: { x: actor.xPos, y: actor.yPos },
+            velocity: { x: actor.xVel, y: actor.yVel },
+            facing: actor.facing,
+            spin: actor.spin,
+            partNames: actor.partNames || []
+        })),
+        parts: parts.map(part => ({
+            name: part.name,
+            position: { x: part.xPos, y: part.yPos },
+            facing: part.facing,
+            polygonName: part.polygonName,
+            appearanceIndex: part.appearanceIndex
+        })),
+        polygons: polygons.map(polygon => ({
+            name: polygon.name,
+            points: polygon.points || polygon.dots || []
+        })),
+        appearances: appearances.map(appearance => ({
+            name: appearance.name,
+            fill: appearance.fill,
+            stroke: appearance.stroke,
+            text: appearance.text
+        }))
+    };
+    
+    // Save to local storage by name
+    const storedScenes = JSON.parse(localStorage.getItem('sceneBuilderScenes') || '{}');
+    storedScenes[sceneData.name] = sceneData;
+    localStorage.setItem('sceneBuilderScenes', JSON.stringify(storedScenes));
+    
+    alert(`Scene "${sceneData.name}" has been exported to local storage.`);
+});
+
+// Import Scene button - show modal with list
+let selectedSceneForImport = null;
+
+importSceneBtn.addEventListener('click', () => {
+    const storedScenes = JSON.parse(localStorage.getItem('sceneBuilderScenes') || '{}');
+    const sceneNames = Object.keys(storedScenes);
+    
+    if (sceneNames.length === 0) {
+        alert('No scenes found in local storage.');
+        return;
+    }
+    
+    // Show modal and populate with scenes
+    selectedSceneForImport = null;
+    sceneImportList.innerHTML = '';
+    
+    sceneNames.forEach((name) => {
+        const item = document.createElement('div');
+        item.className = 'polygon-select-item';
+        item.textContent = name;
+        item.addEventListener('click', () => {
+            // Remove previous selection
+            document.querySelectorAll('#sceneImportList .polygon-select-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            // Select this item
+            item.classList.add('selected');
+            selectedSceneForImport = name;
+        });
+        sceneImportList.appendChild(item);
+    });
+    
+    sceneImportModal.style.display = 'block';
+});
+
+// Modal Import Scene button
+modalImportSceneBtn.addEventListener('click', () => {
+    if (selectedSceneForImport === null) {
+        alert('Please select a scene to import');
+        return;
+    }
+    
+    const storedScenes = JSON.parse(localStorage.getItem('sceneBuilderScenes') || '{}');
+    const sceneData = storedScenes[selectedSceneForImport];
+    
+    // Load scene data into the builder
+    sceneName.value = sceneData.name || '';
+    sceneShortDesc.value = sceneData.shortDescription || '';
+    sceneMissionText.value = sceneData.missionText || '';
+    
+    // Load polygons
+    polygons = sceneData.polygons.map(polygon => ({
+        name: polygon.name,
+        points: polygon.points || [],
+        dots: polygon.points || []
+    }));
+    renderPolygonList();
+    updateActorPolygonDropdown();
+    updatePartPolygonDropdown();
+    
+    // Load appearances
+    appearances = sceneData.appearances.map(appearance => ({
+        name: appearance.name,
+        fill: appearance.fill,
+        stroke: appearance.stroke,
+        text: appearance.text
+    }));
+    renderAppearanceList();
+    updateActorAppearanceDropdown();
+    updatePartAppearanceDropdown();
+    
+    // Load parts
+    parts = sceneData.parts.map(part => ({
+        name: part.name,
+        xPos: part.position.x,
+        yPos: part.position.y,
+        facing: part.facing,
+        polygonName: part.polygonName,
+        appearanceIndex: part.appearanceIndex
+    }));
+    renderPartList();
+    
+    // Load actors
+    actors = sceneData.actors.map(actor => ({
+        name: actor.name,
+        mass: actor.mass,
+        polygonName: actor.polygonName,
+        appearanceName: actor.appearanceName,
+        xPos: actor.position.x,
+        yPos: actor.position.y,
+        xVel: actor.velocity.x,
+        yVel: actor.velocity.y,
+        facing: actor.facing,
+        spin: actor.spin,
+        partNames: actor.partNames || []
+    }));
+    renderActorList();
+    
+    // Redraw the map
+    drawMapView();
+    
+    sceneImportModal.style.display = 'none';
+    alert(`Scene "${selectedSceneForImport}" has been imported successfully.`);
+});
+
+// Modal Cancel Scene Import button
+modalCancelSceneImportBtn.addEventListener('click', () => {
+    sceneImportModal.style.display = 'none';
 });
