@@ -47,7 +47,7 @@ export default class Sensor {
     this.#moveSensor(delta);
     let worldAngle = this.actor.facing + this.centerAngle + this.currentOffset;
     let p2 = Point.fromPolar(worldAngle, this.range);
-    Point.add (p2, this.actor.position); //<--- CHANGE
+    p2 = Point.add(p2, this.actor.position);
     this.#drawAttempt(this.actor.position, p2);
     if (results.locationOfResponse !== undefined) {          //We're drawing the "bounce back" so if nothing is seen, nothing gets drawn.
       console.log(results.locationOfResponse);
@@ -74,7 +74,7 @@ export default class Sensor {
     Director.addForegroundEffect(sensorRay);
   }
   #drawAttempt(p1, p2) {
-    let sensorRay = new LineEffect(p1, p2, 1, new Color(15, 0, 0,0.2), 2)
+    let sensorRay = new LineEffect(p1, p2, 1, new Color(15, 0, 0, 0.2), 2)
     Director.addBackgroundEffect(sensorRay);
   }
   #examineCandidates(foundActors) {
@@ -91,22 +91,17 @@ export default class Sensor {
     for (let actor of foundActors) {
       let points = actor.polygon.points;
       for (let i = 0; i < points.length; i++) {
-        let barrierPoint1 = undefined;        //These represent the two ends of a line segment
-        let barrierPoint2 = undefined;        //formed by the face of the actor's polygon.
+        let worldPoint1 = undefined;
+        let worldPoint2 = undefined;
         if (i === points.length - 1) {
           //connect last point to first point.
-          barrierPoint1 = Point.from(points[i]);
-          barrierPoint2 = Point.from(points[0]);
+          worldPoint1 = Transpose.pointToWorld(points[i], actor); //Transpose polygon to its owners position..
+          worldPoint2 = Transpose.pointToWorld(points[0], actor);
         } else {
           //connect all but last point to next point
-          barrierPoint1 = Point.from(points[i]);
-          barrierPoint2 = Point.from(points[i + 1]);
+          worldPoint1 = Transpose.pointToWorld(points[i], actor);//Transpose polygon to its owners position..
+          worldPoint2 = Transpose.pointToWorld(points[0 + 1], actor);
         }
-        //The barrier points are in LocalCoordinates (the center of the polygon is 0,0)
-        //They need to be transformed to World Coordinates.
-
-        let worldPoint1 = Transpose.pointToWorld(barrierPoint1,actor);
-        let worldPoint2 = Transpose.pointToWorld(barrierPoint2,actor);
 
         let result = this.#rayCast(Point.from(this.actor.position), worldAngle, this.range, Point.from(worldPoint1), Point.from(worldPoint2));
         if (result !== false && result.distance < response.distance && result.distance < this.range) {
@@ -156,7 +151,7 @@ export default class Sensor {
   #rayCast(originPoint, direction, range, barrierPoint1, barrierPoint2) {
     //Math courtesy of  Prof. Daniel Shiffman
     //https://www.youtube.com/@TheCodingTrain
-    
+
     const x1 = barrierPoint1.x;
     const y1 = barrierPoint1.y;
     const x2 = barrierPoint2.x;
