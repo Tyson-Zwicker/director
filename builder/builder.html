@@ -32,6 +32,22 @@
       gap: 10px;
       align-items: stretch;
     }
+    .manage-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 200px;
+      height: 600px;
+      padding: 10px;
+      background-color: #2d2d2d;
+      border: 2px solid #4a90e2;
+      border-radius: 4px;
+    }
+    .manage-column h3 {
+      margin: 0 0 10px 0;
+      color: #4a90e2;
+      font-size: 20px;
+    }
     button {
       padding: 10px 20px;
       font-size: 18px;
@@ -185,6 +201,14 @@
         <input type="text" id="mouseCoords" readonly value="(0, 0)" style="width: 100px;" />
       </div>
     </div>
+    <div class="manage-column">
+      <h3>Manage</h3>
+      <select id="manageList" size="10" style="width: 100%; flex: 1; padding: 5px; background-color: #1e1e1e; border: 1px solid #404040; color: #e0e0e0; border-radius: 3px; font-size: 14px;"></select>
+      <div style="display: flex; gap: 10px;">
+        <button id="renameBtn" style="flex: 1; padding: 8px; font-size: 16px;">Rename</button>
+        <button id="removeBtn" style="flex: 1; padding: 8px; font-size: 16px;">Remove</button>
+      </div>
+    </div>
   </div>
   <div class="output-section">
     <h3>Output:</h3>
@@ -204,6 +228,20 @@
       <div class="modal-buttons">
         <button id="modalImportBtn">Import</button>
         <button id="modalCancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="renameModal" class="modal">
+    <div class="modal-content">
+      <h2>Rename Polygon</h2>
+      <div style="margin: 20px 0;">
+        <label for="newPolygonName" style="display: block; margin-bottom: 10px; color: #e0e0e0;">New Name:</label>
+        <input type="text" id="newPolygonName" style="width: 100%; padding: 8px; background-color: #1e1e1e; border: 1px solid #404040; color: #e0e0e0; border-radius: 3px; font-size: 14px;" />
+      </div>
+      <div class="modal-buttons">
+        <button id="modalRenameBtn">Rename</button>
+        <button id="modalCancelRenameBtn">Cancel</button>
       </div>
     </div>
   </div>

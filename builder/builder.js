@@ -11,6 +11,9 @@ const exportBtn = document.getElementById('exportBtn');
 const importBtn = document.getElementById('importBtn');
 const mouseCoordsField = document.getElementById('mouseCoords');
 const zoomLevel = document.getElementById('zoomLevel');
+const manageList = document.getElementById('manageList');
+const renameBtn = document.getElementById('renameBtn');
+const removeBtn = document.getElementById('removeBtn');
 
 let dots = [];
 const DOT_RADIUS = 5;
@@ -18,6 +21,22 @@ let gridSize = 20;
 let symmetryMode = false;
 let symmetryDots = []; // Track dots added during symmetry mode
 let snapIndicator = null; // Track snap indicator position
+
+// Populate manage list from local storage
+function populateManageList() {
+  const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+  const polygons = storedPolygons ? JSON.parse(storedPolygons) : {};
+  const polygonNames = Object.keys(polygons);
+  
+  manageList.innerHTML = '';
+  
+  polygonNames.forEach(name => {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    manageList.appendChild(option);
+  });
+}
 
 // Update back button visibility
 function updateBackButtonVisibility() {
@@ -29,6 +48,52 @@ function updateBackButtonVisibility() {
     backBtn.style.display = 'none';
   }
 }
+
+// Manage list selection - load polygon on canvas
+manageList.addEventListener('change', () => {
+  const selectedName = manageList.value;
+  if (!selectedName) return;
+  
+  try {
+    const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+    const polygons = storedPolygons ? JSON.parse(storedPolygons) : {};
+    
+    if (polygons[selectedName]) {
+      // Load the polygon data
+      dots = JSON.parse(JSON.stringify(polygons[selectedName])); // Deep copy
+      symmetryDots = [];
+      symmetryMode = false;
+      symmetryBtn.style.backgroundColor = '#4a90e2';
+      symmetryBtn.textContent = 'Symmetry';
+      
+      // Redraw the canvas
+      redraw();
+      
+      // Draw the polygon closed (like the "end" button)
+      if (dots.length >= 2) {
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const zoom = parseFloat(zoomLevel.value) || 1.0;
+        
+        ctx.strokeStyle = '#4a90e2';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        // Convert world coords to screen coords
+        ctx.moveTo(centerX + (dots[0].x * zoom), centerY - (dots[0].y * zoom));
+        
+        for (let i = 1; i < dots.length; i++) {
+          ctx.lineTo(centerX + (dots[i].x * zoom), centerY - (dots[i].y * zoom));
+        }
+        
+        // Connect back to first dot
+        ctx.lineTo(centerX + (dots[0].x * zoom), centerY - (dots[0].y * zoom));
+        ctx.stroke();
+      }
+    }
+  } catch (error) {
+    alert('Error loading polygon: ' + error.message);
+  }
+});
 
 // Back button - return to scenes page
 backBtn.addEventListener('click', () => {
@@ -371,6 +436,9 @@ exportBtn.addEventListener('click', () => {
     localStorage.setItem('polygonBuilderPolygons', JSON.stringify(polygons));
     alert(`Exported "${polygonName}" with ${dots.length} dot(s) to storage`);
     
+    // Refresh manage list
+    populateManageList();
+    
     // Remove the return to scenes flag if present
     localStorage.removeItem('returnToScenes');
   } catch (error) {
@@ -472,8 +540,133 @@ importModal.addEventListener('click', (e) => {
   }
 });
 
+// Rename Modal
+const renameModal = document.getElementById('renameModal');
+const newPolygonName = document.getElementById('newPolygonName');
+const modalRenameBtn = document.getElementById('modalRenameBtn');
+const modalCancelRenameBtn = document.getElementById('modalCancelRenameBtn');
+
+// Rename button - show modal
+renameBtn.addEventListener('click', () => {
+  const selectedIndex = manageList.selectedIndex;
+  if (selectedIndex < 0) {
+    alert('Please select a polygon to rename');
+    return;
+  }
+  
+  const oldName = manageList.value;
+  newPolygonName.value = oldName;
+  renameModal.style.display = 'block';
+  newPolygonName.focus();
+  newPolygonName.select();
+});
+
+// Modal rename button
+modalRenameBtn.addEventListener('click', () => {
+  const selectedIndex = manageList.selectedIndex;
+  if (selectedIndex < 0) {
+    alert('Please select a polygon to rename');
+    renameModal.style.display = 'none';
+    return;
+  }
+  
+  const oldName = manageList.value;
+  const newName = newPolygonName.value.trim();
+  
+  if (!newName) {
+    alert('Please enter a valid name');
+    return;
+  }
+  
+  if (newName === oldName) {
+    renameModal.style.display = 'none';
+    return;
+  }
+  
+  try {
+    const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+    const polygons = storedPolygons ? JSON.parse(storedPolygons) : {};
+    
+    // Check if new name already exists
+    if (polygons[newName]) {
+      alert('A polygon with that name already exists');
+      return;
+    }
+    
+    // Rename the polygon
+    polygons[newName] = polygons[oldName];
+    delete polygons[oldName];
+    
+    // Save back to localStorage
+    localStorage.setItem('polygonBuilderPolygons', JSON.stringify(polygons));
+    
+    // Refresh the list
+    populateManageList();
+    
+    // Select the renamed item
+    for (let i = 0; i < manageList.options.length; i++) {
+      if (manageList.options[i].value === newName) {
+        manageList.selectedIndex = i;
+        break;
+      }
+    }
+    
+    renameModal.style.display = 'none';
+    alert(`Renamed "${oldName}" to "${newName}"`);
+  } catch (error) {
+    alert('Error renaming: ' + error.message);
+  }
+});
+
+// Modal cancel rename button
+modalCancelRenameBtn.addEventListener('click', () => {
+  renameModal.style.display = 'none';
+});
+
+// Close rename modal when clicking outside
+renameModal.addEventListener('click', (e) => {
+  if (e.target === renameModal) {
+    renameModal.style.display = 'none';
+  }
+});
+
+// Remove button - confirm and delete
+removeBtn.addEventListener('click', () => {
+  const selectedIndex = manageList.selectedIndex;
+  if (selectedIndex < 0) {
+    alert('Please select a polygon to remove');
+    return;
+  }
+  
+  const polygonName = manageList.value;
+  const confirmed = confirm(`Are you sure you want to remove "${polygonName}"?\n\nThis action cannot be undone.`);
+  
+  if (!confirmed) {
+    return;
+  }
+  
+  try {
+    const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
+    const polygons = storedPolygons ? JSON.parse(storedPolygons) : {};
+    
+    // Remove the polygon
+    delete polygons[polygonName];
+    
+    // Save back to localStorage
+    localStorage.setItem('polygonBuilderPolygons', JSON.stringify(polygons));
+    
+    // Refresh the list
+    populateManageList();
+    
+    alert(`Removed "${polygonName}"`);
+  } catch (error) {
+    alert('Error removing: ' + error.message);
+  }
+});
+
 // Initialize
 window.addEventListener('load', () => {
   redraw();
   updateBackButtonVisibility();
+  populateManageList();
 });
