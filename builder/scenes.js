@@ -81,6 +81,8 @@ const sceneImportModal = document.getElementById('sceneImportModal');
 const sceneImportList = document.getElementById('sceneImportList');
 const modalImportSceneBtn = document.getElementById('modalImportSceneBtn');
 const modalCancelSceneImportBtn = document.getElementById('modalCancelSceneImportBtn');
+const actorPreviewCanvas = document.getElementById('actorPreviewCanvas');
+const actorPreviewCtx = actorPreviewCanvas.getContext('2d');
 
 let polygons = [];
 let selectedPolygonIndex = -1;
@@ -196,6 +198,167 @@ colorTypeRadios.forEach(radio => {
         loadSlidersFromCurrentType();
     });
 });
+
+// Actor Preview Drawing Functions
+function clearActorPreview() {
+    actorPreviewCtx.fillStyle = '#1a1a1a';
+    actorPreviewCtx.fillRect(0, 0, actorPreviewCanvas.width, actorPreviewCanvas.height);
+}
+
+function drawActorPreviewGrid() {
+    const centerX = actorPreviewCanvas.width / 2;
+    const centerY = actorPreviewCanvas.height / 2;
+    const gridSpacing = 10;
+    
+    actorPreviewCtx.strokeStyle = '#333333';
+    actorPreviewCtx.lineWidth = 1;
+    
+    // Vertical grid lines
+    for (let x = centerX; x <= actorPreviewCanvas.width; x += gridSpacing) {
+        actorPreviewCtx.beginPath();
+        actorPreviewCtx.moveTo(x, 0);
+        actorPreviewCtx.lineTo(x, actorPreviewCanvas.height);
+        actorPreviewCtx.stroke();
+    }
+    for (let x = centerX - gridSpacing; x >= 0; x -= gridSpacing) {
+        actorPreviewCtx.beginPath();
+        actorPreviewCtx.moveTo(x, 0);
+        actorPreviewCtx.lineTo(x, actorPreviewCanvas.height);
+        actorPreviewCtx.stroke();
+    }
+    
+    // Horizontal grid lines
+    for (let y = centerY; y <= actorPreviewCanvas.height; y += gridSpacing) {
+        actorPreviewCtx.beginPath();
+        actorPreviewCtx.moveTo(0, y);
+        actorPreviewCtx.lineTo(actorPreviewCanvas.width, y);
+        actorPreviewCtx.stroke();
+    }
+    for (let y = centerY - gridSpacing; y >= 0; y -= gridSpacing) {
+        actorPreviewCtx.beginPath();
+        actorPreviewCtx.moveTo(0, y);
+        actorPreviewCtx.lineTo(actorPreviewCanvas.width, y);
+        actorPreviewCtx.stroke();
+    }
+    
+    // Draw center axes (brighter)
+    actorPreviewCtx.strokeStyle = '#555555';
+    actorPreviewCtx.lineWidth = 2;
+    
+    // Y-axis
+    actorPreviewCtx.beginPath();
+    actorPreviewCtx.moveTo(centerX, 0);
+    actorPreviewCtx.lineTo(centerX, actorPreviewCanvas.height);
+    actorPreviewCtx.stroke();
+    
+    // X-axis
+    actorPreviewCtx.beginPath();
+    actorPreviewCtx.moveTo(0, centerY);
+    actorPreviewCtx.lineTo(actorPreviewCanvas.width, centerY);
+    actorPreviewCtx.stroke();
+}
+
+function worldToPreview(x, y) {
+    const centerX = actorPreviewCanvas.width / 2;
+    const centerY = actorPreviewCanvas.height / 2;
+    return {
+        x: centerX + x,
+        y: centerY - y  // Flip Y axis for standard coordinate system
+    };
+}
+
+function drawPolygonInPreview(polygonPoints, appearance, offsetX = 0, offsetY = 0, facing = 0) {
+    if (!polygonPoints || polygonPoints.length === 0) return;
+    
+    const centerX = actorPreviewCanvas.width / 2;
+    const centerY = actorPreviewCanvas.height / 2;
+    
+    // Convert facing from degrees to radians
+    const angleRad = (facing * Math.PI) / 180;
+    const cosA = Math.cos(angleRad);
+    const sinA = Math.sin(angleRad);
+    
+    actorPreviewCtx.beginPath();
+    
+    polygonPoints.forEach((point, index) => {
+        // Rotate point around origin
+        const rotatedX = point.x * cosA - point.y * sinA;
+        const rotatedY = point.x * sinA + point.y * cosA;
+        
+        // Apply offset and convert to screen coords
+        const screenPoint = worldToPreview(rotatedX + offsetX, rotatedY + offsetY);
+        
+        if (index === 0) {
+            actorPreviewCtx.moveTo(screenPoint.x, screenPoint.y);
+        } else {
+            actorPreviewCtx.lineTo(screenPoint.x, screenPoint.y);
+        }
+    });
+    
+    actorPreviewCtx.closePath();
+    
+    // Fill
+    if (appearance && appearance.fill) {
+        actorPreviewCtx.fillStyle = appearance.fill;
+        actorPreviewCtx.fill();
+    }
+    
+    // Stroke
+    if (appearance && appearance.stroke) {
+        actorPreviewCtx.strokeStyle = appearance.stroke;
+        actorPreviewCtx.lineWidth = 2;
+        actorPreviewCtx.stroke();
+    }
+}
+
+function drawActorPreview(actor) {
+    clearActorPreview();
+    drawActorPreviewGrid();
+    
+    if (!actor) return;
+    
+    // Get polygon data
+    const polygon = polygons.find(p => p.name === actor.polygonName);
+    if (!polygon || !polygon.points || polygon.points.length === 0) {
+        return;
+    }
+    
+    // Get appearance data
+    const appearance = appearances.find(a => a.name === actor.appearanceName);
+    if (!appearance) {
+        return;
+    }
+    
+    // Draw the actor's polygon
+    drawPolygonInPreview(polygon.points, appearance, 0, 0, actor.facing || 0);
+    
+    // Draw parts if they exist
+    if (actor.partNames && Array.isArray(actor.partNames)) {
+        actor.partNames.forEach(partName => {
+            const part = parts.find(p => p.name === partName);
+            if (!part) return;
+            
+            const partPolygon = polygons.find(p => p.name === part.polygonName);
+            if (!partPolygon || !partPolygon.points) return;
+            
+            const partAppearance = appearances[part.appearanceIndex];
+            if (!partAppearance) return;
+            
+            // Calculate part position relative to actor
+            const actorFacing = actor.facing || 0;
+            const totalFacing = actorFacing + (part.facing || 0);
+            
+            // Rotate part offset by actor facing
+            const angleRad = (actorFacing * Math.PI) / 180;
+            const cosA = Math.cos(angleRad);
+            const sinA = Math.sin(angleRad);
+            const rotatedX = (part.xPos || 0) * cosA - (part.yPos || 0) * sinA;
+            const rotatedY = (part.xPos || 0) * sinA + (part.yPos || 0) * cosA;
+            
+            drawPolygonInPreview(partPolygon.points, partAppearance, rotatedX, rotatedY, totalFacing);
+        });
+    }
+}
 
 // Initialize all color previews
 updateAllPreviews();
@@ -613,6 +776,12 @@ actorList.addEventListener('change', (e) => {
             });
         }
         renderActorPartsList();
+        
+        // Draw actor in preview canvas
+        drawActorPreview(actor);
+    } else {
+        clearActorPreview();
+        drawActorPreviewGrid();
     }
 });
 
@@ -2141,3 +2310,7 @@ modalImportSceneBtn.addEventListener('click', () => {
 modalCancelSceneImportBtn.addEventListener('click', () => {
     sceneImportModal.style.display = 'none';
 });
+
+// Initialize actor preview canvas on page load
+clearActorPreview();
+drawActorPreviewGrid();

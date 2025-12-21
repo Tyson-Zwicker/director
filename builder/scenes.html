@@ -640,8 +640,15 @@
         </div>
         
         <div class="column">
+            <!-- Actor Preview Section -->
+            <div style="margin-bottom: 20px; border-bottom: 2px solid #444; padding-bottom: 15px;">
+                <h3 style="color: #4a90e2;">Actor Preview</h3>
+                <canvas id="actorPreviewCanvas" width="400" height="300" style="display: block; margin: 0 auto; border: 1px solid #555; background-color: #1a1a1a; width: 100%; max-width: 400px;"></canvas>
+            </div>
+            
+            <!-- Scene Section -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <h2 style="margin: 0;">Scene</h2>
+                <h3 style="margin: 0; color: #4a90e2;">Scene</h3>
                 <button id="clearSceneBtn" style="padding: 2px 20px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">Clear</button>
             </div>
             <div id="sceneContent">
@@ -674,7 +681,7 @@
         </div>
         
         <div class="column">
-            <h2>Map View</h2>
+            <h3 style="color: #4a90e2;">Map View</h3>
             <div class="map-view-content">
                 <canvas id="mapCanvas" width="400" height="600"></canvas>
                 <div class="control-group" style="margin-top: 10px; flex-shrink: 0;">
