@@ -3,6 +3,7 @@ const ctx = canvas.getContext('2d');
 const backBtn = document.getElementById('backBtn');
 const endBtn = document.getElementById('endBtn');
 const polygonBtn = document.getElementById('polygonBtn');
+const showJsonBtn = document.getElementById('showJsonBtn');
 const symmetryBtn = document.getElementById('symmetryBtn');
 const clearBtn = document.getElementById('clearBtn');
 const gridSizeInput = document.getElementById('gridSize');
@@ -367,6 +368,16 @@ polygonBtn.addEventListener('click', () => {
   
   const coordString = dots.map(dot => `new Point(${Math.round(dot.x)},${Math.round(dot.y)})`).join(', ');
   outputBox.value = `[${coordString}]`;
+});
+
+// Show JSON button - show polygon as JSON
+showJsonBtn.addEventListener('click', () => {
+  if (dots.length === 0) {
+    outputBox.value = 'No dots to display';
+    return;
+  }
+  
+  outputBox.value = JSON.stringify(dots, null, 2);
 });
 
 // Symmetry button - toggle symmetry mode
