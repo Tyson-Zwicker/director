@@ -60,6 +60,11 @@ const addPartButton = document.getElementById('addPart');
 const removePartButton = document.getElementById('removePart');
 const exportPartButton = document.getElementById('exportPart');
 const importPartButton = document.getElementById('importPart');
+const deletePartButton = document.getElementById('deletePart');
+const partDeleteModal = document.getElementById('partDeleteModal');
+const partDeleteList = document.getElementById('partDeleteList');
+const modalDeletePartBtn = document.getElementById('modalDeletePartBtn');
+const modalCancelPartDeleteBtn = document.getElementById('modalCancelPartDeleteBtn');
 const actorPartsList = document.getElementById('actorPartsList');
 const addActorPartButton = document.getElementById('addActorPart');
 const removeActorPartButton = document.getElementById('removeActorPart');
@@ -2042,6 +2047,116 @@ modalImportPartBtn.addEventListener('click', () => {
 // Modal cancel part button
 modalCancelPartImportBtn.addEventListener('click', () => {
     partImportModal.style.display = 'none';
+});
+
+// Close modal when clicking outside
+partImportModal.addEventListener('click', (e) => {
+    if (e.target === partImportModal) {
+        partImportModal.style.display = 'none';
+    }
+});
+
+// Delete Part button - show delete part modal
+let selectedDeletePartName = null;
+
+deletePartButton.addEventListener('click', () => {
+    try {
+        const storedParts = localStorage.getItem('sceneBuilderStoredParts');
+        
+        if (!storedParts) {
+            alert('No saved parts found in storage');
+            return;
+        }
+        
+        const partsData = JSON.parse(storedParts);
+        const partNames = Object.keys(partsData);
+        
+        if (partNames.length === 0) {
+            alert('No saved parts found in storage');
+            return;
+        }
+        
+        // Show modal and populate list
+        selectedDeletePartName = null;
+        partDeleteList.innerHTML = '';
+        
+        partNames.forEach(name => {
+            const item = document.createElement('div');
+            item.className = 'polygon-select-item';
+            item.textContent = name;
+            item.addEventListener('click', () => {
+                // Remove previous selection
+                document.querySelectorAll('#partDeleteList .polygon-select-item').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                // Select this item
+                item.classList.add('selected');
+                selectedDeletePartName = name;
+            });
+            partDeleteList.appendChild(item);
+        });
+        
+        partDeleteModal.style.display = 'block';
+    } catch (error) {
+        alert('Error loading parts: ' + error.message);
+    }
+});
+
+// Modal delete part button
+modalDeletePartBtn.addEventListener('click', () => {
+    if (!selectedDeletePartName) {
+        alert('Please select a part to delete');
+        return;
+    }
+    
+    // Check if the part is being used in the current scene
+    const isUsedInScene = parts.some(p => p.name === selectedDeletePartName);
+    
+    if (isUsedInScene) {
+        alert('Cannot delete this part because it is being used in the current scene. Remove it from the scene first.');
+        return;
+    }
+    
+    if (!confirm(`Are you sure you want to delete "${selectedDeletePartName}" from storage?`)) {
+        return;
+    }
+    
+    try {
+        const storedParts = localStorage.getItem('sceneBuilderStoredParts');
+        const partsData = JSON.parse(storedParts);
+        
+        // Delete the part
+        delete partsData[selectedDeletePartName];
+        
+        // Save back to localStorage
+        localStorage.setItem('sceneBuilderStoredParts', JSON.stringify(partsData));
+        
+        // Close modal or refresh list
+        if (Object.keys(partsData).length === 0) {
+            partDeleteModal.style.display = 'none';
+            alert('Part deleted successfully. No more parts in storage.');
+        } else {
+            // Refresh the list
+            selectedDeletePartName = null;
+            deletePartButton.click();
+            partDeleteModal.style.display = 'block';
+            alert('Part deleted successfully.');
+        }
+    } catch (error) {
+        alert('Error deleting part: ' + error.message);
+    }
+});
+
+// Modal cancel delete part button
+modalCancelPartDeleteBtn.addEventListener('click', () => {
+    partDeleteModal.style.display = 'none';
+});
+
+// Close modal when clicking outside
+partDeleteModal.addEventListener('click', (e) => {
+    if (e.target === partDeleteModal) {
+        partDeleteModal.style.display = 'none';
+    }
 });
 
 // Close modal when clicking outside
