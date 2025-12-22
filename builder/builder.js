@@ -377,7 +377,22 @@ showJsonBtn.addEventListener('click', () => {
     return;
   }
   
-  outputBox.value = JSON.stringify(dots, null, 2);
+  // Get polygon name from manage list or prompt for one
+  let polygonName = manageList.value || '';
+  
+  if (!polygonName) {
+    polygonName = prompt('Enter a name for this polygon:', `Polygon ${new Date().getTime()}`);
+    if (!polygonName) {
+      return; // User cancelled
+    }
+  }
+  
+  const polygonObject = {
+    name: polygonName,
+    points: dots
+  };
+  
+  outputBox.value = JSON.stringify(polygonObject, null, 2);
 });
 
 // Symmetry button - toggle symmetry mode
