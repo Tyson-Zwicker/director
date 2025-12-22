@@ -1336,7 +1336,9 @@ managePolygonButton.addEventListener('click', () => {
         polygonNames.forEach(name => {
             const item = document.createElement('div');
             item.className = 'polygon-select-item';
-            item.textContent = `${name} (${polygonsData[name].length} points)`;
+            const polygonData = polygonsData[name];
+            const pointCount = Array.isArray(polygonData) ? polygonData.length : (polygonData.points ? polygonData.points.length : 0);
+            item.textContent = `${name} (${pointCount} points)`;
             item.addEventListener('click', () => {
                 // Remove previous selection
                 document.querySelectorAll('#managePolygonList .polygon-select-item').forEach(el => {
@@ -1379,7 +1381,12 @@ modalRenamePolygonBtn.addEventListener('click', () => {
         }
         
         // Rename the polygon
-        polygonsData[newName] = polygonsData[selectedManagePolygonName];
+        const polygonData = polygonsData[selectedManagePolygonName];
+        if (polygonData && typeof polygonData === 'object' && !Array.isArray(polygonData) && polygonData.name) {
+            // New format: update the name property
+            polygonData.name = newName;
+        }
+        polygonsData[newName] = polygonData;
         delete polygonsData[selectedManagePolygonName];
         
         // Save back to localStorage
@@ -1501,7 +1508,9 @@ function addPolygon() {
         polygonNames.forEach(name => {
             const item = document.createElement('div');
             item.className = 'polygon-select-item';
-            item.textContent = `${name} (${polygonsData[name].length} points)`;
+            const polygonData = polygonsData[name];
+            const pointCount = Array.isArray(polygonData) ? polygonData.length : (polygonData.points ? polygonData.points.length : 0);
+            item.textContent = `${name} (${pointCount} points)`;
             item.addEventListener('click', () => {
                 // Remove previous selection
                 document.querySelectorAll('.polygon-select-item').forEach(el => {
@@ -1530,7 +1539,18 @@ modalAddPolygonBtn.addEventListener('click', () => {
     try {
         const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
         const polygonsData = JSON.parse(storedPolygons);
-        const polygonPoints = polygonsData[selectedStoredPolygonName];
+        const polygonData = polygonsData[selectedStoredPolygonName];
+        
+        // Handle both old format (array) and new format (object with name/points)
+        let polygonPoints;
+        if (Array.isArray(polygonData)) {
+            polygonPoints = polygonData;
+        } else if (polygonData && polygonData.points) {
+            polygonPoints = polygonData.points;
+        } else {
+            alert('Invalid polygon data');
+            return;
+        }
         
         // Add polygon to list with its data
         polygons.push({ 
@@ -1751,9 +1771,19 @@ function loadPolygonsFromStorage() {
             Object.keys(polygonsData).forEach(name => {
                 const exists = polygons.some(p => p.name === name);
                 if (!exists) {
+                    const polygonData = polygonsData[name];
+                    let polygonPoints;
+                    // Handle both old format (array) and new format (object with name/points)
+                    if (Array.isArray(polygonData)) {
+                        polygonPoints = polygonData;
+                    } else if (polygonData && polygonData.points) {
+                        polygonPoints = polygonData.points;
+                    } else {
+                        return; // Skip invalid data
+                    }
                     polygons.push({
                         name: name,
-                        points: polygonsData[name]
+                        points: polygonPoints
                     });
                 }
             });
