@@ -1069,17 +1069,18 @@ modalImportActorBtn.addEventListener('click', () => {
         }
         
         // Create actor object with (possibly renamed) name
+        // Position, velocity, facing, spin are scene-specific and set to 0 on import
         const newActor = {
             name: newActorName,
             mass: importedActor.mass,
             polygonName: polygonName,
             appearanceName: importedActor.appearanceName || '',
-            xPos: importedActor.xPos,
-            yPos: importedActor.yPos,
-            xVel: importedActor.xVel,
-            yVel: importedActor.yVel,
-            facing: importedActor.facing,
-            spin: importedActor.spin,
+            xPos: 0,
+            yPos: 0,
+            xVel: 0,
+            yVel: 0,
+            facing: 0,
+            spin: 0,
             parts: actorParts.map(part => ({
                 name: part.name,
                 xOffset: part.xOffset || 0,
@@ -1092,8 +1093,19 @@ modalImportActorBtn.addEventListener('click', () => {
         renderActorList();
         drawMapView();
         
-        // Clear fields and parts for next actor
-        clearActorFields();
+        // Update UI fields to show the imported actor with 0 position/velocity/facing/spin
+        actorName.value = newActor.name;
+        actorMass.value = newActor.mass;
+        actorPolygonDropdown.value = newActor.polygonName;
+        actorAppearanceDropdown.value = newActor.appearanceName;
+        actorXPos.value = 0;
+        actorYPos.value = 0;
+        actorXVel.value = 0;
+        actorYVel.value = 0;
+        actorFacing.value = 0;
+        actorSpin.value = 0;
+        renderActorPartsList();
+        drawActorPreview(newActor);
         
         actorImportModal.style.display = 'none';
     } catch (error) {
@@ -1140,8 +1152,14 @@ exportActorButton.addEventListener('click', () => {
             }
         }
         
-        // Add or update the actor
-        actorsData[actor.name] = actor;
+        // Add or update the actor (exclude position, velocity, facing, spin - these are scene-specific)
+        actorsData[actor.name] = {
+            name: actor.name,
+            mass: actor.mass,
+            polygonName: actor.polygonName,
+            appearanceName: actor.appearanceName,
+            parts: actor.parts
+        };
         
         // Save back to localStorage
         localStorage.setItem('sceneBuilderStoredActors', JSON.stringify(actorsData));
