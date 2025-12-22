@@ -55,9 +55,6 @@ const panCenterBtn = document.getElementById('panCenterBtn');
 const partPolygonDropdown = document.getElementById('partPolygon');
 const partAppearanceDropdown = document.getElementById('partAppearance');
 const partName = document.getElementById('partName');
-const partXPos = document.getElementById('partXPos');
-const partYPos = document.getElementById('partYPos');
-const partFacing = document.getElementById('partFacing');
 const partList = document.getElementById('partList');
 const addPartButton = document.getElementById('addPart');
 const removePartButton = document.getElementById('removePart');
@@ -66,6 +63,9 @@ const importPartButton = document.getElementById('importPart');
 const actorPartsList = document.getElementById('actorPartsList');
 const addActorPartButton = document.getElementById('addActorPart');
 const removeActorPartButton = document.getElementById('removeActorPart');
+const partXOffset = document.getElementById('partXOffset');
+const partYOffset = document.getElementById('partYOffset');
+const changePartOffsetBtn = document.getElementById('changePartOffset');
 const partSelectModal = document.getElementById('partSelectModal');
 const partSelectList = document.getElementById('partSelectList');
 const modalAddPartBtn = document.getElementById('modalAddPartBtn');
@@ -334,7 +334,33 @@ function drawActorPreview(actor) {
     drawPolygonInPreview(polygon.points, appearance, 0, 0, actor.facing || 0);
     
     // Draw parts if they exist
-    if (actor.partNames && Array.isArray(actor.partNames)) {
+    if (actor.parts && Array.isArray(actor.parts)) {
+        actor.parts.forEach(partInfo => {
+            const part = parts.find(p => p.name === partInfo.name);
+            if (!part) return;
+            
+            const partPolygon = polygons.find(p => p.name === part.polygonName);
+            if (!partPolygon || !partPolygon.points) return;
+            
+            const partAppearance = appearances[part.appearanceIndex];
+            if (!partAppearance) return;
+            
+            // Calculate part position relative to actor using offsets
+            const actorFacing = actor.facing || 0;
+            
+            // Rotate part offset by actor facing
+            const angleRad = (actorFacing * Math.PI) / 180;
+            const cosA = Math.cos(angleRad);
+            const sinA = Math.sin(angleRad);
+            const xOffset = partInfo.xOffset || 0;
+            const yOffset = partInfo.yOffset || 0;
+            const rotatedX = xOffset * cosA - yOffset * sinA;
+            const rotatedY = xOffset * sinA + yOffset * cosA;
+            
+            drawPolygonInPreview(partPolygon.points, partAppearance, rotatedX, rotatedY, actorFacing);
+        });
+    } else if (actor.partNames && Array.isArray(actor.partNames)) {
+        // Legacy format support (parts without offsets)
         actor.partNames.forEach(partName => {
             const part = parts.find(p => p.name === partName);
             if (!part) return;
@@ -345,18 +371,7 @@ function drawActorPreview(actor) {
             const partAppearance = appearances[part.appearanceIndex];
             if (!partAppearance) return;
             
-            // Calculate part position relative to actor
-            const actorFacing = actor.facing || 0;
-            const totalFacing = actorFacing + (part.facing || 0);
-            
-            // Rotate part offset by actor facing
-            const angleRad = (actorFacing * Math.PI) / 180;
-            const cosA = Math.cos(angleRad);
-            const sinA = Math.sin(angleRad);
-            const rotatedX = (part.xPos || 0) * cosA - (part.yPos || 0) * sinA;
-            const rotatedY = (part.xPos || 0) * sinA + (part.yPos || 0) * cosA;
-            
-            drawPolygonInPreview(partPolygon.points, partAppearance, rotatedX, rotatedY, totalFacing);
+            drawPolygonInPreview(partPolygon.points, partAppearance, 0, 0, actor.facing || 0);
         });
     }
 }
@@ -702,7 +717,11 @@ function addActor() {
         yVel,
         facing,
         spin,
-        partNames: actorParts.map(part => part.name)
+        parts: actorParts.map(part => ({
+            name: part.name,
+            xOffset: part.xOffset || 0,
+            yOffset: part.yOffset || 0
+        }))
     };
     
     actors.push(actor);
@@ -803,13 +822,30 @@ actorList.addEventListener('change', (e) => {
         actorFacing.value = actor.facing;
         actorSpin.value = actor.spin;
         
-        // Load actor parts by name
+        // Load actor parts with offsets
         actorParts = [];
-        if (actor.partNames && Array.isArray(actor.partNames)) {
+        if (actor.parts && Array.isArray(actor.parts)) {
+            // New format: parts with offsets
+            actor.parts.forEach(partInfo => {
+                const part = parts.find(p => p.name === partInfo.name);
+                if (part) {
+                    actorParts.push({
+                        ...part,
+                        xOffset: partInfo.xOffset || 0,
+                        yOffset: partInfo.yOffset || 0
+                    });
+                }
+            });
+        } else if (actor.partNames && Array.isArray(actor.partNames)) {
+            // Legacy format: just part names (no offsets)
             actor.partNames.forEach(partName => {
                 const part = parts.find(p => p.name === partName);
                 if (part) {
-                    actorParts.push(part);
+                    actorParts.push({
+                        ...part,
+                        xOffset: 0,
+                        yOffset: 0
+                    });
                 }
             });
         }
@@ -953,14 +989,29 @@ modalImportActorBtn.addEventListener('click', () => {
             return;
         }
         
-        // Load actor parts by name and auto-import if needed
+        // Load actor parts and auto-import if needed
         actorParts = [];
-        if (importedActor.partNames && Array.isArray(importedActor.partNames)) {
+        let partsToLoad = [];
+        
+        // Handle new format (parts with offsets) or legacy format (partNames)
+        if (importedActor.parts && Array.isArray(importedActor.parts)) {
+            partsToLoad = importedActor.parts;
+        } else if (importedActor.partNames && Array.isArray(importedActor.partNames)) {
+            // Convert legacy format to new format
+            partsToLoad = importedActor.partNames.map(name => ({
+                name: name,
+                xOffset: 0,
+                yOffset: 0
+            }));
+        }
+        
+        if (partsToLoad.length > 0) {
             const storedParts = localStorage.getItem('sceneBuilderStoredParts');
             const partsData = storedParts ? JSON.parse(storedParts) : {};
             const missingParts = [];
             
-            for (const partName of importedActor.partNames) {
+            for (const partInfo of partsToLoad) {
+                const partName = partInfo.name;
                 let part = parts.find(p => p.name === partName);
                 
                 if (!part && partsData[partName]) {
@@ -973,7 +1024,11 @@ modalImportActorBtn.addEventListener('click', () => {
                 }
                 
                 if (part) {
-                    actorParts.push(part);
+                    actorParts.push({
+                        ...part,
+                        xOffset: partInfo.xOffset || 0,
+                        yOffset: partInfo.yOffset || 0
+                    });
                 } else {
                     missingParts.push(partName);
                 }
@@ -998,7 +1053,11 @@ modalImportActorBtn.addEventListener('click', () => {
             yVel: importedActor.yVel,
             facing: importedActor.facing,
             spin: importedActor.spin,
-            partNames: actorParts.map(part => part.name)
+            parts: actorParts.map(part => ({
+                name: part.name,
+                xOffset: part.xOffset || 0,
+                yOffset: part.yOffset || 0
+            }))
         };
         
         // Add to actors list
@@ -1820,17 +1879,11 @@ function addPart() {
         alert('Part must have a polygon selected.');
         return;
     }
-    const xPos = parseFloat(partXPos.value) || 0;
-    const yPos = parseFloat(partYPos.value) || 0;
-    const facing = parseFloat(partFacing.value) || 0;
     
     const part = {
         name,
         polygonName,
-        appearanceIndex,
-        xPos,
-        yPos,
-        facing
+        appearanceIndex
     };
     
     parts.push(part);
@@ -1840,9 +1893,6 @@ function addPart() {
     partName.value = '';
     partPolygonDropdown.value = '';
     partAppearanceDropdown.value = '';
-    partXPos.value = 0;
-    partYPos.value = 0;
-    partFacing.value = '';
 }
 
 // Remove selected part from list
@@ -1874,9 +1924,6 @@ partList.addEventListener('change', (e) => {
         partName.value = part.name;
         partPolygonDropdown.value = part.polygonName || '';
         partAppearanceDropdown.value = part.appearanceIndex;
-        partXPos.value = part.xPos;
-        partYPos.value = part.yPos;
-        partFacing.value = part.facing;
     }
 });
 
@@ -1984,9 +2031,6 @@ modalImportPartBtn.addEventListener('click', () => {
         partName.value = importedPart.name;
         partPolygonDropdown.value = importedPart.polygonName || importedPart.polygonIndex || '';
         partAppearanceDropdown.value = importedPart.appearanceIndex;
-        partXPos.value = importedPart.xPos;
-        partYPos.value = importedPart.yPos;
-        partFacing.value = importedPart.facing;
         
         partImportModal.style.display = 'none';
         alert(`Part "${selectedImportPartName}" imported successfully!`);
@@ -2044,8 +2088,26 @@ modalAddPartBtn.addEventListener('click', () => {
         return;
     }
     
+    // Ask for X and Y offsets
+    const xOffsetStr = prompt('Enter X Offset:', '0');
+    if (xOffsetStr === null) return; // User cancelled
+    
+    const yOffsetStr = prompt('Enter Y Offset:', '0');
+    if (yOffsetStr === null) return; // User cancelled
+    
+    const xOffset = parseFloat(xOffsetStr) || 0;
+    const yOffset = parseFloat(yOffsetStr) || 0;
+    
     const part = parts[selectedPartForActor];
-    actorParts.push(part);
+    
+    // Create a part instance with offset data
+    const partInstance = {
+        ...part,
+        xOffset: xOffset,
+        yOffset: yOffset
+    };
+    
+    actorParts.push(partInstance);
     renderActorPartsList();
     partSelectModal.style.display = 'none';
 });
@@ -2071,10 +2133,38 @@ function renderActorPartsList() {
     actorParts.forEach((part, index) => {
         const option = document.createElement('option');
         option.value = index;
-        option.textContent = part.name;
+        const offsetText = part.xOffset !== undefined ? ` (${part.xOffset}, ${part.yOffset})` : '';
+        option.textContent = part.name + offsetText;
         actorPartsList.appendChild(option);
     });
 }
+
+// Handle actor parts list selection to show offsets
+actorPartsList.addEventListener('change', () => {
+    const selectedIndex = actorPartsList.selectedIndex;
+    if (selectedIndex >= 0 && selectedIndex < actorParts.length) {
+        const part = actorParts[selectedIndex];
+        partXOffset.value = part.xOffset || 0;
+        partYOffset.value = part.yOffset || 0;
+    }
+});
+
+// Handle change offset button
+changePartOffsetBtn.addEventListener('click', () => {
+    const selectedIndex = actorPartsList.selectedIndex;
+    if (selectedIndex >= 0 && selectedIndex < actorParts.length) {
+        const xOffset = parseFloat(partXOffset.value) || 0;
+        const yOffset = parseFloat(partYOffset.value) || 0;
+        
+        actorParts[selectedIndex].xOffset = xOffset;
+        actorParts[selectedIndex].yOffset = yOffset;
+        
+        renderActorPartsList();
+        alert('Offset updated');
+    } else {
+        alert('Please select a part from the list');
+    }
+});
 
 // Reset DB button - clear all localStorage
 resetDbBtn.addEventListener('click', () => {
@@ -2101,9 +2191,6 @@ resetDbBtn.addEventListener('click', () => {
         
         // Clear all part fields
         partName.value = '';
-        partXPos.value = 0;
-        partYPos.value = 0;
-        partFacing.value = 0;
         partPolygonDropdown.value = '';
         partAppearanceDropdown.value = '';
         
@@ -2189,12 +2276,10 @@ toJSONBtn.addEventListener('click', () => {
             velocity: { x: actor.xVel, y: actor.yVel },
             facing: actor.facing,
             spin: actor.spin,
-            partNames: actor.partNames || []
+            parts: actor.parts || []
         })),
         parts: parts.map(part => ({
             name: part.name,
-            position: { x: part.xPos, y: part.yPos },
-            facing: part.facing,
             polygonName: part.polygonName,
             appearanceName: appearances[part.appearanceIndex]?.name || ''
         })),
@@ -2237,7 +2322,10 @@ toJSONBtn.addEventListener('click', () => {
     // Find all part names used in actors
     const usedPartNames = new Set();
     actors.forEach(actor => {
-        if (actor.partNames && actor.partNames.length > 0) {
+        if (actor.parts && actor.parts.length > 0) {
+            actor.parts.forEach(partInfo => usedPartNames.add(partInfo.name));
+        } else if (actor.partNames && actor.partNames.length > 0) {
+            // Legacy format support
             actor.partNames.forEach(partName => usedPartNames.add(partName));
         }
     });
@@ -2247,8 +2335,6 @@ toJSONBtn.addEventListener('click', () => {
         usedPartNames.has(part.name)
     ).map(part => ({
         name: part.name,
-        position: { x: part.xPos, y: part.yPos },
-        facing: part.facing,
         polygonName: part.polygonName,
         appearanceName: appearances[part.appearanceIndex]?.name || ''
     }));
@@ -2263,7 +2349,7 @@ toJSONBtn.addEventListener('click', () => {
         velocity: { x: actor.xVel, y: actor.yVel },
         facing: actor.facing,
         spin: actor.spin,
-        partNames: actor.partNames || []
+        parts: actor.parts || []
     }));
     
     // Build output with scene JSON followed by lists
@@ -2326,12 +2412,10 @@ exportSceneBtn.addEventListener('click', () => {
             velocity: { x: actor.xVel, y: actor.yVel },
             facing: actor.facing,
             spin: actor.spin,
-            partNames: actor.partNames || []
+            parts: actor.parts || []
         })),
         parts: parts.map(part => ({
             name: part.name,
-            position: { x: part.xPos, y: part.yPos },
-            facing: part.facing,
             polygonName: part.polygonName,
             appearanceIndex: part.appearanceIndex
         })),
@@ -2429,9 +2513,6 @@ modalImportSceneBtn.addEventListener('click', () => {
     // Load parts
     parts = sceneData.parts.map(part => ({
         name: part.name,
-        xPos: part.position.x,
-        yPos: part.position.y,
-        facing: part.facing,
         polygonName: part.polygonName,
         appearanceIndex: part.appearanceIndex
     }));
@@ -2449,7 +2530,7 @@ modalImportSceneBtn.addEventListener('click', () => {
         yVel: actor.velocity.y,
         facing: actor.facing,
         spin: actor.spin,
-        partNames: actor.partNames || []
+        parts: actor.parts || actor.partNames?.map(name => ({ name, xOffset: 0, yOffset: 0 })) || []
     }));
     renderActorList();
     
