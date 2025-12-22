@@ -80,6 +80,8 @@ const partSelectModal = document.getElementById('partSelectModal');
 const partSelectList = document.getElementById('partSelectList');
 const modalAddPartBtn = document.getElementById('modalAddPartBtn');
 const modalCancelPartBtn = document.getElementById('modalCancelPartBtn');
+const modalPartXOffset = document.getElementById('modalPartXOffset');
+const modalPartYOffset = document.getElementById('modalPartYOffset');
 const resetDbBtn = document.getElementById('resetDbBtn');
 const sceneName = document.getElementById('sceneName');
 const sceneShortDesc = document.getElementById('sceneShortDesc');
@@ -94,6 +96,7 @@ const modalImportSceneBtn = document.getElementById('modalImportSceneBtn');
 const modalCancelSceneImportBtn = document.getElementById('modalCancelSceneImportBtn');
 const actorPreviewCanvas = document.getElementById('actorPreviewCanvas');
 const actorPreviewCtx = actorPreviewCanvas.getContext('2d');
+const actorPreviewZoom = document.getElementById('actorPreviewZoom');
 
 let polygons = [];
 let selectedPolygonIndex = -1;
@@ -317,16 +320,16 @@ function drawActorPreviewGrid() {
     actorPreviewCtx.stroke();
 }
 
-function worldToPreview(x, y) {
+function worldToPreview(x, y, zoom = 1) {
     const centerX = actorPreviewCanvas.width / 2;
     const centerY = actorPreviewCanvas.height / 2;
     return {
-        x: centerX + x,
-        y: centerY - y  // Flip Y axis for standard coordinate system
+        x: centerX + x * zoom,
+        y: centerY - y * zoom  // Flip Y axis for standard coordinate system
     };
 }
 
-function drawPolygonInPreview(polygonPoints, appearance, offsetX = 0, offsetY = 0, facing = 0) {
+function drawPolygonInPreview(polygonPoints, appearance, offsetX = 0, offsetY = 0, facing = 0, zoom = 1) {
     if (!polygonPoints || polygonPoints.length === 0) return;
     
     const centerX = actorPreviewCanvas.width / 2;
@@ -345,7 +348,7 @@ function drawPolygonInPreview(polygonPoints, appearance, offsetX = 0, offsetY = 
         const rotatedY = point.x * sinA + point.y * cosA;
         
         // Apply offset and convert to screen coords
-        const screenPoint = worldToPreview(rotatedX + offsetX, rotatedY + offsetY);
+        const screenPoint = worldToPreview(rotatedX + offsetX, rotatedY + offsetY, zoom);
         
         if (index === 0) {
             actorPreviewCtx.moveTo(screenPoint.x, screenPoint.y);
@@ -358,13 +361,15 @@ function drawPolygonInPreview(polygonPoints, appearance, offsetX = 0, offsetY = 
     
     // Fill
     if (appearance && appearance.fill) {
-        actorPreviewCtx.fillStyle = appearance.fill;
+        const fill = appearance.fill;
+        actorPreviewCtx.fillStyle = `rgb(${fill.r}, ${fill.g}, ${fill.b})`;
         actorPreviewCtx.fill();
     }
     
     // Stroke
     if (appearance && appearance.stroke) {
-        actorPreviewCtx.strokeStyle = appearance.stroke;
+        const stroke = appearance.stroke;
+        actorPreviewCtx.strokeStyle = `rgb(${stroke.r}, ${stroke.g}, ${stroke.b})`;
         actorPreviewCtx.lineWidth = 2;
         actorPreviewCtx.stroke();
     }
@@ -388,8 +393,69 @@ function drawActorPreview(actor) {
         return;
     }
     
+    // Calculate bounding box for auto-scaling
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    
+    const actorFacing = actor.facing || 0;
+    const angleRad = (actorFacing * Math.PI) / 180;
+    const cosA = Math.cos(angleRad);
+    const sinA = Math.sin(angleRad);
+    
+    // Include actor polygon points
+    polygon.points.forEach(point => {
+        const rotatedX = point.x * cosA - point.y * sinA;
+        const rotatedY = point.x * sinA + point.y * cosA;
+        minX = Math.min(minX, rotatedX);
+        maxX = Math.max(maxX, rotatedX);
+        minY = Math.min(minY, rotatedY);
+        maxY = Math.max(maxY, rotatedY);
+    });
+    
+    // Include part polygons
+    if (actor.parts && Array.isArray(actor.parts)) {
+        actor.parts.forEach(partInfo => {
+            const part = parts.find(p => p.name === partInfo.name);
+            if (!part) return;
+            
+            const partPolygon = polygons.find(p => p.name === part.polygonName);
+            if (!partPolygon || !partPolygon.points) return;
+            
+            const xOffset = partInfo.xOffset || 0;
+            const yOffset = partInfo.yOffset || 0;
+            const rotatedOffsetX = xOffset * cosA - yOffset * sinA;
+            const rotatedOffsetY = xOffset * sinA + yOffset * cosA;
+            
+            partPolygon.points.forEach(point => {
+                const rotatedX = point.x * cosA - point.y * sinA + rotatedOffsetX;
+                const rotatedY = point.x * sinA + point.y * cosA + rotatedOffsetY;
+                minX = Math.min(minX, rotatedX);
+                maxX = Math.max(maxX, rotatedX);
+                minY = Math.min(minY, rotatedY);
+                maxY = Math.max(maxY, rotatedY);
+            });
+        });
+    }
+    
+    // Calculate auto-scale zoom to fit in canvas with padding
+    const padding = 20; // pixels of padding
+    const boundingWidth = maxX - minX;
+    const boundingHeight = maxY - minY;
+    const availableWidth = actorPreviewCanvas.width - (padding * 2);
+    const availableHeight = actorPreviewCanvas.height - (padding * 2);
+    
+    let autoZoom = 1;
+    if (boundingWidth > 0 && boundingHeight > 0) {
+        const zoomX = availableWidth / boundingWidth;
+        const zoomY = availableHeight / boundingHeight;
+        autoZoom = Math.min(zoomX, zoomY, 10); // Cap at 10x zoom
+        autoZoom = Math.max(autoZoom, 0.1); // Minimum 0.1x zoom
+    }
+    
+    // Update zoom field
+    actorPreviewZoom.value = autoZoom.toFixed(2);
+    
     // Draw the actor's polygon
-    drawPolygonInPreview(polygon.points, appearance, 0, 0, actor.facing || 0);
+    drawPolygonInPreview(polygon.points, appearance, 0, 0, actorFacing, autoZoom);
     
     // Draw parts if they exist
     if (actor.parts && Array.isArray(actor.parts)) {
@@ -404,18 +470,12 @@ function drawActorPreview(actor) {
             if (!partAppearance) return;
             
             // Calculate part position relative to actor using offsets
-            const actorFacing = actor.facing || 0;
-            
-            // Rotate part offset by actor facing
-            const angleRad = (actorFacing * Math.PI) / 180;
-            const cosA = Math.cos(angleRad);
-            const sinA = Math.sin(angleRad);
             const xOffset = partInfo.xOffset || 0;
             const yOffset = partInfo.yOffset || 0;
             const rotatedX = xOffset * cosA - yOffset * sinA;
             const rotatedY = xOffset * sinA + yOffset * cosA;
             
-            drawPolygonInPreview(partPolygon.points, partAppearance, rotatedX, rotatedY, actorFacing);
+            drawPolygonInPreview(partPolygon.points, partAppearance, rotatedX, rotatedY, actorFacing, autoZoom);
         });
     } else if (actor.partNames && Array.isArray(actor.partNames)) {
         // Legacy format support (parts without offsets)
@@ -835,6 +895,70 @@ function clearActorFields() {
     actorSpin.value = 0;
     actorParts = [];
     renderActorPartsList();
+}
+
+// Manual zoom adjustment - redraw actor preview when zoom changes
+actorPreviewZoom.addEventListener('input', () => {
+    if (selectedActorIndex >= 0 && selectedActorIndex < actors.length) {
+        const actor = actors[selectedActorIndex];
+        drawActorPreviewWithManualZoom(actor, parseFloat(actorPreviewZoom.value) || 1);
+    }
+});
+
+// Draw actor preview with manual zoom (no auto-scaling)
+function drawActorPreviewWithManualZoom(actor, zoom) {
+    clearActorPreview();
+    drawActorPreviewGrid();
+    
+    if (!actor) return;
+    
+    const polygon = polygons.find(p => p.name === actor.polygonName);
+    if (!polygon || !polygon.points || polygon.points.length === 0) return;
+    
+    const appearance = appearances.find(a => a.name === actor.appearanceName);
+    if (!appearance) return;
+    
+    const actorFacing = actor.facing || 0;
+    const angleRad = (actorFacing * Math.PI) / 180;
+    const cosA = Math.cos(angleRad);
+    const sinA = Math.sin(angleRad);
+    
+    // Draw the actor's polygon
+    drawPolygonInPreview(polygon.points, appearance, 0, 0, actorFacing, zoom);
+    
+    // Draw parts if they exist
+    if (actor.parts && Array.isArray(actor.parts)) {
+        actor.parts.forEach(partInfo => {
+            const part = parts.find(p => p.name === partInfo.name);
+            if (!part) return;
+            
+            const partPolygon = polygons.find(p => p.name === part.polygonName);
+            if (!partPolygon || !partPolygon.points) return;
+            
+            const partAppearance = appearances[part.appearanceIndex];
+            if (!partAppearance) return;
+            
+            const xOffset = partInfo.xOffset || 0;
+            const yOffset = partInfo.yOffset || 0;
+            const rotatedX = xOffset * cosA - yOffset * sinA;
+            const rotatedY = xOffset * sinA + yOffset * cosA;
+            
+            drawPolygonInPreview(partPolygon.points, partAppearance, rotatedX, rotatedY, actorFacing, zoom);
+        });
+    } else if (actor.partNames && Array.isArray(actor.partNames)) {
+        actor.partNames.forEach(partName => {
+            const part = parts.find(p => p.name === partName);
+            if (!part) return;
+            
+            const partPolygon = polygons.find(p => p.name === part.polygonName);
+            if (!partPolygon || !partPolygon.points) return;
+            
+            const partAppearance = appearances[part.appearanceIndex];
+            if (!partAppearance) return;
+            
+            drawPolygonInPreview(partPolygon.points, partAppearance, 0, 0, actorFacing, zoom);
+        });
+    }
 }
 
 // Actor listbox selection
@@ -1957,13 +2081,36 @@ function addPart() {
         return;
     }
     
+    // Check if part with this name already exists
+    const existingPartIndex = parts.findIndex(p => p.name === name);
+    if (existingPartIndex !== -1) {
+        const shouldOverwrite = confirm(`A part with the name "${name}" already exists in the list.\n\nDo you want to overwrite it with the new part data?`);
+        if (!shouldOverwrite) {
+            return;
+        }
+    }
+    
     const part = {
         name,
         polygonName,
         appearanceIndex
     };
     
-    parts.push(part);
+    if (existingPartIndex !== -1) {
+        // Overwrite existing part
+        parts[existingPartIndex] = part;
+    } else {
+        // Add new part
+        parts.push(part);
+    }
+    
+    // Update localStorage if this part name exists there
+    const storedParts = getFromLocalStorage('sceneBuilderStoredParts');
+    if (storedParts && storedParts[name]) {
+        storedParts[name] = part;
+        saveToLocalStorage('sceneBuilderStoredParts', storedParts);
+    }
+    
     renderPartList();
     
     // Clear the form fields after adding
@@ -2237,6 +2384,10 @@ addActorPartButton.addEventListener('click', () => {
         return;
     }
     
+    // Reset offset fields
+    modalPartXOffset.value = 0;
+    modalPartYOffset.value = 0;
+    
     // Show modal and populate with parts
     selectedPartForActor = null;
     partSelectList.innerHTML = '';
@@ -2267,15 +2418,9 @@ modalAddPartBtn.addEventListener('click', () => {
         return;
     }
     
-    // Ask for X and Y offsets
-    const xOffsetStr = prompt('Enter X Offset:', '0');
-    if (xOffsetStr === null) return; // User cancelled
-    
-    const yOffsetStr = prompt('Enter Y Offset:', '0');
-    if (yOffsetStr === null) return; // User cancelled
-    
-    const xOffset = parseFloat(xOffsetStr) || 0;
-    const yOffset = parseFloat(yOffsetStr) || 0;
+    // Get X and Y offsets from modal input fields
+    const xOffset = parseFloat(modalPartXOffset.value) || 0;
+    const yOffset = parseFloat(modalPartYOffset.value) || 0;
     
     const part = parts[selectedPartForActor];
     
