@@ -11,6 +11,7 @@ const outputBox = document.getElementById('outputBox');
 const exportBtn = document.getElementById('exportBtn');
 const importBtn = document.getElementById('importBtn');
 const mouseCoordsField = document.getElementById('mouseCoords');
+const polygonNameField = document.getElementById('polygonNameField');
 const zoomLevel = document.getElementById('zoomLevel');
 const manageList = document.getElementById('manageList');
 const renameBtn = document.getElementById('renameBtn');
@@ -22,6 +23,7 @@ let gridSize = 20;
 let symmetryMode = false;
 let symmetryDots = []; // Track dots added during symmetry mode
 let snapIndicator = null; // Track snap indicator position
+let currentPolygonName = null; // Track the name of the current polygon being edited
 
 // Populate manage list from local storage
 function populateManageList() {
@@ -60,8 +62,24 @@ manageList.addEventListener('change', () => {
     const polygons = storedPolygons ? JSON.parse(storedPolygons) : {};
     
     if (polygons[selectedName]) {
-      // Load the polygon data
-      dots = JSON.parse(JSON.stringify(polygons[selectedName])); // Deep copy
+      // Load the polygon data - handle both old format (array) and new format (object with name/points)
+      const polygonData = polygons[selectedName];
+      if (Array.isArray(polygonData)) {
+        // Legacy format: just an array of points
+        dots = JSON.parse(JSON.stringify(polygonData));
+      } else if (polygonData.points) {
+        // New format: object with name and points
+        dots = JSON.parse(JSON.stringify(polygonData.points));
+      } else {
+        dots = [];
+      }
+      
+      // Set current polygon name
+      currentPolygonName = selectedName;
+      
+      // Update name field
+      polygonNameField.value = selectedName;
+      
       symmetryDots = [];
       symmetryMode = false;
       symmetryBtn.style.backgroundColor = '#4a90e2';
@@ -377,14 +395,17 @@ showJsonBtn.addEventListener('click', () => {
     return;
   }
   
-  // Get polygon name from manage list or prompt for one
-  let polygonName = manageList.value || '';
+  // Get polygon name from name field, manage list, or prompt for one
+  let polygonName = polygonNameField.value.trim() || manageList.value || '';
   
   if (!polygonName) {
     polygonName = prompt('Enter a name for this polygon:', `Polygon ${new Date().getTime()}`);
     if (!polygonName) {
       return; // User cancelled
     }
+    // Update the name field with the provided name
+    polygonNameField.value = polygonName;
+    currentPolygonName = polygonName;
   }
   
   const polygonObject = {
@@ -422,6 +443,8 @@ symmetryBtn.addEventListener('click', () => {
 // Clear button - remove all dots
 clearBtn.addEventListener('click', () => {
   dots = [];
+  currentPolygonName = null; // Clear the polygon name
+  polygonNameField.value = ''; // Clear the name field
   redraw();
   updateBackButtonVisibility();
 });
@@ -444,10 +467,18 @@ exportBtn.addEventListener('click', () => {
     return;
   }
   
-  const polygonName = prompt('Enter a name for this polygon:', `Polygon ${new Date().getTime()}`);
+  // Use name from name field, or prompt if empty
+  let polygonName = polygonNameField.value.trim();
   
   if (!polygonName) {
-    return; // User cancelled
+    polygonName = prompt('Enter a name for this polygon:', `Polygon ${new Date().getTime()}`);
+    
+    if (!polygonName) {
+      return; // User cancelled
+    }
+    
+    // Update the name field with the provided name
+    polygonNameField.value = polygonName;
   }
   
   try {
@@ -455,11 +486,17 @@ exportBtn.addEventListener('click', () => {
     const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
     const polygons = storedPolygons ? JSON.parse(storedPolygons) : {};
     
-    // Add new polygon
-    polygons[polygonName] = dots;
+    // Add new polygon with name and points structure
+    polygons[polygonName] = {
+      name: polygonName,
+      points: dots
+    };
     
     // Save back to localStorage
     localStorage.setItem('polygonBuilderPolygons', JSON.stringify(polygons));
+    
+    // Update current polygon name
+    currentPolygonName = polygonName;
     alert(`Exported "${polygonName}" with ${dots.length} dot(s) to storage`);
     
     // Refresh manage list
@@ -503,7 +540,9 @@ importBtn.addEventListener('click', () => {
     polygonNames.forEach(name => {
       const item = document.createElement('div');
       item.className = 'polygon-list-item';
-      item.textContent = `${name} (${polygons[name].length} dots)`;
+      const polygonData = polygons[name];
+      const dotCount = Array.isArray(polygonData) ? polygonData.length : (polygonData.points ? polygonData.points.length : 0);
+      item.textContent = `${name} (${dotCount} dots)`;
       item.addEventListener('click', () => {
         // Remove previous selection
         document.querySelectorAll('.polygon-list-item').forEach(el => {
@@ -532,7 +571,18 @@ modalImportBtn.addEventListener('click', () => {
   try {
     const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
     const polygons = JSON.parse(storedPolygons);
-    const loadedDots = polygons[selectedPolygonName];
+    const polygonData = polygons[selectedPolygonName];
+    
+    // Handle both old format (array) and new format (object with name/points)
+    let loadedDots;
+    if (Array.isArray(polygonData)) {
+      loadedDots = polygonData;
+    } else if (polygonData && polygonData.points) {
+      loadedDots = polygonData.points;
+    } else {
+      alert('Invalid polygon data');
+      return;
+    }
     
     if (!Array.isArray(loadedDots) || loadedDots.length === 0) {
       alert('Invalid polygon data');
@@ -541,6 +591,8 @@ modalImportBtn.addEventListener('click', () => {
     
     // Replace all current data with imported data
     dots = loadedDots;
+    currentPolygonName = selectedPolygonName; // Set the current polygon name
+    polygonNameField.value = selectedPolygonName; // Update the name field
     symmetryDots = [];
     symmetryMode = false;
     symmetryBtn.style.backgroundColor = '#4a90e2';
