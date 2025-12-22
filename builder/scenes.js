@@ -38,6 +38,11 @@ const addActorButton = document.getElementById('addActor');
 const removeActorButton = document.getElementById('removeActor');
 const importActorButton = document.getElementById('importActor');
 const exportActorButton = document.getElementById('exportActor');
+const deleteActorButton = document.getElementById('deleteActor');
+const actorDeleteModal = document.getElementById('actorDeleteModal');
+const actorDeleteList = document.getElementById('actorDeleteList');
+const modalDeleteActorBtn = document.getElementById('modalDeleteActorBtn');
+const modalCancelActorDeleteBtn = document.getElementById('modalCancelActorDeleteBtn');
 const clearActorButton = document.getElementById('clearActor');
 const addPolygonButton = document.getElementById('addPolygon');
 const removePolygonButton = document.getElementById('removePolygon');
@@ -1129,6 +1134,110 @@ exportActorButton.addEventListener('click', () => {
         alert('Error exporting actor: ' + error.message);
     }
 });
+
+// Delete Actor button - show delete actor modal
+let selectedDeleteActorName = null;
+
+deleteActorButton.addEventListener('click', () => {
+    try {
+        const storedActors = localStorage.getItem('sceneBuilderStoredActors');
+        
+        if (!storedActors) {
+            alert('No saved actors found in storage');
+            return;
+        }
+        
+        const actorsData = JSON.parse(storedActors);
+        const actorNames = Object.keys(actorsData);
+        
+        if (actorNames.length === 0) {
+            alert('No saved actors found in storage');
+            return;
+        }
+        
+        // Show modal and populate list
+        selectedDeleteActorName = null;
+        actorDeleteList.innerHTML = '';
+        
+        actorNames.forEach(name => {
+            const item = document.createElement('div');
+            item.className = 'polygon-select-item';
+            item.textContent = name;
+            item.addEventListener('click', () => {
+                // Remove previous selection
+                document.querySelectorAll('#actorDeleteList .polygon-select-item').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                // Select this item
+                item.classList.add('selected');
+                selectedDeleteActorName = name;
+            });
+            actorDeleteList.appendChild(item);
+        });
+        
+        actorDeleteModal.style.display = 'block';
+    } catch (error) {
+        alert('Error loading actors: ' + error.message);
+    }
+});
+
+// Modal delete actor button
+modalDeleteActorBtn.addEventListener('click', () => {
+    if (!selectedDeleteActorName) {
+        alert('Please select an actor to delete');
+        return;
+    }
+    
+    // Check if the actor is being used in the current scene
+    const isUsedInScene = actors.some(a => a.name === selectedDeleteActorName);
+    
+    if (isUsedInScene) {
+        alert('Cannot delete this actor because it is being used in the current scene. Remove it from the scene first.');
+        return;
+    }
+    
+    if (!confirm(`Are you sure you want to delete "${selectedDeleteActorName}" from storage?`)) {
+        return;
+    }
+    
+    try {
+        const storedActors = localStorage.getItem('sceneBuilderStoredActors');
+        const actorsData = JSON.parse(storedActors);
+        
+        // Delete the actor
+        delete actorsData[selectedDeleteActorName];
+        
+        // Save back to localStorage
+        localStorage.setItem('sceneBuilderStoredActors', JSON.stringify(actorsData));
+        
+        // Close modal or refresh list
+        if (Object.keys(actorsData).length === 0) {
+            actorDeleteModal.style.display = 'none';
+            alert('Actor deleted successfully. No more actors in storage.');
+        } else {
+            // Refresh the list
+            selectedDeleteActorName = null;
+            deleteActorButton.click();
+            actorDeleteModal.style.display = 'block';
+            alert('Actor deleted successfully.');
+        }
+    } catch (error) {
+        alert('Error deleting actor: ' + error.message);
+    }
+});
+
+// Modal cancel delete actor button
+modalCancelActorDeleteBtn.addEventListener('click', () => {
+    actorDeleteModal.style.display = 'none';
+});
+
+// Close modal when clicking outside
+actorDeleteModal.addEventListener('click', (e) => {
+    if (e.target === actorDeleteModal) {
+        actorDeleteModal.style.display = 'none';
+    }
+});
+
 clearActorButton.addEventListener('click', clearActorFields);
 
 // Update the actor polygon dropdown with current polygons
@@ -1858,7 +1967,7 @@ function loadPolygonsFromStorage() {
     }
 }
 
-loadPolygonsFromStorage();
+// loadPolygonsFromStorage();
 
 // Initialize part dropdowns
 updatePartPolygonDropdown();
