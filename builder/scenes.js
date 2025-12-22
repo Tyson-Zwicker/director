@@ -682,16 +682,11 @@ appearanceImportModal.addEventListener('click', (e) => {
 function addActor() {
     let name = actorName.value.trim() || `Actor ${actors.length + 1}`;
     
-    // Check if an actor with this name already exists in the listbox and prompt for new name
-    while (actors.some(actor => actor.name === name)) {
-        const promptResult = prompt(`An actor with the name "${name}" already exists in the list.\n\nEnter a new name for this actor, or click Cancel to abort:`, name);
-        if (promptResult === null) {
-            // User cancelled
-            return;
-        }
-        name = promptResult.trim();
-        if (!name) {
-            alert('Actor name cannot be empty.');
+    // Check if an actor with this name already exists in the listbox
+    const existingActorIndex = actors.findIndex(actor => actor.name === name);
+    if (existingActorIndex !== -1) {
+        const shouldOverwrite = confirm(`An actor with the name "${name}" already exists in the list.\n\nDo you want to overwrite it with the new actor data?`);
+        if (!shouldOverwrite) {
             return;
         }
     }
@@ -734,7 +729,28 @@ function addActor() {
         }))
     };
     
-    actors.push(actor);
+    if (existingActorIndex !== -1) {
+        // Overwrite existing actor
+        actors[existingActorIndex] = actor;
+    } else {
+        // Add new actor
+        actors.push(actor);
+    }
+    
+    // Update localStorage if this actor name exists there
+    try {
+        const storedActors = localStorage.getItem('sceneBuilderStoredActors');
+        if (storedActors) {
+            const actorsData = JSON.parse(storedActors);
+            if (actorsData[name]) {
+                actorsData[name] = actor;
+                localStorage.setItem('sceneBuilderStoredActors', JSON.stringify(actorsData));
+            }
+        }
+    } catch (error) {
+        console.error('Error updating localStorage:', error);
+    }
+    
     renderActorList();
     drawMapView();
     
