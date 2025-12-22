@@ -106,6 +106,54 @@ let selectedPartForActor = null;
 let panOffsetX = 0;
 let panOffsetY = 0;
 
+// ===== Helper Functions =====
+
+// Helper: Remove selection from all items in a container
+function removeAllSelections(containerSelector) {
+    document.querySelectorAll(`${containerSelector} .polygon-select-item`).forEach(el => {
+        el.classList.remove('selected');
+    });
+}
+
+// Helper: Get data from localStorage with error handling
+function getFromLocalStorage(key) {
+    try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : null;
+    } catch (error) {
+        console.error(`Error reading from localStorage (${key}):`, error);
+        return null;
+    }
+}
+
+// Helper: Save data to localStorage with error handling
+function saveToLocalStorage(key, data) {
+    try {
+        localStorage.setItem(key, JSON.stringify(data));
+        return true;
+    } catch (error) {
+        console.error(`Error saving to localStorage (${key}):`, error);
+        return false;
+    }
+}
+
+// Helper: Update a dropdown with items
+function updateDropdown(dropdown, items, valueKey, textKey, placeholder = 'Select...') {
+    const currentSelection = dropdown.value;
+    dropdown.innerHTML = `<option value="">${placeholder}</option>`;
+    
+    items.forEach((item, index) => {
+        const option = document.createElement('option');
+        option.value = valueKey ? item[valueKey] : index;
+        option.textContent = textKey ? item[textKey] : item;
+        dropdown.appendChild(option);
+    });
+    
+    if (currentSelection !== '') {
+        dropdown.value = currentSelection;
+    }
+}
+
 // Validate number inputs for position and velocity fields
 function validateNumberInput(inputElement) {
     const value = inputElement.value.trim();
@@ -467,44 +515,12 @@ function renderAppearanceList() {
 
 // Update the actor appearance dropdown with current appearances
 function updateActorAppearanceDropdown() {
-    // Save current selection
-    const currentSelection = actorAppearanceDropdown.value;
-    
-    // Clear and rebuild dropdown
-    actorAppearanceDropdown.innerHTML = '<option value="">Select appearance...</option>';
-    
-    appearances.forEach((appearance, index) => {
-        const option = document.createElement('option');
-        option.value = appearance.name;
-        option.textContent = appearance.name;
-        actorAppearanceDropdown.appendChild(option);
-    });
-    
-    // Restore selection if it still exists
-    if (currentSelection !== '') {
-        actorAppearanceDropdown.value = currentSelection;
-    }
+    updateDropdown(actorAppearanceDropdown, appearances, 'name', 'name', 'Select appearance...');
 }
 
 // Update the part appearance dropdown with current appearances
 function updatePartAppearanceDropdown() {
-    // Save current selection
-    const currentSelection = partAppearanceDropdown.value;
-    
-    // Clear and rebuild dropdown
-    partAppearanceDropdown.innerHTML = '<option value="">Select appearance...</option>';
-    
-    appearances.forEach((appearance, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.textContent = appearance.name;
-        partAppearanceDropdown.appendChild(option);
-    });
-    
-    // Restore selection if it still exists
-    if (currentSelection !== '') {
-        partAppearanceDropdown.value = currentSelection;
-    }
+    updateDropdown(partAppearanceDropdown, appearances, null, 'name', 'Select appearance...');
 }
 
 // Load appearance into controls
@@ -576,20 +592,13 @@ exportAppearanceButton.addEventListener('click', () => {
         text: { ...colors.text }
     };
     
-    try {
-        // Get existing appearances from localStorage
-        const storedAppearances = localStorage.getItem('sceneBuilderStoredAppearances');
-        let appearancesData = storedAppearances ? JSON.parse(storedAppearances) : {};
-        
-        // Add or update the appearance
-        appearancesData[name] = appearanceData;
-        
-        // Save back to localStorage
-        localStorage.setItem('sceneBuilderStoredAppearances', JSON.stringify(appearancesData));
-        
+    const appearancesData = getFromLocalStorage('sceneBuilderStoredAppearances') || {};
+    appearancesData[name] = appearanceData;
+    
+    if (saveToLocalStorage('sceneBuilderStoredAppearances', appearancesData)) {
         alert(`Appearance "${name}" exported successfully!`);
-    } catch (error) {
-        alert('Error exporting appearance: ' + error.message);
+    } else {
+        alert('Error exporting appearance.');
     }
 });
 
@@ -626,11 +635,7 @@ importAppearanceButton.addEventListener('click', () => {
             item.className = 'polygon-select-item';
             item.textContent = name;
             item.addEventListener('click', () => {
-                // Remove previous selection
-                document.querySelectorAll('#appearanceImportList .polygon-select-item').forEach(el => {
-                    el.classList.remove('selected');
-                });
-                // Select this item
+                removeAllSelections('#appearanceImportList');
                 item.classList.add('selected');
                 selectedImportAppearanceName = name;
             });
@@ -918,11 +923,7 @@ function importActor() {
             item.className = 'polygon-select-item';
             item.textContent = name;
             item.addEventListener('click', () => {
-                // Remove previous selection
-                document.querySelectorAll('#actorImportList .polygon-select-item').forEach(el => {
-                    el.classList.remove('selected');
-                });
-                // Select this item
+                removeAllSelections('#actorImportList');
                 item.classList.add('selected');
                 selectedImportActorIndex = name;
             });
@@ -1180,11 +1181,7 @@ deleteActorButton.addEventListener('click', () => {
             item.className = 'polygon-select-item';
             item.textContent = name;
             item.addEventListener('click', () => {
-                // Remove previous selection
-                document.querySelectorAll('#actorDeleteList .polygon-select-item').forEach(el => {
-                    el.classList.remove('selected');
-                });
-                // Select this item
+                removeAllSelections('#actorDeleteList');
                 item.classList.add('selected');
                 selectedDeleteActorName = name;
             });
@@ -1258,44 +1255,12 @@ clearActorButton.addEventListener('click', clearActorFields);
 
 // Update the actor polygon dropdown with current polygons
 function updateActorPolygonDropdown() {
-    // Save current selection
-    const currentSelection = actorPolygonDropdown.value;
-    
-    // Clear and rebuild dropdown
-    actorPolygonDropdown.innerHTML = '<option value="">Select polygon...</option>';
-    
-    polygons.forEach((polygon, index) => {
-        const option = document.createElement('option');
-        option.value = polygon.name;
-        option.textContent = polygon.name;
-        actorPolygonDropdown.appendChild(option);
-    });
-    
-    // Restore selection if it still exists
-    if (currentSelection !== '') {
-        actorPolygonDropdown.value = currentSelection;
-    }
+    updateDropdown(actorPolygonDropdown, polygons, 'name', 'name', 'Select polygon...');
 }
 
 // Update the part polygon dropdown with current polygons
 function updatePartPolygonDropdown() {
-    // Save current selection
-    const currentSelection = partPolygonDropdown.value;
-    
-    // Clear and rebuild dropdown
-    partPolygonDropdown.innerHTML = '<option value="">Select polygon...</option>';
-    
-    polygons.forEach((polygon, index) => {
-        const option = document.createElement('option');
-        option.value = polygon.name;
-        option.textContent = polygon.name;
-        partPolygonDropdown.appendChild(option);
-    });
-    
-    // Restore selection if it still exists
-    if (currentSelection !== '') {
-        partPolygonDropdown.value = currentSelection;
-    }
+    updateDropdown(partPolygonDropdown, polygons, 'name', 'name', 'Select polygon...');
 }
 
 // Polygon management functions
@@ -1529,11 +1494,7 @@ managePolygonButton.addEventListener('click', () => {
             const pointCount = Array.isArray(polygonData) ? polygonData.length : (polygonData.points ? polygonData.points.length : 0);
             item.textContent = `${name} (${pointCount} points)`;
             item.addEventListener('click', () => {
-                // Remove previous selection
-                document.querySelectorAll('#managePolygonList .polygon-select-item').forEach(el => {
-                    el.classList.remove('selected');
-                });
-                // Select this item
+                removeAllSelections('#managePolygonList');
                 item.classList.add('selected');
                 selectedManagePolygonName = name;
             });
@@ -1950,40 +1911,8 @@ clearPolygonCanvas();
 // Load actors from localStorage on page load
 loadActorsFromLocalStorage();
 
-// Load polygons from localStorage when coming back from builder
-function loadPolygonsFromStorage() {
-    try {
-        const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
-        if (storedPolygons) {
-            const polygonsData = JSON.parse(storedPolygons);
-            // Check which polygons are not already in the list
-            Object.keys(polygonsData).forEach(name => {
-                const exists = polygons.some(p => p.name === name);
-                if (!exists) {
-                    const polygonData = polygonsData[name];
-                    let polygonPoints;
-                    // Handle both old format (array) and new format (object with name/points)
-                    if (Array.isArray(polygonData)) {
-                        polygonPoints = polygonData;
-                    } else if (polygonData && polygonData.points) {
-                        polygonPoints = polygonData.points;
-                    } else {
-                        return; // Skip invalid data
-                    }
-                    polygons.push({
-                        name: name,
-                        points: polygonPoints
-                    });
-                }
-            });
-            renderPolygonList();
-        }
-    } catch (error) {
-        console.error('Error loading polygons:', error);
-    }
-}
-
-// loadPolygonsFromStorage();
+// Note: Auto-loading of polygons has been disabled per user preference
+// The unused loadPolygonsFromStorage() function has been removed
 
 // Initialize part dropdowns
 updatePartPolygonDropdown();
@@ -2120,11 +2049,7 @@ importPartButton.addEventListener('click', () => {
             item.className = 'polygon-select-item';
             item.textContent = name;
             item.addEventListener('click', () => {
-                // Remove previous selection
-                document.querySelectorAll('#partImportList .polygon-select-item').forEach(el => {
-                    el.classList.remove('selected');
-                });
-                // Select this item
+                removeAllSelections('#partImportList');
                 item.classList.add('selected');
                 selectedImportPartName = name;
             });
@@ -2210,11 +2135,7 @@ deletePartButton.addEventListener('click', () => {
             item.className = 'polygon-select-item';
             item.textContent = name;
             item.addEventListener('click', () => {
-                // Remove previous selection
-                document.querySelectorAll('#partDeleteList .polygon-select-item').forEach(el => {
-                    el.classList.remove('selected');
-                });
-                // Select this item
+                removeAllSelections('#partDeleteList');
                 item.classList.add('selected');
                 selectedDeletePartName = name;
             });
