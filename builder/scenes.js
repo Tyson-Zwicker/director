@@ -20,6 +20,7 @@ const appearanceName = document.getElementById('appearanceName');
 const addButton = document.getElementById('addAppearance');
 const removeButton = document.getElementById('removeAppearance');
 const appearanceList = document.getElementById('appearanceList');
+const newAppearanceBtn = document.getElementById('newAppearanceBtn');
 const exportAppearanceButton = document.getElementById('exportAppearance');
 const importAppearanceButton = document.getElementById('importAppearance');
 const actorAppearanceDropdown = document.getElementById('actorAppearance');
@@ -368,19 +369,30 @@ function addAppearance() {
     const name = appearanceName.value.trim() || `Appearance ${appearances.length + 1}`;
     
     // Check if an appearance with this name already exists
-    if (appearances.some(appearance => appearance.name === name)) {
-        alert(`An appearance with the name "${name}" already exists. Please use a different name.`);
-        return;
+    const existingIndex = appearances.findIndex(appearance => appearance.name === name);
+    if (existingIndex !== -1) {
+        const shouldReplace = confirm(`An appearance with the name "${name}" already exists. Do you want to replace it?`);
+        if (!shouldReplace) {
+            return;
+        }
+        // Replace the existing appearance
+        appearances[existingIndex] = {
+            name: name,
+            fill: { ...colors.fill },
+            stroke: { ...colors.stroke },
+            text: { ...colors.text }
+        };
+    } else {
+        // Add new appearance
+        const newAppearance = {
+            name: name,
+            fill: { ...colors.fill },
+            stroke: { ...colors.stroke },
+            text: { ...colors.text }
+        };
+        appearances.push(newAppearance);
     }
     
-    const newAppearance = {
-        name: name,
-        fill: { ...colors.fill },
-        stroke: { ...colors.stroke },
-        text: { ...colors.text }
-    };
-    
-    appearances.push(newAppearance);
     renderAppearanceList();
     
     // Clear the form fields after adding
@@ -496,6 +508,32 @@ function loadAppearance(index) {
 // Add event listeners for buttons
 addButton.addEventListener('click', addAppearance);
 removeButton.addEventListener('click', removeAppearance);
+
+// New appearance button - reset fields and deselect
+newAppearanceBtn.addEventListener('click', () => {
+    // Clear the name field
+    appearanceName.value = '';
+    
+    // Reset colors to black
+    colors.fill = { r: 0, g: 0, b: 0 };
+    colors.stroke = { r: 0, g: 0, b: 0 };
+    colors.text = { r: 0, g: 0, b: 0 };
+    
+    // Reset sliders
+    redSlider.value = 0;
+    greenSlider.value = 0;
+    blueSlider.value = 0;
+    redValue.textContent = 0;
+    greenValue.textContent = 0;
+    blueValue.textContent = 0;
+    
+    // Update previews
+    updateAllPreviews();
+    
+    // Deselect appearance list
+    appearanceList.selectedIndex = -1;
+    selectedAppearanceIndex = -1;
+});
 
 // Export appearance to localStorage
 exportAppearanceButton.addEventListener('click', () => {
@@ -869,7 +907,16 @@ modalImportActorBtn.addEventListener('click', () => {
         
         console.log('Using actor name:', newActorName);
         
+        // Validation: Check if polygon exists
+        const polygonName = importedActor.polygonName || importedActor.polygonIndex || '';
+        if (!polygonName || !polygons.find(p => p.name === polygonName)) {
+            alert(`Cannot import actor: The polygon "${polygonName}" does not exist. Please import or create this polygon first.`);
+            actorImportModal.style.display = 'none';
+            return;
+        }
+        
         // Check if the actor has an appearance and if it exists in current appearances
+        let appearanceExists = false;
         if (importedActor.appearanceName) {
             const existingAppearance = appearances.find(app => app.name === importedActor.appearanceName);
             
@@ -885,15 +932,25 @@ modalImportActorBtn.addEventListener('click', () => {
                         appearances.push(importedAppearance);
                         renderAppearanceList();
                         updateActorAppearanceDropdown();
-                        
+                        appearanceExists = true;
                         alert(`Automatically imported appearance "${importedActor.appearanceName}" for this actor.`);
                     } else {
-                        alert(`Warning: The actor requires appearance "${importedActor.appearanceName}" which is not found in storage. Please import or create this appearance manually.`);
+                        alert(`Cannot import actor: The appearance "${importedActor.appearanceName}" is not found in storage. Please import or create this appearance first.`);
+                        actorImportModal.style.display = 'none';
+                        return;
                     }
                 } else {
-                    alert(`Warning: The actor requires appearance "${importedActor.appearanceName}" but no stored appearances exist. Please create this appearance manually.`);
+                    alert(`Cannot import actor: The appearance "${importedActor.appearanceName}" is required but no stored appearances exist. Please create this appearance first.`);
+                    actorImportModal.style.display = 'none';
+                    return;
                 }
+            } else {
+                appearanceExists = true;
             }
+        } else {
+            alert(`Cannot import actor: The actor requires an appearance. Please ensure the actor has an appearance defined.`);
+            actorImportModal.style.display = 'none';
+            return;
         }
         
         // Load actor parts by name and auto-import if needed
@@ -903,7 +960,7 @@ modalImportActorBtn.addEventListener('click', () => {
             const partsData = storedParts ? JSON.parse(storedParts) : {};
             const missingParts = [];
             
-            importedActor.partNames.forEach(partName => {
+            for (const partName of importedActor.partNames) {
                 let part = parts.find(p => p.name === partName);
                 
                 if (!part && partsData[partName]) {
@@ -920,10 +977,12 @@ modalImportActorBtn.addEventListener('click', () => {
                 } else {
                     missingParts.push(partName);
                 }
-            });
+            }
             
             if (missingParts.length > 0) {
-                alert(`Warning: The following parts could not be found or imported: ${missingParts.join(', ')}. Please create or import these parts manually.`);
+                alert(`Cannot import actor: The following parts could not be found or imported: ${missingParts.join(', ')}. Please create or import these parts first.`);
+                actorImportModal.style.display = 'none';
+                return;
             }
         }
         
@@ -931,7 +990,7 @@ modalImportActorBtn.addEventListener('click', () => {
         const newActor = {
             name: newActorName,
             mass: importedActor.mass,
-            polygonName: importedActor.polygonName || importedActor.polygonIndex || '',
+            polygonName: polygonName,
             appearanceName: importedActor.appearanceName || '',
             xPos: importedActor.xPos,
             yPos: importedActor.yPos,
@@ -2107,7 +2166,7 @@ toJSONBtn.addEventListener('click', () => {
             position: { x: part.xPos, y: part.yPos },
             facing: part.facing,
             polygonName: part.polygonName,
-            appearanceName: part.appearanceName
+            appearanceName: appearances[part.appearanceIndex]?.name || ''
         })),
         polygons: polygons.map(polygon => ({
             name: polygon.name,
@@ -2121,7 +2180,72 @@ toJSONBtn.addEventListener('click', () => {
         }))
     };
     
-    sceneOutput.value = JSON.stringify(sceneData, null, 2);
+    // Find all appearance names used in actors and parts
+    const usedAppearanceNames = new Set();
+    actors.forEach(actor => {
+        if (actor.appearanceName) {
+            usedAppearanceNames.add(actor.appearanceName);
+        }
+    });
+    parts.forEach(part => {
+        const appearanceName = appearances[part.appearanceIndex]?.name;
+        if (appearanceName) {
+            usedAppearanceNames.add(appearanceName);
+        }
+    });
+    
+    // Filter appearances to only used ones
+    const usedAppearances = appearances.filter(appearance => 
+        usedAppearanceNames.has(appearance.name)
+    ).map(appearance => ({
+        name: appearance.name,
+        fill: appearance.fill,
+        stroke: appearance.stroke,
+        text: appearance.text
+    }));
+    
+    // Find all part names used in actors
+    const usedPartNames = new Set();
+    actors.forEach(actor => {
+        if (actor.partNames && actor.partNames.length > 0) {
+            actor.partNames.forEach(partName => usedPartNames.add(partName));
+        }
+    });
+    
+    // Filter parts to only used ones
+    const usedParts = parts.filter(part => 
+        usedPartNames.has(part.name)
+    ).map(part => ({
+        name: part.name,
+        position: { x: part.xPos, y: part.yPos },
+        facing: part.facing,
+        polygonName: part.polygonName,
+        appearanceName: appearances[part.appearanceIndex]?.name || ''
+    }));
+    
+    // All actors are used (they're in the scene)
+    const usedActors = actors.map(actor => ({
+        name: actor.name,
+        mass: actor.mass,
+        polygonName: actor.polygonName,
+        appearanceName: actor.appearanceName,
+        position: { x: actor.xPos, y: actor.yPos },
+        velocity: { x: actor.xVel, y: actor.yVel },
+        facing: actor.facing,
+        spin: actor.spin,
+        partNames: actor.partNames || []
+    }));
+    
+    // Build output with scene JSON followed by lists
+    let output = JSON.stringify(sceneData, null, 2);
+    output += '\n\n// Appearances used in this scene:\n';
+    output += JSON.stringify(usedAppearances, null, 2);
+    output += '\n\n// Parts used in this scene:\n';
+    output += JSON.stringify(usedParts, null, 2);
+    output += '\n\n// Actors in this scene:\n';
+    output += JSON.stringify(usedActors, null, 2);
+    
+    sceneOutput.value = output;
 });
 
 // Export Scene button - save to local storage
