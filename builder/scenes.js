@@ -362,20 +362,24 @@ function drawPolygonInPreview(polygonPoints, appearance, offsetX = 0, offsetY = 
     // Fill
     if (appearance && appearance.fill) {
         const fill = appearance.fill;
-        const r = fill.r !== undefined ? fill.r : 0;
-        const g = fill.g !== undefined ? fill.g : 0;
-        const b = fill.b !== undefined ? fill.b : 0;
-        actorPreviewCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+        // Convert 4-bit color (0-15) to 8-bit (0-255)
+        const r = (fill.r !== undefined ? fill.r : 0) * 17;
+        const g = (fill.g !== undefined ? fill.g : 0) * 17;
+        const b = (fill.b !== undefined ? fill.b : 0) * 17;
+        const colorString = `rgb(${r}, ${g}, ${b})`;
+        actorPreviewCtx.fillStyle = colorString;
         actorPreviewCtx.fill();
     }
     
     // Stroke
     if (appearance && appearance.stroke) {
         const stroke = appearance.stroke;
-        const r = stroke.r !== undefined ? stroke.r : 0;
-        const g = stroke.g !== undefined ? stroke.g : 0;
-        const b = stroke.b !== undefined ? stroke.b : 0;
-        actorPreviewCtx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+        // Convert 4-bit color (0-15) to 8-bit (0-255)
+        const r = (stroke.r !== undefined ? stroke.r : 0) * 17;
+        const g = (stroke.g !== undefined ? stroke.g : 0) * 17;
+        const b = (stroke.b !== undefined ? stroke.b : 0) * 17;
+        const colorString = `rgb(${r}, ${g}, ${b})`;
+        actorPreviewCtx.strokeStyle = colorString;
         actorPreviewCtx.lineWidth = 2;
         actorPreviewCtx.stroke();
     }
@@ -395,6 +399,7 @@ function drawActorPreview(actor) {
     
     // Get appearance data
     const appearance = appearances.find(a => a.name === actor.appearanceName);
+    console.log('Actor appearance lookup:', actor.appearanceName, appearance);
     if (!appearance) {
         return;
     }
@@ -473,6 +478,7 @@ function drawActorPreview(actor) {
             if (!partPolygon || !partPolygon.points) return;
             
             const partAppearance = appearances[part.appearanceIndex];
+            console.log('Part appearance lookup:', part.appearanceIndex, partAppearance);
             if (!partAppearance) return;
             
             // Calculate part position relative to actor using offsets
