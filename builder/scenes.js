@@ -1779,7 +1779,7 @@ const polygonSelectModal = document.getElementById('polygonSelectModal');
 const polygonSelectList = document.getElementById('polygonSelectList');
 const modalAddPolygonBtn = document.getElementById('modalAddPolygonBtn');
 const modalCancelPolygonBtn = document.getElementById('modalCancelPolygonBtn');
-let selectedStoredPolygonName = null;
+let selectedPolygonForImport = null;
 
 // Update addPolygon to show modal with stored polygons
 function addPolygon() {
@@ -1800,7 +1800,7 @@ function addPolygon() {
         }
         
         // Show modal and populate list
-        selectedStoredPolygonName = null;
+        selectedPolygonForImport = null;
         polygonSelectList.innerHTML = '';
         
         polygonNames.forEach(name => {
@@ -1810,13 +1810,9 @@ function addPolygon() {
             const pointCount = Array.isArray(polygonData) ? polygonData.length : (polygonData.points ? polygonData.points.length : 0);
             item.textContent = `${name} (${pointCount} points)`;
             item.addEventListener('click', () => {
-                // Remove previous selection
-                document.querySelectorAll('.polygon-select-item').forEach(el => {
-                    el.classList.remove('selected');
-                });
-                // Select this item
+                removeAllSelections('#polygonSelectList');
                 item.classList.add('selected');
-                selectedStoredPolygonName = name;
+                selectedPolygonForImport = name;
             });
             polygonSelectList.appendChild(item);
         });
@@ -1829,7 +1825,7 @@ function addPolygon() {
 
 // Modal add button
 modalAddPolygonBtn.addEventListener('click', () => {
-    if (!selectedStoredPolygonName) {
+    if (!selectedPolygonForImport) {
         alert('Please select a polygon to add');
         return;
     }
@@ -1837,7 +1833,7 @@ modalAddPolygonBtn.addEventListener('click', () => {
     try {
         const storedPolygons = localStorage.getItem('polygonBuilderPolygons');
         const polygonsData = JSON.parse(storedPolygons);
-        const polygonData = polygonsData[selectedStoredPolygonName];
+        const polygonData = polygonsData[selectedPolygonForImport];
         
         // Handle both old format (array) and new format (object with name/points)
         let polygonPoints;
@@ -1852,7 +1848,7 @@ modalAddPolygonBtn.addEventListener('click', () => {
         
         // Add polygon to list with its data
         polygons.push({ 
-            name: selectedStoredPolygonName,
+            name: selectedPolygonForImport,
             points: polygonPoints
         });
         
