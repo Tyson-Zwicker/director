@@ -362,14 +362,20 @@ function drawPolygonInPreview(polygonPoints, appearance, offsetX = 0, offsetY = 
     // Fill
     if (appearance && appearance.fill) {
         const fill = appearance.fill;
-        actorPreviewCtx.fillStyle = `rgb(${fill.r}, ${fill.g}, ${fill.b})`;
+        const r = fill.r !== undefined ? fill.r : 0;
+        const g = fill.g !== undefined ? fill.g : 0;
+        const b = fill.b !== undefined ? fill.b : 0;
+        actorPreviewCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
         actorPreviewCtx.fill();
     }
     
     // Stroke
     if (appearance && appearance.stroke) {
         const stroke = appearance.stroke;
-        actorPreviewCtx.strokeStyle = `rgb(${stroke.r}, ${stroke.g}, ${stroke.b})`;
+        const r = stroke.r !== undefined ? stroke.r : 0;
+        const g = stroke.g !== undefined ? stroke.g : 0;
+        const b = stroke.b !== undefined ? stroke.b : 0;
+        actorPreviewCtx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
         actorPreviewCtx.lineWidth = 2;
         actorPreviewCtx.stroke();
     }
@@ -2492,22 +2498,26 @@ changePartOffsetBtn.addEventListener('click', () => {
 
 // Reset DB button - clear all localStorage
 resetDbBtn.addEventListener('click', () => {
-    const confirmed = confirm('Are you sure you want to clear all stored data?\n\nThis will delete all saved actors, appearances, parts, and polygons from localStorage.\n\nThis action cannot be undone.');
+    const confirmed = confirm('Are you sure you want to clear all stored data?\n\nThis will delete all saved actors, appearances, and parts from localStorage.\n\nPolygons will NOT be deleted.\n\nThis action cannot be undone.');
     
     if (confirmed) {
-        localStorage.clear();
+        // Clear specific localStorage items, but NOT polygons
+        localStorage.removeItem('sceneBuilderStoredActors');
+        localStorage.removeItem('sceneBuilderStoredAppearances');
+        localStorage.removeItem('sceneBuilderStoredParts');
+        localStorage.removeItem('sceneBuilderScenes');
+        localStorage.removeItem('sceneBuilderActors');
+        // Note: NOT removing 'polygonBuilderPolygons'
         
-        // Clear all arrays
+        // Clear arrays except polygons
         actors = [];
         parts = [];
-        polygons = [];
         appearances = [];
         actorParts = [];
         
         // Reset selected indices
         selectedActorIndex = -1;
         selectedPartIndex = -1;
-        selectedPolygonIndex = -1;
         selectedAppearanceIndex = -1;
         
         // Clear all actor fields
@@ -2533,7 +2543,6 @@ resetDbBtn.addEventListener('click', () => {
         // Update all lists and dropdowns
         renderActorList();
         renderPartList();
-        renderPolygonList();
         renderAppearanceList();
         renderActorPartsList();
         updateActorPolygonDropdown();
@@ -2542,13 +2551,10 @@ resetDbBtn.addEventListener('click', () => {
         updatePartAppearanceDropdown();
         updateAllPreviews();
         
-        // Clear polygon canvas
-        polygonCtx.clearRect(0, 0, polygonCanvas.width, polygonCanvas.height);
-        
         // Clear map view
         drawMapView();
         
-        alert('All stored data has been cleared.');
+        alert('All stored data has been cleared (polygons preserved).');
     }
 });
 
