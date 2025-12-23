@@ -809,9 +809,11 @@ function addActor() {
     if (existingActorIndex !== -1) {
         // Overwrite existing actor
         actors[existingActorIndex] = actor;
+        selectedActorIndex = existingActorIndex;
     } else {
         // Add new actor
         actors.push(actor);
+        selectedActorIndex = actors.length - 1;
     }
     
     // Update localStorage if this actor name exists there
@@ -829,6 +831,8 @@ function addActor() {
     }
     
     renderActorList();
+    actorList.selectedIndex = selectedActorIndex;
+    drawActorPreview(actors[selectedActorIndex]);
     drawMapView();
     
     // Clear actorParts for next actor
@@ -975,8 +979,14 @@ function drawActorPreviewWithManualZoom(actor, zoom) {
 
 // Actor listbox selection
 actorList.addEventListener('change', (e) => {
-    selectedActorIndex = parseInt(e.target.value);
-    if (selectedActorIndex >= 0 && selectedActorIndex < actors.length) {
+    let actorListIndex = parseInt(e.target.value);
+    if (actorListIndex >= 0 && actorListIndex < actors.length) {
+      selectedActorIndex = actorListIndex;
+    }else{
+      
+    }
+    selectedActorIndex = actorListIndex
+    if (actorListIndex >= 0 && actorListIndex < actors.length) {
         const actor = actors[selectedActorIndex];
         actorName.value = actor.name;
         actorMass.value = actor.mass;
@@ -1945,8 +1955,8 @@ function drawMapView() {
     // Calculate world coordinates at canvas edges
     const leftWorldX = Math.round((-centerX - panOffsetX) / zoom);
     const rightWorldX = Math.round((centerX - panOffsetX) / zoom);
-    const topWorldY = Math.round((centerY - panOffsetY) / zoom);
-    const bottomWorldY = Math.round((-centerY - panOffsetY) / zoom);
+    const topWorldY = Math.round((-centerY - panOffsetY) / zoom);
+    const bottomWorldY = Math.round((centerY - panOffsetY) / zoom);
     
     // X-axis labels (left and right edges)
     ctx.fillText(leftWorldX.toString(), 30, centerY + 5);
@@ -1962,7 +1972,7 @@ function drawMapView() {
     actors.forEach((actor, index) => {
         // Convert world coordinates to screen coordinates with pan offset
         const screenX = centerX + (actor.xPos * zoom) + panOffsetX;
-        const screenY = centerY - (actor.yPos * zoom) + panOffsetY; // Negate Y for screen coordinates
+        const screenY = centerY + (actor.yPos * zoom) + panOffsetY; // Positive Y goes down (screen coordinates)
         
         // Get polygon and appearance
         const polygon = polygons.find(p => p.name === actor.polygonName);
@@ -1980,7 +1990,7 @@ function drawMapView() {
         // Draw polygon at actor position with rotation
         ctx.save();
         ctx.translate(screenX, screenY);
-        ctx.rotate(actor.facing || 0);
+        ctx.rotate((actor.facing || 0) * Math.PI / 180); // Convert degrees to radians
         ctx.scale(zoom, zoom);
         
         // Set colors from appearance
@@ -2121,6 +2131,12 @@ function addPart() {
     
     renderPartList();
     
+    // Update actor preview if an actor is selected
+    if (selectedActorIndex >= 0 && selectedActorIndex < actors.length) {
+        const actor = actors[selectedActorIndex];
+        drawActorPreview(actor);
+    }
+    
     // Clear the form fields after adding
     partName.value = '';
     partPolygonDropdown.value = '';
@@ -2133,6 +2149,12 @@ function removePart() {
         parts.splice(selectedPartIndex, 1);
         selectedPartIndex = -1;
         renderPartList();
+        
+        // Update actor preview if an actor is selected
+        if (selectedActorIndex >= 0 && selectedActorIndex < actors.length) {
+            const actor = actors[selectedActorIndex];
+            drawActorPreview(actor);
+        }
     }
 }
 
@@ -2441,6 +2463,13 @@ modalAddPartBtn.addEventListener('click', () => {
     
     actorParts.push(partInstance);
     renderActorPartsList();
+    
+    // Update actor preview
+    if (selectedActorIndex >= 0 && selectedActorIndex < actors.length) {
+        const actor = actors[selectedActorIndex];
+        drawActorPreview(actor);
+    }
+    
     partSelectModal.style.display = 'none';
 });
 
@@ -2455,6 +2484,12 @@ removeActorPartButton.addEventListener('click', () => {
     if (selectedIndex >= 0 && selectedIndex < actorParts.length) {
         actorParts.splice(selectedIndex, 1);
         renderActorPartsList();
+        
+        // Update actor preview
+        if (selectedActorIndex >= 0 && selectedActorIndex < actors.length) {
+            const actor = actors[selectedActorIndex];
+            drawActorPreview(actor);
+        }
     }
 });
 
@@ -2492,6 +2527,13 @@ changePartOffsetBtn.addEventListener('click', () => {
         actorParts[selectedIndex].yOffset = yOffset;
         
         renderActorPartsList();
+        
+        // Update actor preview
+        if (selectedActorIndex >= 0 && selectedActorIndex < actors.length) {
+            const actor = actors[selectedActorIndex];
+            drawActorPreview(actor);
+        }
+        
         alert('Offset updated');
     } else {
         alert('Please select a part from the list');
