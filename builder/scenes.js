@@ -835,9 +835,9 @@ function addActor() {
     drawActorPreview(actors[selectedActorIndex]);
     drawMapView();
     
-    // Clear actorParts for next actor
-    actorParts = [];
-    renderActorPartsList();
+    // Don't clear actorParts - keep them visible for continued editing
+    // actorParts = [];
+    // renderActorPartsList();
 }
 
 function removeActor() {
