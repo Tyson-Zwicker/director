@@ -75,6 +75,7 @@ const addActorPartButton = document.getElementById('addActorPart');
 const removeActorPartButton = document.getElementById('removeActorPart');
 const partXOffset = document.getElementById('partXOffset');
 const partYOffset = document.getElementById('partYOffset');
+const partFacing = document.getElementById('partFacing');
 const changePartOffsetBtn = document.getElementById('changePartOffset');
 const partSelectModal = document.getElementById('partSelectModal');
 const partSelectList = document.getElementById('partSelectList');
@@ -82,6 +83,7 @@ const modalAddPartBtn = document.getElementById('modalAddPartBtn');
 const modalCancelPartBtn = document.getElementById('modalCancelPartBtn');
 const modalPartXOffset = document.getElementById('modalPartXOffset');
 const modalPartYOffset = document.getElementById('modalPartYOffset');
+const modalPartFacing = document.getElementById('modalPartFacing');
 const resetDbBtn = document.getElementById('resetDbBtn');
 const sceneName = document.getElementById('sceneName');
 const sceneShortDesc = document.getElementById('sceneShortDesc');
@@ -484,10 +486,11 @@ function drawActorPreview(actor) {
             // Calculate part position relative to actor using offsets
             const xOffset = partInfo.xOffset || 0;
             const yOffset = partInfo.yOffset || 0;
+            const partFacingOffset = partInfo.facing || 0;
             const rotatedX = xOffset * cosA - yOffset * sinA;
             const rotatedY = xOffset * sinA + yOffset * cosA;
             
-            drawPolygonInPreview(partPolygon.points, partAppearance, rotatedX, rotatedY, actorFacing, autoZoom);
+            drawPolygonInPreview(partPolygon.points, partAppearance, rotatedX, rotatedY, actorFacing + partFacingOffset, autoZoom);
         });
     } else if (actor.partNames && Array.isArray(actor.partNames)) {
         // Legacy format support (parts without offsets)
@@ -802,7 +805,8 @@ function addActor() {
         parts: actorParts.map(part => ({
             name: part.name,
             xOffset: part.xOffset || 0,
-            yOffset: part.yOffset || 0
+            yOffset: part.yOffset || 0,
+            facing: part.facing || 0
         }))
     };
     
@@ -956,10 +960,11 @@ function drawActorPreviewWithManualZoom(actor, zoom) {
             
             const xOffset = partInfo.xOffset || 0;
             const yOffset = partInfo.yOffset || 0;
+            const partFacingOffset = partInfo.facing || 0;
             const rotatedX = xOffset * cosA - yOffset * sinA;
             const rotatedY = xOffset * sinA + yOffset * cosA;
             
-            drawPolygonInPreview(partPolygon.points, partAppearance, rotatedX, rotatedY, actorFacing, zoom);
+            drawPolygonInPreview(partPolygon.points, partAppearance, rotatedX, rotatedY, actorFacing + partFacingOffset, zoom);
         });
     } else if (actor.partNames && Array.isArray(actor.partNames)) {
         actor.partNames.forEach(partName => {
@@ -1009,7 +1014,8 @@ actorList.addEventListener('change', (e) => {
                     actorParts.push({
                         ...part,
                         xOffset: partInfo.xOffset || 0,
-                        yOffset: partInfo.yOffset || 0
+                        yOffset: partInfo.yOffset || 0,
+                        facing: partInfo.facing || 0
                     });
                 }
             });
@@ -1021,7 +1027,8 @@ actorList.addEventListener('change', (e) => {
                     actorParts.push({
                         ...part,
                         xOffset: 0,
-                        yOffset: 0
+                        yOffset: 0,
+                        facing: 0
                     });
                 }
             });
@@ -1200,7 +1207,8 @@ modalImportActorBtn.addEventListener('click', () => {
                     actorParts.push({
                         ...part,
                         xOffset: partInfo.xOffset || 0,
-                        yOffset: partInfo.yOffset || 0
+                        yOffset: partInfo.yOffset || 0,
+                        facing: partInfo.facing || 0
                     });
                 } else {
                     missingParts.push(partName);
@@ -1230,7 +1238,8 @@ modalImportActorBtn.addEventListener('click', () => {
             parts: actorParts.map(part => ({
                 name: part.name,
                 xOffset: part.xOffset || 0,
-                yOffset: part.yOffset || 0
+                yOffset: part.yOffset || 0,
+                facing: part.facing || 0
             }))
         };
         
@@ -2417,6 +2426,7 @@ addActorPartButton.addEventListener('click', () => {
     // Reset offset fields
     modalPartXOffset.value = 0;
     modalPartYOffset.value = 0;
+    modalPartFacing.value = 0;
     
     // Show modal and populate with parts
     selectedPartForActor = null;
@@ -2451,6 +2461,7 @@ modalAddPartBtn.addEventListener('click', () => {
     // Get X and Y offsets from modal input fields
     const xOffset = parseFloat(modalPartXOffset.value) || 0;
     const yOffset = parseFloat(modalPartYOffset.value) || 0;
+    const facing = parseFloat(modalPartFacing.value) || 0;
     
     const part = parts[selectedPartForActor];
     
@@ -2458,7 +2469,8 @@ modalAddPartBtn.addEventListener('click', () => {
     const partInstance = {
         ...part,
         xOffset: xOffset,
-        yOffset: yOffset
+        yOffset: yOffset,
+        facing: facing
     };
     
     actorParts.push(partInstance);
@@ -2513,6 +2525,7 @@ actorPartsList.addEventListener('change', () => {
         const part = actorParts[selectedIndex];
         partXOffset.value = part.xOffset || 0;
         partYOffset.value = part.yOffset || 0;
+        partFacing.value = part.facing || 0;
     }
 });
 
@@ -2522,9 +2535,11 @@ changePartOffsetBtn.addEventListener('click', () => {
     if (selectedIndex >= 0 && selectedIndex < actorParts.length) {
         const xOffset = parseFloat(partXOffset.value) || 0;
         const yOffset = parseFloat(partYOffset.value) || 0;
+        const facing = parseFloat(partFacing.value) || 0;
         
         actorParts[selectedIndex].xOffset = xOffset;
         actorParts[selectedIndex].yOffset = yOffset;
+        actorParts[selectedIndex].facing = facing;
         
         renderActorPartsList();
         
