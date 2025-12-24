@@ -661,11 +661,36 @@
                 </div>
             </div>
             
+            <!-- Permanent Storage Section -->
+            <div style="margin-bottom: 20px; border-bottom: 2px solid #444; padding-bottom: 15px;">
+                <h3 style="color: #4a90e2;">Permanent Storage (<span id="storageDomain"></span>)</h3>
+                
+                <!-- Row 1: Reset buttons -->
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+                    <label style="margin: 0; min-width: 50px;">Reset:</label>
+                    <button id="resetAllBtn" style="padding: 4px 12px; font-size: 14px; background-color: #d32f2f; color: #ffffff; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">All</button>
+                    <button id="checkAppearanceBtn" style="padding: 4px 12px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">Appearance</button>
+                    <button id="checkPartsBtn" style="padding: 4px 12px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">Parts</button>
+                    <button id="checkActorBtn" style="padding: 4px 12px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">Actor</button>
+                </div>
+                
+                <!-- Row 2: Exports Required listbox -->
+                <div class="control-group" style="margin-bottom: 8px;">
+                    <label for="exportsRequiredList">Exports Required:</label>
+                    <select id="exportsRequiredList" size="6" style="width: 100%; background-color: #2d2d2d; border: 1px solid #404040; color: #e0e0e0; border-radius: 3px;"></select>
+                </div>
+                
+                <!-- Row 3: Export buttons -->
+                <div style="display: flex; gap: 10px;">
+                    <button id="exportSelectedBtn" style="padding: 4px 20px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer; flex: 1;">Export</button>
+                    <button id="exportAllRequiredBtn" style="padding: 4px 20px; font-size: 14px; background-color: #FFD700; color: #000000; border: none; border-radius: 3px; cursor: pointer; flex: 1; font-weight: bold;">Export All</button>
+                </div>
+            </div>
+            
             <!-- Scene Section -->
             <h3 style="margin: 0; color: #4a90e2; margin-bottom: 4px;">Scene</h3>
             <div id="sceneContent">
-                <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <button id="resetDbBtn" style="padding: 4px 12px; font-size: 14px; background-color: #d32f2f; color: #ffffff; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">RESET DB</button>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
                     <div style="display: flex; gap: 10px;">
                         <button id="importSceneBtn" style="padding: 2px 30px; font-size: 16px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">Import</button>
                         <button id="exportSceneBtn" style="padding: 2px 30px; font-size: 16px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">Export</button>
