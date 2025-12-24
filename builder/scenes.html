@@ -665,10 +665,9 @@
             <div style="margin-bottom: 20px; border-bottom: 2px solid #444; padding-bottom: 15px;">
                 <h3 style="color: #4a90e2;">Permanent Storage (<span id="storageDomain"></span>)</h3>
                 
-                <!-- Row 1: Reset buttons -->
+                <!-- Row 1: Check buttons -->
                 <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
-                    <label style="margin: 0; min-width: 50px;">Reset:</label>
-                    <button id="resetAllBtn" style="padding: 4px 12px; font-size: 14px; background-color: #d32f2f; color: #ffffff; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">All</button>
+                    <label style="margin: 0; min-width: 95px;">is Permanent?</label>
                     <button id="checkAppearanceBtn" style="padding: 4px 12px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">Appearance</button>
                     <button id="checkPartsBtn" style="padding: 4px 12px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">Parts</button>
                     <button id="checkActorBtn" style="padding: 4px 12px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">Actor</button>
@@ -681,9 +680,18 @@
                 </div>
                 
                 <!-- Row 3: Export buttons -->
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px; margin-bottom: 8px;">
                     <button id="exportSelectedBtn" style="padding: 4px 20px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer; flex: 1;">Export</button>
                     <button id="exportAllRequiredBtn" style="padding: 4px 20px; font-size: 14px; background-color: #FFD700; color: #000000; border: none; border-radius: 3px; cursor: pointer; flex: 1; font-weight: bold;">Export All</button>
+                </div>
+                
+                <!-- Row 4: Reset button -->
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <label style="margin: 0; min-width: 95px;">Reset:</label>
+                    <button id="resetAllBtn" style="padding: 4px 12px; font-size: 14px; background-color: #d32f2f; color: #ffffff; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">All</button>
+                    <button id="resetAppearancesBtn" style="padding: 4px 12px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">Appearances</button>
+                    <button id="resetPartsStorageBtn" style="padding: 4px 12px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">Parts</button>
+                    <button id="resetActorsBtn" style="padding: 4px 12px; font-size: 14px; background-color: #4a90e2; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">Actors</button>
                 </div>
             </div>
             

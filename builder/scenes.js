@@ -85,6 +85,17 @@ const modalPartXOffset = document.getElementById('modalPartXOffset');
 const modalPartYOffset = document.getElementById('modalPartYOffset');
 const modalPartFacing = document.getElementById('modalPartFacing');
 const resetDbBtn = document.getElementById('resetDbBtn');
+const resetAllBtn = document.getElementById('resetAllBtn');
+const resetAppearancesBtn = document.getElementById('resetAppearancesBtn');
+const resetPartsStorageBtn = document.getElementById('resetPartsStorageBtn');
+const resetActorsBtn = document.getElementById('resetActorsBtn');
+const checkAppearanceBtn = document.getElementById('checkAppearanceBtn');
+const checkPartsBtn = document.getElementById('checkPartsBtn');
+const checkActorBtn = document.getElementById('checkActorBtn');
+const exportsRequiredList = document.getElementById('exportsRequiredList');
+const exportSelectedBtn = document.getElementById('exportSelectedBtn');
+const exportAllRequiredBtn = document.getElementById('exportAllRequiredBtn');
+const storageDomain = document.getElementById('storageDomain');
 const sceneName = document.getElementById('sceneName');
 const sceneShortDesc = document.getElementById('sceneShortDesc');
 const sceneMissionText = document.getElementById('sceneMissionText');
@@ -2037,7 +2048,183 @@ function drawMapView() {
 }
 
 // Initialize when page loads
-window.addEventListener('load', initCanvas);
+window.addEventListener('load', () => {
+    initCanvas();
+    
+    // Initialize storage domain display
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    
+    if (protocol === 'file:') {
+        storageDomain.textContent = '(local filesystem)';
+    } else if (host) {
+        storageDomain.textContent = `${protocol}//${host}`;
+    } else {
+        storageDomain.textContent = '(unknown location)';
+    }
+    
+    // Add permanent storage event listeners
+    resetAllBtn.addEventListener('click', () => {
+        const confirmed = confirm('Are you sure you want to clear all stored data?\n\nThis will delete all saved actors, appearances, and parts from localStorage.\n\nPolygons will NOT be deleted.\n\nThis action cannot be undone.');
+        
+        if (confirmed) {
+            localStorage.removeItem('sceneBuilderStoredActors');
+            localStorage.removeItem('sceneBuilderStoredAppearances');
+            localStorage.removeItem('sceneBuilderStoredParts');
+            localStorage.removeItem('sceneBuilderScenes');
+            localStorage.removeItem('sceneBuilderActors');
+            
+            alert('All stored data (except polygons) has been cleared.');
+        }
+    });
+    
+    resetAppearancesBtn.addEventListener('click', () => {
+        const confirmed = confirm('Are you sure you want to clear all stored appearances from localStorage?\n\nThis action cannot be undone.');
+        
+        if (confirmed) {
+            localStorage.removeItem('sceneBuilderStoredAppearances');
+            alert('All stored appearances have been cleared.');
+        }
+    });
+    
+    resetPartsStorageBtn.addEventListener('click', () => {
+        const confirmed = confirm('Are you sure you want to clear all stored parts from localStorage?\n\nThis action cannot be undone.');
+        
+        if (confirmed) {
+            localStorage.removeItem('sceneBuilderStoredParts');
+            alert('All stored parts have been cleared.');
+        }
+    });
+    
+    resetActorsBtn.addEventListener('click', () => {
+        const confirmed = confirm('Are you sure you want to clear all stored actors from localStorage?\n\nThis action cannot be undone.');
+        
+        if (confirmed) {
+            localStorage.removeItem('sceneBuilderStoredActors');
+            alert('All stored actors have been cleared.');
+        }
+    });
+    
+    checkAppearanceBtn.addEventListener('click', () => {
+        exportsRequired = exportsRequired.filter(item => item.type !== 'appearance');
+        checkAppearancesForExport();
+        if (exportsRequired.filter(item => item.type === 'appearance').length === 0) {
+            alert('All appearances are already in localStorage.');
+        }
+    });
+    
+    checkPartsBtn.addEventListener('click', () => {
+        exportsRequired = exportsRequired.filter(item => item.type !== 'part');
+        checkPartsForExport();
+        if (exportsRequired.filter(item => item.type === 'part').length === 0) {
+            alert('All parts are already in localStorage.');
+        }
+    });
+    
+    checkActorBtn.addEventListener('click', () => {
+        exportsRequired = exportsRequired.filter(item => item.type !== 'actor');
+        checkActorsForExport();
+        if (exportsRequired.filter(item => item.type === 'actor').length === 0) {
+            alert('All actors are already in localStorage.');
+        }
+    });
+    
+    exportSelectedBtn.addEventListener('click', () => {
+        const selectedIndex = exportsRequiredList.selectedIndex;
+        if (selectedIndex < 0) {
+            alert('Please select an item to export.');
+            return;
+        }
+        
+        const item = exportsRequired[selectedIndex];
+        
+        if (item.type === 'appearance') {
+            const appearance = appearances.find(a => a.name === item.name);
+            if (appearance) {
+                const storedAppearances = JSON.parse(localStorage.getItem('sceneBuilderStoredAppearances') || '{}');
+                storedAppearances[appearance.name] = appearance;
+                localStorage.setItem('sceneBuilderStoredAppearances', JSON.stringify(storedAppearances));
+                
+                exportsRequired.splice(selectedIndex, 1);
+                populateExportsRequiredList();
+                alert(`Appearance "${item.name}" has been exported to localStorage.`);
+            }
+        } else if (item.type === 'part') {
+            const part = parts.find(p => p.name === item.name);
+            if (part) {
+                const storedParts = JSON.parse(localStorage.getItem('sceneBuilderStoredParts') || '{}');
+                storedParts[part.name] = part;
+                localStorage.setItem('sceneBuilderStoredParts', JSON.stringify(storedParts));
+                
+                exportsRequired.splice(selectedIndex, 1);
+                populateExportsRequiredList();
+                alert(`Part "${item.name}" has been exported to localStorage.`);
+            }
+        } else if (item.type === 'actor') {
+            const actor = actors.find(a => a.name === item.name);
+            if (actor) {
+                const storedActors = JSON.parse(localStorage.getItem('sceneBuilderStoredActors') || '{}');
+                storedActors[actor.name] = actor;
+                localStorage.setItem('sceneBuilderStoredActors', JSON.stringify(storedActors));
+                
+                exportsRequired.splice(selectedIndex, 1);
+                populateExportsRequiredList();
+                alert(`Actor "${item.name}" has been exported to localStorage.`);
+            }
+        }
+    });
+    
+    exportAllRequiredBtn.addEventListener('click', () => {
+        if (exportsRequired.length === 0) {
+            alert('No items to export.');
+            return;
+        }
+        
+        const confirmed = confirm(`Export all ${exportsRequired.length} item(s) to localStorage?`);
+        if (!confirmed) return;
+        
+        let exportCount = 0;
+        
+        exportsRequired.forEach(item => {
+            if (item.type === 'appearance') {
+                const appearance = appearances.find(a => a.name === item.name);
+                if (appearance) {
+                    const storedAppearances = JSON.parse(localStorage.getItem('sceneBuilderStoredAppearances') || '{}');
+                    if (!storedAppearances[appearance.name]) {
+                        storedAppearances[appearance.name] = appearance;
+                        localStorage.setItem('sceneBuilderStoredAppearances', JSON.stringify(storedAppearances));
+                        exportCount++;
+                    }
+                }
+            } else if (item.type === 'part') {
+                const part = parts.find(p => p.name === item.name);
+                if (part) {
+                    const storedParts = JSON.parse(localStorage.getItem('sceneBuilderStoredParts') || '{}');
+                    if (!storedParts[part.name]) {
+                        storedParts[part.name] = part;
+                        localStorage.setItem('sceneBuilderStoredParts', JSON.stringify(storedParts));
+                        exportCount++;
+                    }
+                }
+            } else if (item.type === 'actor') {
+                const actor = actors.find(a => a.name === item.name);
+                if (actor) {
+                    const storedActors = JSON.parse(localStorage.getItem('sceneBuilderStoredActors') || '{}');
+                    if (!storedActors[actor.name]) {
+                        storedActors[actor.name] = actor;
+                        localStorage.setItem('sceneBuilderStoredActors', JSON.stringify(storedActors));
+                        exportCount++;
+                    }
+                }
+            }
+        });
+        
+        exportsRequired = [];
+        populateExportsRequiredList();
+        
+        alert(`${exportCount} item(s) have been exported to localStorage.`);
+    });
+});
 window.addEventListener('resize', initCanvas);
 
 // Zoom level change listener
@@ -2555,68 +2742,6 @@ changePartOffsetBtn.addEventListener('click', () => {
     }
 });
 
-// Reset DB button - clear all localStorage
-resetDbBtn.addEventListener('click', () => {
-    const confirmed = confirm('Are you sure you want to clear all stored data?\n\nThis will delete all saved actors, appearances, and parts from localStorage.\n\nPolygons will NOT be deleted.\n\nThis action cannot be undone.');
-    
-    if (confirmed) {
-        // Clear specific localStorage items, but NOT polygons
-        localStorage.removeItem('sceneBuilderStoredActors');
-        localStorage.removeItem('sceneBuilderStoredAppearances');
-        localStorage.removeItem('sceneBuilderStoredParts');
-        localStorage.removeItem('sceneBuilderScenes');
-        localStorage.removeItem('sceneBuilderActors');
-        // Note: NOT removing 'polygonBuilderPolygons'
-        
-        // Clear arrays except polygons
-        actors = [];
-        parts = [];
-        appearances = [];
-        actorParts = [];
-        
-        // Reset selected indices
-        selectedActorIndex = -1;
-        selectedPartIndex = -1;
-        selectedAppearanceIndex = -1;
-        
-        // Clear all actor fields
-        clearActorFields();
-        
-        // Clear all part fields
-        partName.value = '';
-        partPolygonDropdown.value = '';
-        partAppearanceDropdown.value = '';
-        
-        // Clear all appearance fields
-        appearanceName.value = '';
-        redSlider.value = 0;
-        greenSlider.value = 0;
-        blueSlider.value = 0;
-        redValue.textContent = 0;
-        greenValue.textContent = 0;
-        blueValue.textContent = 0;
-        colors.fill = { r: 0, g: 0, b: 0 };
-        colors.stroke = { r: 0, g: 0, b: 0 };
-        colors.text = { r: 0, g: 0, b: 0 };
-        
-        // Update all lists and dropdowns
-        renderActorList();
-        renderPartList();
-        renderAppearanceList();
-        renderActorPartsList();
-        updateActorPolygonDropdown();
-        updateActorAppearanceDropdown();
-        updatePartPolygonDropdown();
-        updatePartAppearanceDropdown();
-        updateAllPreviews();
-        
-        // Clear map view
-        drawMapView();
-        
-        alert('All stored data has been cleared (polygons preserved).');
-    }
-});
-
 // To JSON button - generate scene JSON
 toJSONBtn.addEventListener('click', () => {
     // Validate required fields
@@ -2938,3 +3063,77 @@ modalCancelSceneImportBtn.addEventListener('click', () => {
 // Initialize actor preview canvas on page load
 clearActorPreview();
 drawActorPreviewGrid();
+
+// Storage for exports required list (with type information)
+let exportsRequired = []; // Array of {name: string, type: 'appearance'|'part'|'actor'}
+
+// Function to populate exports required list
+function populateExportsRequiredList() {
+    exportsRequiredList.innerHTML = '';
+    exportsRequired.forEach((item, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `[${item.type}] ${item.name}`;
+        exportsRequiredList.appendChild(option);
+    });
+}
+
+// Function to check appearances against localStorage
+function checkAppearancesForExport() {
+    const storedAppearances = JSON.parse(localStorage.getItem('sceneBuilderStoredAppearances') || '{}');
+    const storedNames = new Set(Object.keys(storedAppearances));
+    
+    appearances.forEach(appearance => {
+        if (!storedNames.has(appearance.name)) {
+            // Check if already in exports required
+            const alreadyAdded = exportsRequired.some(item => 
+                item.type === 'appearance' && item.name === appearance.name
+            );
+            if (!alreadyAdded) {
+                exportsRequired.push({ name: appearance.name, type: 'appearance' });
+            }
+        }
+    });
+    
+    populateExportsRequiredList();
+}
+
+// Function to check parts against localStorage
+function checkPartsForExport() {
+    const storedParts = JSON.parse(localStorage.getItem('sceneBuilderStoredParts') || '{}');
+    const storedNames = new Set(Object.keys(storedParts));
+    
+    parts.forEach(part => {
+        if (!storedNames.has(part.name)) {
+            // Check if already in exports required
+            const alreadyAdded = exportsRequired.some(item => 
+                item.type === 'part' && item.name === part.name
+            );
+            if (!alreadyAdded) {
+                exportsRequired.push({ name: part.name, type: 'part' });
+            }
+        }
+    });
+    
+    populateExportsRequiredList();
+}
+
+// Function to check actors against localStorage
+function checkActorsForExport() {
+    const storedActors = JSON.parse(localStorage.getItem('sceneBuilderStoredActors') || '{}');
+    const storedNames = new Set(Object.keys(storedActors));
+    
+    actors.forEach(actor => {
+        if (!storedNames.has(actor.name)) {
+            // Check if already in exports required
+            const alreadyAdded = exportsRequired.some(item => 
+                item.type === 'actor' && item.name === actor.name
+            );
+            if (!alreadyAdded) {
+                exportsRequired.push({ name: actor.name, type: 'actor' });
+            }
+        }
+    });
+    
+    populateExportsRequiredList();
+}
