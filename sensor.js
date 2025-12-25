@@ -52,6 +52,11 @@ class Sensor {
     //Are they bounded within the two lines segments?  If so, put them in the "detected" list,
     //and refine the sensorEdges to the angles the won't intersect the detected object.
 
+    //TODO: I need a function that can take two points and turn them into a "line" that can
+    //then be asked "where is x if y=?? and also where is y if x=??" in order to calculate the
+    //boundry. DIGEST THIS:  https://en.wikipedia.org/wiki/Linear_equation 
+
+
     for (let candidate of candidates) {
 
     }
