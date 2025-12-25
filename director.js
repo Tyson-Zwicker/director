@@ -185,7 +185,7 @@ export default class Director {
       Director.quadtree.insert(actor);
     }
   }
-  static sensing(delta, currentTime) {
+  /*static sensing(delta, currentTime) {
     for (let actor of Director.actors.values()) {
       if (actor.sensors) {
         for (let sensor of actor.sensors) {
@@ -203,6 +203,7 @@ export default class Director {
       }
     }
   }
+    */
   //------------------------- loop
   static loop(currentTime) {
     const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
@@ -211,7 +212,7 @@ export default class Director {
     Director.applyActorField(delta);
     Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.
     //BROKEN: Director.removeOldSensorData(currentTime);
-    Director.sensing(delta, currentTime); //<- do this before draw, as it may add effects..
+    //Director.sensing(delta, currentTime); //<- do this before draw, as it may add effects..
     Director.runParticleGenerators(currentTime);
     Director.draw(delta);
     Director.collisions(delta);
