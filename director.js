@@ -211,7 +211,8 @@ export default class Director {
     Director.kinematics(delta); //This redraws the entire quadtree.
     Director.applyActorField(delta);
     Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.
-    //BROKEN: Director.removeOldSensorData(currentTime);
+    //TODO
+    //Director.removeOldSensorData(currentTime);
     //Director.sensing(delta, currentTime); //<- do this before draw, as it may add effects..
     Director.runParticleGenerators(currentTime);
     Director.draw(delta);

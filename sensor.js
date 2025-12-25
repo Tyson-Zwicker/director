@@ -15,7 +15,6 @@ class Sensor {
     this.owner = parent;
   }
   detect() {
-
     //Find the end-points of the line segments defining this sensor field of view.
     let sensorEdge1 = new Point(1, 0);
     Point.rotate(sensorEdge1, this.owner.owner.facing + this.owner.facing + this.fieldOfView / 2);
@@ -35,7 +34,8 @@ class Sensor {
       this.owner.position.y + this.range);
     let candidates = Director.quadtree.findInRange(sensorBoundry);
 
-    //Sort them by distance in ascending order using "Chebyshev Distance".
+    //Sort them by distance in ascending order using "Chebyshev Distance" 
+    //It is somewhat inaccurate, but very fast...
     candidates.sort((a, b) => {
       // Chebyshev Distance = max(|x1 - x2|, |y1 - y2|)
       const distA = Math.max(
@@ -48,6 +48,9 @@ class Sensor {
       );
       return distA - distB;
     });
+
+    //Are they bounded within the two lines segments?  If so, put them in the "detected" list,
+    //and refine the sensorEdges to the angles the won't intersect the detected object.
 
     for (let candidate of candidates) {
 
