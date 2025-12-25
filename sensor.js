@@ -56,6 +56,9 @@ class Sensor {
     //then be asked "where is x if y=?? and also where is y if x=??" in order to calculate the
     //boundry. DIGEST THIS:  https://en.wikipedia.org/wiki/Linear_equation 
 
+    //Consider scenarios.  Object is DIRECTLY above (x2-x1 =0) or beside (y2-y1=0).
+    //And then squarely in each quadrant.  Are there edge cases?
+
 
     for (let candidate of candidates) {
 
