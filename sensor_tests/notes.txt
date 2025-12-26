@@ -1,0 +1,173 @@
+
+function findVisibleCones(O, v0, v1, R, circles):
+    // Find closest intersecting circle
+    let closest = null
+    let minDist = infinity
+    
+    for (let circle of circles){
+        if (circleIntersectsCone(circle, O, v0, v1, R)){
+            let dist = distance(O, circle.center) - circle.radius
+            if (dist < minDist){
+                minDist = dist
+                closest = circle
+            }
+        }
+    }
+    if (closest == null) return [cone(v0, v1)];  // No obstruction
+    
+    // Calculate tangent vectors from O to closest circle
+    [tangent_left, tangent_right] = calculateTangents(O, closest)
+    
+    // Create new cones in unblocked regions
+    newCones = []
+    if angularlyBetween(tangent_left, v0, closest.center):
+        newCones.add(cone(v0, tangent_left))
+    if angularlyBetween(tangent_right, closest.center, v1):
+        newCones.add(cone(tangent_right, v1))
+    
+    return newCones
+
+----------
+ */
+/*function circleIntersectsCone(circle, O, v0, v1, R) {
+  const C = circle.center;
+  const r = circle.radius;
+
+  // 1. Distance check: Is any part of the circle within range R?
+  const distOC = distance(O, C);
+  if (distOC - r > R) {
+    return false;  // Circle is entirely beyond range
+  }
+
+  // 2. Angular bounds check
+  // Calculate angles for the cone boundaries
+  const angle_v0 = Math.atan2(v0.y, v0.x);
+  const angle_v1 = Math.atan2(v1.y, v1.x);
+  const angle_C = Math.atan2(C.y - O.y, C.x - O.x);
+
+  // Calculate the angular extent of the circle as seen from O
+  const angularRadius = Math.asin(Math.min(r / distOC, 1.0));
+
+  // Check if the circle's angular range overlaps with cone's angular range
+  if (!angularOverlap(angle_v0, angle_v1, angle_C - angularRadius, angle_C + angularRadius)) {
+    return false;  // Circle is outside the angular bounds
+  }
+
+  // 3. Detailed geometric checks
+  // At this point, we know the circle is in the right general area
+  // Now check if it actually intersects the triangular cone region
+
+  // Check if circle intersects the two edge rays
+  if (distancePointToRay(C, O, v0) <= r ||
+    distancePointToRay(C, O, v1) <= r) {
+    return true;
+  }
+
+  // Check if the circle center is inside the cone
+  if (pointInCone(C, O, v0, v1) && distOC <= R) {
+    return true;
+  }
+
+  // Check if any of the cone's vertices are inside the circle
+  if (distOC <= r) {  // Origin O is inside circle
+    return true;
+  }
+
+  const endPoint0 = { x: O.x + v0.x, y: O.y + v0.y };
+  const endPoint1 = { x: O.x + v1.x, y: O.y + v1.y };
+
+  if (distance(C, endPoint0) <= r || distance(C, endPoint1) <= r) {
+    return true;
+  }
+  return false;
+}
+
+// Helper: Check if two angular ranges overlap
+function angularOverlap(a0, a1, b0, b1) {
+  // Normalize angles to handle wraparound
+  // This assumes angles are in radians (-π to π)
+
+  // Handle the case where the cone crosses the -π/π boundary
+  let coneSpan = angleDifference(a0, a1);
+  let circleSpan = angleDifference(b0, b1);
+
+  // Check if circle's angular range intersects cone's angular range
+  const circleMinInCone = angleInRange(b0, a0, a1);
+  const circleMaxInCone = angleInRange(b1, a0, a1);
+  const coneMinInCircle = angleInRange(a0, b0, b1);
+  const coneMaxInCircle = angleInRange(a1, b0, b1);
+
+  return circleMinInCone || circleMaxInCone || coneMinInCircle || coneMaxInCircle;
+}
+
+// Check if angle is within range [a0, a1] (handling wraparound)
+function angleInRange(angle, a0, a1) {
+  // Normalize to [0, 2π] for easier comparison
+  const normalize = (a) => {
+    while (a < 0) a += 2 * Math.PI;
+    while (a >= 2 * Math.PI) a -= 2 * Math.PI;
+    return a;
+  };
+
+  angle = normalize(angle);
+  a0 = normalize(a0);
+  a1 = normalize(a1);
+
+  if (a0 <= a1) {
+    return angle >= a0 && angle <= a1;
+  } else {
+    // Range wraps around 0
+    return angle >= a0 || angle <= a1;
+  }
+}
+
+// Signed angle difference from a0 to a1
+function angleDifference(a0, a1) {
+  let diff = a1 - a0;
+  while (diff > Math.PI) diff -= 2 * Math.PI;
+  while (diff < -Math.PI) diff += 2 * Math.PI;
+  return diff;
+}
+
+// Distance from point P to ray starting at O in direction v
+function distancePointToRay(P, O, v) {
+  const OP = { x: P.x - O.x, y: P.y - O.y };
+  const vNorm = Math.sqrt(v.x * v.x + v.y * v.y);
+  const vUnit = { x: v.x / vNorm, y: v.y / vNorm };
+
+  // Project OP onto v
+  const projection = OP.x * vUnit.x + OP.y * vUnit.y;
+
+  if (projection < 0) {
+    // Point is "behind" the ray origin
+    return distance(P, O);
+  }
+
+  // Perpendicular distance
+  const perpX = OP.x - projection * vUnit.x;
+  const perpY = OP.y - projection * vUnit.y;
+  return Math.sqrt(perpX * perpX + perpY * perpY);
+}
+
+// Check if point P is inside the cone defined by O, v0, v1
+function pointInCone(P, O, v0, v1) {
+  const OP = { x: P.x - O.x, y: P.y - O.y };
+
+  // Use cross products to check if P is on the correct side of both rays
+  const cross0 = crossProduct2D(v0, OP);
+  const cross1 = crossProduct2D(OP, v1);
+
+  // Both should have the same sign (assuming cone spans < 180 degrees)
+  return cross0 >= 0 && cross1 >= 0;
+}
+
+function crossProduct2D(a, b) {
+  return a.x * b.y - a.y * b.x;
+}
+
+function distance(p1, p2) {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
