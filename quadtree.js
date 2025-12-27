@@ -119,7 +119,7 @@ export default class Quadtree {
     if (this.northwest) this.northwest.draw(context, offsetX, offsetY, currentColorIndex);
     if (this.southwest) this.southwest.draw(context, offsetX, offsetY, currentColorIndex);
     for (let actor of this.actors) {
-      draw.circle(actor.position.x + offsetX, actor.position.y + offsetY, actor.radius, '#fff');
+      draw.circle2(actor.position.x + offsetX, actor.position.y + offsetY, actor.radius, '#fff');
     }
   }
 }
