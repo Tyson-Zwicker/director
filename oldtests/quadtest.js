@@ -22,7 +22,7 @@ export default function init() {
   actors.push({ "x": 200, "y": -300, "radius": 20 });
   actors.push({ "x": -150, "y": -350, "radius": 20 });*/
 
-  for (let i = 0; i < 50; i++) actors.push({"x":rnd (-399,399), "y":rnd (-399,399), "radius":rnd (2,20)});
+  for (let i = 0; i < 50; i++) actors.push({"position":{"x":rnd (-399,399), "y":rnd (-399,399)}, "radius":rnd (2,20)});
 
   let actorIndex = 0;
   const intervalId = setInterval(() => {
@@ -32,9 +32,7 @@ export default function init() {
     if (actorIndex === actors.length) clearInterval(intervalId);
   }, 1000);
 }
-function step() {
 
-}
 function rnd(min, max) {
   return Math.floor(min + (max - min) * Math.random());
 }
