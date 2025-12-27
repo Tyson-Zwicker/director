@@ -27,6 +27,9 @@ export default class Actor {
     this.appearance = appearance;
     this._mass = mass;
   }
+  get radius(){
+    return this.polygon.radius;
+  }
   setLabel(text, position, appearance, size) {
     this.#label = new Label (this, position, appearance, size, text);
   }
@@ -93,9 +96,6 @@ export default class Actor {
     this.facing += this.spin * delta;
     if (this.facing > 360) this.facing -= 360;
     if (this.facing < 0) this.facing += 360;
-  }
-  radius() {
-    return this.polygon.radius;
   }
   toString() {
     return `[${this.name}], contains [${this.parts.length}] parts, label [${this.#label?.text}]`;
