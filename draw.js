@@ -11,7 +11,22 @@ export default class Draw {
     this.g.rect(x1, y1, x2 - x1, y2 - y1);
     this.g.stroke();
   }
-  circle (x,y,radius, hexColor){
+  fillbox2(x1, y1, x2, y2, hexColor) {
+    if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
+    
+    this.g.fillStyle = hexColor;
+    this.g.beginPath();
+    this.g.rect(x1, y1, x2 - x1, y2 - y1);
+    this.g.fill();
+  }
+  line2 (line, hexColor){
+    this.g.strokeStyle = hexColor;
+    this.g.beginPath();
+    this.g.moveTo (line.p0.x, line.p0.y);
+    this.g.lineTo (line.p1.x, line.p1.y);
+    this.g.stroke();
+  }
+  circle2 (x,y,radius, hexColor){
     this.g.fillStyle = hexColor;
     this.g.beginPath();
     this.g.arc (x,y,radius,0,Math.PI*2);
