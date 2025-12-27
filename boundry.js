@@ -25,15 +25,11 @@ export default class Boundry {
       y < this.y2) return true;
     return false;
   }
-  touches(otherBoundry) {
-    //Is the other (x1,y1) in boundry?
-    if (otherBoundry.x1 > this.x1 && otherBoundry.x1 < this.x2 && otherBoundry.y1 > this.y1 && otherBoundry.y1 < this.y2) return true;
-    //Is the other (x1,y2) in boundry?
-    if (otherBoundry.x1 > this.x1 && otherBoundry.x1 < this.x2 && otherBoundry.y2 > this.y1 && otherBoundry.y2 < this.y2) return true;
-    //Is the other (x2,y1) in boundry?
-    if (otherBoundry.x2 > this.x1 && otherBoundry.x2 < this.x2 && otherBoundry.y1 > this.y1 && otherBoundry.y1 < this.y2) return true;
-    //Is the other (x2,y2) in boundry?
-    if (otherBoundry.x2 > this.x1 && otherBoundry.x2 < this.x2 && otherBoundry.y2 > this.y1 && otherBoundry.y2 < this.y2) return true;
-    return false;
+    touches(otherBoundry) {
+    return (
+      ((otherBoundry.x2 = this.x1 && otherBoundry.x2 <= this.x2) ||
+        (otherBoundry.x1 >= this.x1 && otherBoundry.x1 <= this.x2)) ||
+      ((otherBoundry.y2 >=this.y1 && otherBoundry.y2 <= this.y2) ||
+        (otherBoundry.y1 >= this.y1 && otherBoundry.y1 <= this.y2)));
   }
 }
