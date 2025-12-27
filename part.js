@@ -1,6 +1,4 @@
 import Point from './point.js';
-import Director from './director.js';
-import Appearance from './appearance.js'
 import Transpose from './transpose.js';
 export default class Part {
   name = undefined;
