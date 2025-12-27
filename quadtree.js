@@ -1,5 +1,5 @@
 import Boundry from './boundry.js';
-
+import Draw from '../draw.js';
 export default class Quadtree {
   constructor(bounds, capacity, minimumSize = 1) {
     if (!bounds.isBoundry()) throw (`Quadtree boundry was not a boundry: ${bounds}`);
@@ -8,7 +8,6 @@ export default class Quadtree {
     this.minimumSize = minimumSize; // Minimum size (the side of the square, defined in world coordinates) before subdivision
     this.actors = [];
     this.divided = false;
-    this.canDivide = true;
     this.hasReachedMinimumSize = bounds.width <= minimumSize || bounds.height <= minimumSize;
   }
   clear() {
@@ -19,14 +18,18 @@ export default class Quadtree {
       this.southeast = undefined;
       this.southwest = undefined;
       this.divided = false;
-      this.canDivide = true;
     }
   }
   findInRange(otherBoundry, found = []) {
     if (!this.bounds.touches(otherBoundry)) return found; //Safely ignore this whole quadrant..
     for (let actor of this.actors) {
-      let actorBounds = Boundry.getActorBounds(actor);
-      if (actorBounds.touches(otherBoundry)) {
+      let actorBoundry = new Boundry(
+        actor.x - actor.radius,
+        actor.y - actor.radius,
+        actor.x + actor.radius,
+        actor.y + actor.radius
+      );
+      if (actorBoundry.touches(otherBoundry)) {
         found.push(actor);                                //Anything in the same quadrant is worth looking at more closely..
       }
     }
@@ -40,38 +43,83 @@ export default class Quadtree {
   }
   insert(actor) {
     //If the object is not in the quadtree, check if it is within the bounds
-    let actorBoundry = Boundry.getActorBounds(actor);
+
+    let actorBoundry = new Boundry(
+      actor.x - actor.radius,
+      actor.y - actor.radius,
+      actor.x + actor.radius,
+      actor.y + actor.radius
+    );
     if (!this.bounds.touches(actorBoundry)) return false;
     //If this cannot be put into a subquadrant because it would be to big... it gets an exemption!
-    let toBigtoSplit = actor.radius() >= Math.min(this.bounds.width / 2, this.bounds.height / 2);
+    let toBigtoSplit = actor.radius >= Math.min(this.bounds.width / 2, this.bounds.height / 2);
     //Insert the actor in this quadrant ONLY if there is room, BUT exceed the capacity rule if:
     //  the quadrant cannot be reduced because it is at minimize allowed size
     //  or the object would not fit in a subdivision of this quadrant
-    let rules = toBigtoSplit || this.actors.length < this.capacity || this.hasReachedMinimumSize || !this.canDivide;
+    let rules = toBigtoSplit || this.actors.length < this.capacity || this.hasReachedMinimumSize;
+
     if (rules) {
       this.actors.push(actor);
-      this.canDivide = false;
       return true;
     }
+
     //The quadrant is full, but the actor will fit in a subquarant,and there is space for another subdivision so find one for it...
     if (!this.divided) this.subdivide();
-    return (
-      this.northeast.insert(actor) ||
-      this.northwest.insert(actor) ||
-      this.southeast.insert(actor) ||
-      this.southwest.insert(actor)
-    );
+    if (!this.northeast) throw Error('subdivision failed NE.');
+    if (!this.northwest) throw Error('subdivision failed NW.');
+    if (!this.southeast) throw Error('subdivision failed SE.');
+    if (!this.southwest) throw Error('subdivision failed SW.');
+    if (this.northeast.insert(actor)) return true;
+    if (this.northwest.insert(actor)) return true;
+    if (this.southeast.insert(actor)) return true;
+    if (this.southwest.insert(actor)) return true;
+    throw new Error('Quadtree unable to insert object.');
   }
   subdivide() {
     const { x1, y1, x2, y2 } = this.bounds;
-    const width = x2 - x1;
-    const halfWidth = width / 2;
-    const height = y2 - y1;
-    const halfHeight = height / 2;
-    this.northeast = new Quadtree(new Boundry(x1 + halfWidth, y1, x1 + width, y1 + height), this.capacity, this.minimumSize);
-    this.northwest = new Quadtree(new Boundry(x1, y, x1 + halfWidth, y1 + halfHeight), this.capacity, this.minimumSize);
-    this.southeast = new Quadtree(new Boundry(x1 + halfWidth, y1 + halfHeight, x1 + width, y1 + height), this.capacity, this.minimumSize);
-    this.southwest = new Quadtree(new Boundry(x1, y1 + halfHeight, x1 + halfWidth, y1 + height), this.capacity, this.minimumSize);
+    const midX = (x1 + x2) / 2;
+    const midY = (y1 + y2) / 2;
+
+    this.northwest = new Quadtree(
+      new Boundry(x1, y1, midX, midY),
+      this.capacity,
+      this.minimumSize
+    );
+    this.northeast = new Quadtree(
+      new Boundry(midX, y1, x2, midY),
+      this.capacity,
+      this.minimumSize
+    );
+    this.southwest = new Quadtree(
+      new Boundry(x1, midY, midX, y2),
+      this.capacity,
+      this.minimumSize
+    );
+    this.southeast = new Quadtree(
+      new Boundry(midX, midY, x2, y2),
+      this.capacity,
+      this.minimumSize
+    );
+
     this.divided = true;
+  }
+  draw(context, offsetX, offsetY, currentColorIndex) {
+    let draw = new Draw(context);
+    let colors = ['#d00', '#090', '#00f'];
+    if (!currentColorIndex) currentColorIndex = 0;
+    let x1 = this.bounds.x1 + offsetX;
+    let y1 = this.bounds.y1 + offsetY;
+    let x2 = this.bounds.x2 + offsetX;
+    let y2 = this.bounds.y2 + offsetY;
+
+    draw.box2(x1, y1, x2, y2, colors[currentColorIndex % colors.length]);
+    currentColorIndex = (currentColorIndex + 1) % colors.length;
+    if (this.northeast) this.northeast.draw(context, offsetX, offsetY, currentColorIndex);
+    if (this.southeast) this.southeast.draw(context, offsetX, offsetY, currentColorIndex);
+    if (this.northwest) this.northwest.draw(context, offsetX, offsetY, currentColorIndex);
+    if (this.southwest) this.southwest.draw(context, offsetX, offsetY, currentColorIndex);
+    for (let actor of this.actors) {
+      draw.circle(actor.x + offsetX, actor.y + offsetY, actor.radius, '#fff');
+    }
   }
 }
