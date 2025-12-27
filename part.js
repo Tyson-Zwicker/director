@@ -26,11 +26,7 @@ export default class Part {
   }
   
   updateParticleGenerator() {
-    if (this.particleGenerator) {
-      //    let worldCoords = this.getWorldCoordinates();
-      console.log ('updateParticleAccelerator');
-      console.log (this);
-      console.log (this.parent);
+    if (this.particleGenerator) {      
       let worldCoords = Transpose.childToWorld (this,this.parent);
       this.particleGenerator.setPosition(worldCoords);
       this.particleGenerator.setFacing(this.parent.facing + this.facing);
