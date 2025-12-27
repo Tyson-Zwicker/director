@@ -20,15 +20,14 @@ export default class Actor {
   spin = 0; // Defined in degrees per second.
   velocity = new Point(0, 0); // Point used as a component vector because they are the same thing.
   #label = undefined;
+  radius = undefined;
   
   constructor(name, polygon, appearance, mass) {
     this.name = name;
     this.polygon = polygon;
     this.appearance = appearance;
     this._mass = mass;
-  }
-  get radius(){
-    return this.polygon.radius;
+    this.radius = polygon.radius;
   }
   setLabel(text, position, appearance, size) {
     this.#label = new Label (this, position, appearance, size, text);
