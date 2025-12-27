@@ -21,19 +21,32 @@ export default class Quadtree {
     }
   }
   findInRange(otherBoundry, found = []) {
-    if (!this.bounds.touches(otherBoundry)) return found; //Safely ignore this whole quadrant..
+    //console.log ('find in range has been called.')
+    if (!this.bounds.touches(otherBoundry)) {
+      //console.log ('ignoring this quadrant.');
+      return found; //Safely ignore this whole quadrant..
+    }
+    //console.log ('made it here #actors:'+this.actors.length);
     for (let actor of this.actors) {
+     //console.log ('examing actor:');
+     //console.log (actor);
       let actorBoundry = new Boundry(
-        actor.x - actor.radius,
-        actor.y - actor.radius,
-        actor.x + actor.radius,
-        actor.y + actor.radius
+        actor.position.x - actor.radius,
+        actor.position.y - actor.radius,
+        actor.position.x + actor.radius,
+        actor.position.y + actor.radius
       );
+      //console.log ('actorBounry:');
+      //console.log (actorBoundry);
+      //console.log ('otherBoundry:');
+      //console.log (otherBoundry);
+      //console.log ('--------');
       if (actorBoundry.touches(otherBoundry)) {
         found.push(actor);                                //Anything in the same quadrant is worth looking at more closely..
       }
     }
     if (this.divided) {                                   //Probably nothing in the top level quadrant because it has been subdivided,
+      console.log ('looking in subdivisions');
       this.northwest.findInRange(otherBoundry, found);    //and the actors moved to other locations, so we check the subquadants
       this.northeast.findInRange(otherBoundry, found);
       this.southwest.findInRange(otherBoundry, found);
@@ -43,13 +56,16 @@ export default class Quadtree {
   }
   insert(actor) {
     //If the object is not in the quadtree, check if it is within the bounds
-
+    console.log ('inserting');
+    console.log (actor);
     let actorBoundry = new Boundry(
-      actor.x - actor.radius,
-      actor.y - actor.radius,
-      actor.x + actor.radius,
-      actor.y + actor.radius
+      actor.position.x - actor.radius,  ///<--- actor.position....
+      actor.position.y - actor.radius,
+      actor.position.x + actor.radius,
+      actor.position.y + actor.radius
     );
+    console.log ('with boundry');
+    console.log (actorBoundry);
     if (!this.bounds.touches(actorBoundry)) return false;
     //If this cannot be put into a subquadrant because it would be to big... it gets an exemption!
     let toBigtoSplit = actor.radius >= Math.min(this.bounds.width / 2, this.bounds.height / 2);
@@ -119,7 +135,7 @@ export default class Quadtree {
     if (this.northwest) this.northwest.draw(context, offsetX, offsetY, currentColorIndex);
     if (this.southwest) this.southwest.draw(context, offsetX, offsetY, currentColorIndex);
     for (let actor of this.actors) {
-      draw.circle(actor.x + offsetX, actor.y + offsetY, actor.radius, '#fff');
+      draw.circle(actor.position.x + offsetX, actor.position.y + offsetY, actor.radius, '#fff');
     }
   }
 }
