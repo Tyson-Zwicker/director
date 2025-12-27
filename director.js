@@ -103,7 +103,7 @@ export default class Director {
   static draw(delta) {
     Director.#draw_foregroundEffects(delta);
     for (let actor of Director.actors.values()) {
-      if (Director.view.canSee(actor.position, actor.radius())) {
+      if (Director.view.canSee(actor.position, actor.radius)) {
         actor.draw(Director.view);
       }
     }
