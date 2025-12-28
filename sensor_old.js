@@ -112,6 +112,7 @@ export default class Sensor {
     }
     return response;
   }
+
   #rayCast2(originPoint, direction, range, barrierPoint1, barrierPoint2) {
     //Where the math came from:
     //https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect/565282#565282
