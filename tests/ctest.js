@@ -43,7 +43,7 @@ export default function init() {
   c.spin = Math.random() * 20 - 10;
   c.facing = Math.random() * 360;
   c.appearance = new Appearance(Color.random(8).asHex(), Color.random(8).asHex(), Color.random(8).asHex());
-  c.velocity = new Point(0, 5);
+  c.velocity = new Point(0, 7);
   c.bounceCoefficient = 0.5;
   c.setLabel("3", new Point(0, 30), c.appearance, 1);
   Director.addActor(c);
@@ -53,8 +53,8 @@ export default function init() {
   d.spin = Math.random() * 20 - 10;
   d.facing = Math.random() * 360;
   d.appearance = new Appearance(Color.random(8).asHex(), Color.random(8).asHex(), Color.random(8).asHex());
-  d.velocity = new Point(0, -5);
-  d.bounceCoefficient = 0.5;
+  d.velocity = new Point(0, -7);
+  d.bounceCoefficient = 0.9;
   d.setLabel("4", new Point(0, 30), d.appearance, 1);
   Director.addActor(d);
 
