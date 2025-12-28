@@ -22,31 +22,44 @@ export default function init() {
   draw.line2 (l3,'#00f');
   draw.line2 (l4,'#f0f');
 
-  let result = Line.pointOfInterception (l,l1);
+  let result = Line.getPointOfInterception (l,l1);
   if (result){
     draw.circle2 (result.x, result.y,10,'#488' );
   }
-  result = Line.pointOfInterception (l,l2);
+  result = Line.getPointOfInterception (l,l2);
   if (result){
     draw.circle2 (result.x, result.y,10,'#f88' );
   }
-  result = Line.pointOfInterception (l,l3);
+  result = Line.getPointOfInterception (l,l3);
   if (result){
     draw.circle2 (result.x, result.y,10,'#88f' );
   }
-  result = Line.pointOfInterception (l1,l2);
+  result = Line.getPointOfInterception (l1,l2);
   if (result){
     draw.circle2 (result.x, result.y,10,'#ff0' );
   }
-  result = Line.pointOfInterception (l2,l3);
+  result = Line.getPointOfInterception (l2,l3);
   if (result){
     draw.circle2 (result.x, result.y,10,'#ff0' );
   }
-  result = Line.pointOfInterception (l1,l3);
+  result = Line.getPointOfInterception (l1,l3);
   if (result){
     draw.circle2 (result.x, result.y,10,'#0ff' );
   }
-  
+  result = Line.getPointOfInterception (l4,l1);
+  if (result){
+    draw.circle2 (result.x, result.y,10,'#f55' );
+  }
+  result = Line.getPointOfInterception (l4,l2);
+  if (result){
+    draw.circle2 (result.x, result.y,10,'#f5f' );
+  }
+  result = Line.getPointOfInterception (l4,l);
+  if (result){
+    draw.circle2 (result.x, result.y,10,'#f5f' );
+  }else{
+    console.log ('successfully did not detect any interception.');
+  }
   let perp = Line.getPerpendicular (l,l.p1,20);
   draw.line2 (perp, '#ff0');
   let perp1 = Line.getPerpendicular (l1,l1.p1,30);
