@@ -185,35 +185,27 @@ export default class Director {
       Director.quadtree.insert(actor);
     }
   }
-  /*static sensing(delta, currentTime) {
+  static sensing(delta, currentTime) {
     for (let actor of Director.actors.values()) {
       if (actor.sensors) {
         for (let sensor of actor.sensors) {
-          let result = sensor.sweep(delta);
-          //If they sensor is active, its shine like a beacon, everything knows "something" is there.
-          if (sensor.active) {
-            //It knows where it came from, when, and what its "signature" is.
-            //This works regardless of wether or not the result returned anything to the one using the sensor.
-            Director.signals.add(currentTime, { position: actor.position, sensor: sensor.name });
-          }
-          if (result !== undefined) {                  // Sometimes the sensor doesn't see anything..
-            actor.sensorData.add(currentTime, result); //<-- it needs its own list of things "it" sees.         
+          let result = sensor.detect(delta);
+          if (result) {
+            console.log ('detected ', result);           
           }
         }
       }
     }
   }
-    */
+
   //------------------------- loop
   static loop(currentTime) {
     const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
     Director.lastFrameTime = currentTime;
     Director.kinematics(delta); //This redraws the entire quadtree.
     Director.applyActorField(delta);
-    Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.
-    //TODO
-    //Director.removeOldSensorData(currentTime);
-    //Director.sensing(delta, currentTime); //<- do this before draw, as it may add effects..
+    Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.    
+    Director.sensing(delta, currentTime); //<- do this before draw, because it adds effects..
     Director.runParticleGenerators(currentTime);
     Director.draw(delta);
     Director.collisions(delta);

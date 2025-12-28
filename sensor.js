@@ -2,7 +2,7 @@ import Line from './lines.js';
 import Boundry from './boundry.js';
 import Point from './Point.js';
 class Sensor {
-  constructor(owner, range, sweepArc, facing, sweepSpeed) {
+  constructor(owner, range, sweepArc, facing, sweepSpeed, active) {
     this.sweepArc = sweepArc;
     this.facing = facing;
     this.halfArc = sweepArc / 2; //to avoid dividing by 2 a lot..
@@ -11,8 +11,9 @@ class Sensor {
     this.sweepAngle = sweepArc / 2; //This is the direction the beam is look now. (always between -halfSweepArc and +halfSweepArc)
     this.sweepSpeed = sweepSpeed; //How many degrees per sweep motoin the beam angle changes..
     this.owner = owner;
+    this.active = active;
   }
-  detect() {
+  detect(delta) {
     let trueFacing = this.owner.facing + this.facing + this.sweepAngle;
     let rayEndPoint = Point.fromPolar(trueFacing, this.range);
     Point.add(rayEndPoint, this.owner.position)
@@ -25,7 +26,7 @@ class Sensor {
       }
       this.#drawPingToEdge(rayEndPoint);
     }
-    (this.#sweep());
+    (this.#sweep(delta));
   }
   #canSee(rayLine) {
     let tangentLine = Line.getPerpendicular(rayLine, rayLine.p1, 2);
@@ -48,8 +49,8 @@ class Sensor {
     }
     return candidates.sort((a, b) => { return a.distance - b.distance });
   }
-  #sweep() {
-    this.sweepAngle += this.sweepSpeed * this.sweepDirectionOfRotation;
+  #sweep(delta) {
+    this.sweepAngle += (delta * this.sweepSpeed) * this.sweepDirectionOfRotation;
     if (this.sweepAngle >= this.sweepArc) {
       this.sweepAngle = sweepArc;
       this.sweepDirectionOfRotation = -1;
