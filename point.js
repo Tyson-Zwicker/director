@@ -1,10 +1,11 @@
-//The whole point of this class is eleminating garbage collection when using vectors,
+//The whole point of this class is to eleminating garbage collection when using vectors, whenever possible,
 //which is all the time.  The "persistent" object doesn't get thrown away, and never needs to be re-created.
 //It makes the math look a little wierd, but it elimantes a lot of stuttering.
 export default class Point {
   x = 0;
   y = 0;
   static toRad = Math.PI / 180;
+  static toDeg = 1 / (Math.PI / 180);
   constructor(x, y) {
     if (x === undefined || y === undefined) {
       throw new Error(`Point constructor: x or y is undefined`);
@@ -140,10 +141,10 @@ export default class Point {
     let x = p1.x - p0.x;
     let y = p1.y - p0.y;
     let a = Math.atan2(y, x);
-    if (y<0){
-      a= Math.PI*2-a;
+    if (y < 0) {
+      a = Math.PI * 2 - a;
     }
-    return (180*a)/Math.PI;
+    return (180 * a) / Math.PI;
   }
   toString() {
     return `Point(${this.x},${this.y})`;

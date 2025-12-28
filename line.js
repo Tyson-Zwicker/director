@@ -25,20 +25,23 @@ export default class Line {
   //returns a line prependicular to the line parameter, with the given length.
   //The Mid-Point of the returned line will be p1 of the line.
   //If angle has been calculated somewhere you can pass it (efficiency!) otherwise it calculates it.
-  static getPerpendicularToEndOf(line, desiredLength, originalLineAngle) {
-    
-    if (!originalLineAngle) {
-      let dx = line.p0.x - line.p1.x;
-      let dy = line.p0.y - line.p1.y;
-      //atan2 gives proper angles for quadrants 1 and 2
-      //q3 and q4 give -values so true angle would be (2pi + given value) 
-      originalLineAngle = Math.atan(y, x);
-      //If quadrant 3 or 4, subtract the value from 360. y > 0
-      if (y > 0) originalLineAngle = 2 * Math.PI - a;      
+  static getPerpendicular(line, origin, desiredLength) {
+    //calculate then angle
+    let dx = line.p0.x - line.p1.x;
+    let dy = line.p0.y - line.p1.y;
+    let angle = Math.atan2(dy, dx);
+    if (angle < 0) {
+      //adjust for quadrants 3 and 4..
+      angle = 2 * Math.PI + angle;
     }
-    let origin = line.p1;
-    let p0 = new Point.fromPolar (originalLineAngle+90, desiredLength/2);
-    let p1 = new Point.fromPolar (originalLineAngle-90, desiredLength/2);
-    return new Line (p0,p1);
+    //get the tangent angle and its counterpart with the opposite slope..
+    let angle1 = (angle + Math.PI / 2) * Point.toDeg;
+    let angle2 = (angle - Math.PI / 2) * Point.toDeg;
+    angle *= Point.toDeg;
+    let p0 = Point.fromPolar(angle1, desiredLength / 2);
+    let p1 = Point.fromPolar(angle2, desiredLength / 2);
+    Point.add(p0, origin);
+    Point.add(p1, origin);
+    return new Line(p0, p1);
   }
 }
