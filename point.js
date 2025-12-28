@@ -136,7 +136,16 @@ export default class Point {
     persistent.y -= change.y;
     return persistent;
   }
-  toString() {``
+  static trueBearingFromTo(p0, p1) {
+    let x = p1.x - p0.x;
+    let y = p1.y - p0.y;
+    let a = Math.atan2(y, x);
+    if (y<0){
+      a= Math.PI*2-a;
+    }
+    return (180*a)/Math.PI;
+  }
+  toString() {
     return `Point(${this.x},${this.y})`;
   }
   static zero() {
