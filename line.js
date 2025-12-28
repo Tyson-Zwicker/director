@@ -6,7 +6,7 @@ export default class Line {
   }
 
   //returns a point if they intersect and "false" if they do not.
-  static pointOfInterception(line0, line1) {
+  static getPointOfInterception(line0, line1) {
     //Based on Andrre LeMothe's "Tricks of the Windows Game Programming Gurus""
     let p0 = line0.p0;
     let p1 = line0.p1;
