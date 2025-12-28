@@ -56,11 +56,33 @@ class Sensor {
   
  
   #canSee(actor) {
+    //https://www.mathsisfun.com/algebra/trig-interactive-unit-circle.html
+    //also remember that the perpendicular to any line y=mx+b = y=-mx+b
+    //Also you could just start at the center of the candidate, set and calculate where a point would be 
+    //from there are +90 and -90 degrees from the "true facing" of the ray.  That would give you both points to..
+    
     //TODO:
     //get the angle to the center of obj from origin.
+
+    //atan2 gives proper angles for quadrants 1 and 2
+    //q3 and q4 give -values so true angle would be (2pi + given value)
+
     //If that angle is within a degree of the sweepAngle - return true.
     //get a the line segments tangential to the line from origin to obj.
     //the first line segment goes to the "right" of the obj position, the other to the left.
     //If line coming from the origin intersects either line segment, return true.
   }
+    #findIntersection(p0, p1, q0, q1) {
+      //Based on Andrre LeMothe's "Tricks of the Windows Game Programming Gurus""
+      let s1 = new Point(p1.x - p0.x, p1.y - p0.y);
+      let s2 = new Point(q1.x - q0.x, q1.y - q0.y);
+      let s = (-s1.y * (p0.x - q0.x) + s1.x * (p0.y - q0.y)) / (-s2.x * s1.y + s1.x * s2.y);
+      let t = (s2.x * (p0.y - q0.y) - s2.y * (p0.x - q0.x)) / (-s2.x * s1.y + s1.x + s1.x * s2.y);
+  
+      if (s>=0 &&s<=1 && t>=0 && t<=1){
+        return new Point (p0.x + (t * s1.x),p0.y + (t * s1.y));
+      }else{
+        return false;
+      }
+    }
 }
