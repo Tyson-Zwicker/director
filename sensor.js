@@ -1,6 +1,6 @@
-import Line from './lines.js';
+import Line from './line.js';
 import Boundry from './boundry.js';
-import Point from './Point.js';
+import Point from './point.js';
 class Sensor {
   constructor(owner, range, sweepArc, facing, sweepSpeed, active) {
     this.sweepArc = sweepArc;
