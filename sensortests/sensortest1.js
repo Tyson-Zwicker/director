@@ -54,8 +54,8 @@ export default function init() {
     part2.appearance = new Appearance('#ff0', '#f00', '#fff');
     a.attachPart(part2);
     Director.addActor(a);
-    let sensor1 = new Sensor (a, 100, 33, 0, 1, true);
-    //let sensor2 = new Sensor (a, 2000, 33, 270, 1, true);
+    let sensor1 = new Sensor (a, 400, 33, 0, 1, true);
+    //let sensor2 = new Sensor (a, 400, 33, 270, 1, true);
     a.attachSensor (sensor1);
     //a.attachSensor (sensor2);
     
@@ -77,48 +77,7 @@ export default function init() {
     d.facing = 90;
     Director.addActor(d);
 
-  let redParticles = new ParticleGenerator(
-    'red',
-    new Point(0, 0),
-    170, 190, 150, 250,
-    new Color(15, 0, 0),
-    2,
-    5, 20,
-    5, true
-  );
-  Director.addParticleGenerator(redParticles);
-  part1.attachParticleGenerator(redParticles);
-  let blueParticles = new ParticleGenerator(
-    'blue',
-    new Point(0, 0),
-    90, 270, 50, 150,
-    new Color(0, 0, 15),
-    2,
-    5, 20,
-    2, true
-  );
-  Director.addParticleGenerator(blueParticles);
-  let greenParticles = new ParticleGenerator(
-    'green',
-    new Point(0, 0),
-    -10, 10, 50, 150,
-    new Color(0, 15, 0),
-    2,
-    5, 20,
-    10, true
-  );
-  Director.addParticleGenerator(greenParticles);
-  part2.attachParticleGenerator(greenParticles);
-  let cyanParticles = new ParticleGenerator(
-    'cyan',
-    new Point(0, 0),
-    0, 355, 60, 150,
-    new Color(0, 10, 15),
-    2,
-    5, 20,
-    10, true
-  );
-  Director.addParticleGenerator(cyanParticles);
+ 
  
   // Get the actor we want to control (A1)
   let controlledActor = Director.actors.get('A1');
