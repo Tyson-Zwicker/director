@@ -20,9 +20,9 @@ export default class Sensor {
   }
   detect(delta) {
     this.#sweep(delta);
-    let moved  = Math.abs (Math.abs(this.sweepAngle) - Math.abs (this.lastSweepAngle));
-    console.log ('moved:',moved);
+    let moved  = Math.abs (Math.abs(this.sweepAngle) - Math.abs (this.lastSweepAngle));    
     if (moved >= 1) {
+      this.lastSweepAngle = this.sweepAngle;
       let trueFacing = this.owner.facing + this.facing + this.sweepAngle;
       let rayEndPoint = Point.fromPolar(trueFacing, this.range);
       Point.add(rayEndPoint, this.owner.position)
@@ -31,16 +31,15 @@ export default class Sensor {
       for (let candidate of candidates) {
         if (candidate != this.owner) { //don't detect yourself
           let seenPosition = this.#canSee(candidate, rayLine);
-          if (seenPosition === false) {
-            this.#drawPingToEdge(rayEndPoint);
-          } else {
+          if (seenPosition != false) {            
             this.#drawPingReturned(seenPosition);
-            return candidate; //don't look past the first one you see, because anything else will be blocked.        
+            return candidate; //leave loop early - don't look past the first one you see, because anything else will be blocked.        
           }
-
         }
       }
-      this.lastSweepAngle = this.sweepAngle;
+      this.#drawPingToEdge(rayEndPoint);
+    
+      return false;
     }
   }
   #canSee(candidate, rayLine) {
