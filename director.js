@@ -101,13 +101,13 @@ export default class Director {
     }
   }
   static draw(delta) {
-    Director.#draw_foregroundEffects(delta);
+    Director.#draw_backgroundEffects(delta);
     for (let actor of Director.actors.values()) {
       if (Director.view.canSee(actor.position, actor.radius)) {
         actor.draw(Director.view);
       }
     }
-    Director.#draw_backgroundEffects(delta);
+    Director.#draw_foregroundEffects(delta);
   }
   static #draw_foregroundEffects(delta) {
     let survivingForegroundEffects = [];
@@ -191,7 +191,7 @@ export default class Director {
         for (let sensor of actor.sensors) {
           let result = sensor.detect(delta);
           if (result) {
-            console.log ('detected ', result);           
+            //TODO:  Store the results with the sensor owner.         
           }
         }
       }
