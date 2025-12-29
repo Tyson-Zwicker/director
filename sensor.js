@@ -1,7 +1,10 @@
 import Line from './line.js';
 import Boundry from './boundry.js';
 import Point from './point.js';
-class Sensor {
+import Director from './director.js'
+import LineEffect from './lineeffect.js';
+import Color from './color.js';
+export default class Sensor {
   constructor(owner, range, sweepArc, facing, sweepSpeed, active) {
     this.sweepArc = sweepArc;
     this.facing = facing;
@@ -21,7 +24,7 @@ class Sensor {
     let candidates = this.#getSortedObjectsWithinRange(rayEndPoint);
     for (let candidate of candidates) {
       if (this.#canSee(rayLine, rayLine.p1, 2)) {
-        this.#drawPingReturned(candidate);
+        this.#drawPingReturned(trueFacing,candidate);
         return candidate; //don't look past the first one you see, because anything else will be blocked.        
       }
       this.#drawPingToEdge(rayEndPoint);
@@ -33,8 +36,11 @@ class Sensor {
     return Line.getPointOfInterception(rayLine, tangentLine);
   }
   #drawPingReturned(trueFacing, candidate) {
-    let rayPoint = Point.fromPolar(trueFacing, candidate.distance)
-    let ray = new LineEffect(this.owner.position, closestPoint, 2, new Color(0, 15, 0, 1), 2);
+    let rayPoint = Point.fromPolar(trueFacing, Point.distance (this.owner.position, candidate.position))
+    Point.add (rayPoint, this.owner.position);
+
+    let ray = new LineEffect(this.owner.position, rayPoint, 2, new Color(0, 15, 0, 1), 2);
+
     Director.addForegroundEffect(ray);
   }
   #drawPingToEdge(rayEndPoint) {
@@ -52,28 +58,12 @@ class Sensor {
   #sweep(delta) {
     this.sweepAngle += (delta * this.sweepSpeed) * this.sweepDirectionOfRotation;
     if (this.sweepAngle >= this.sweepArc) {
-      this.sweepAngle = sweepArc;
+      this.sweepAngle = this.sweepArc;
       this.sweepDirectionOfRotation = -1;
     }
     else if (this.sweepAngle <= 0) {
       this.sweepAngle =0;
       this.sweepDirectionOfRotation = 1;      
-    }
-  }
-
-
-
-  #findIntersection(p0, p1, q0, q1) {
-    //Based on Andre LeMothe's "Tricks of the Windows Game Programming Gurus""
-    let s1 = new Point(p1.x - p0.x, p1.y - p0.y);
-    let s2 = new Point(q1.x - q0.x, q1.y - q0.y);
-    let s = (-s1.y * (p0.x - q0.x) + s1.x * (p0.y - q0.y)) / (-s2.x * s1.y + s1.x * s2.y);
-    let t = (s2.x * (p0.y - q0.y) - s2.y * (p0.x - q0.x)) / (-s2.x * s1.y + s1.x + s1.x * s2.y);
-
-    if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
-      return new Point(p0.x + (t * s1.x), p0.y + (t * s1.y));
-    } else {
-      return false;
     }
   }
 }
