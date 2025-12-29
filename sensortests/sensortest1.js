@@ -45,7 +45,7 @@ export default function init() {
     }
     let a = new Actor(`A1`, Polygon.triangle(50, 100),new Appearance('#066', '#06f', '#fff'));
     a.position = new Point(-200, -200);
-    a.spin = 10;
+    a.spin = 0;
     a.facing = 0;
     let part1 = new Part('box', 20, -10, Polygon.rectangle(3, 7), 0,a);
     part1.appearance = new Appearance('#ff0', '#f00', '#fff');
@@ -54,7 +54,7 @@ export default function init() {
     part2.appearance = new Appearance('#ff0', '#f00', '#fff');
     a.attachPart(part2);
     Director.addActor(a);
-    let sensor1 = new Sensor (a, 400, 33, 0, 1, true);
+    let sensor1 = new Sensor (a, 700, 46, 0, 15, true);
     //let sensor2 = new Sensor (a, 400, 33, 270, 1, true);
     a.attachSensor (sensor1);
     //a.attachSensor (sensor2);
