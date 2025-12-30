@@ -5,7 +5,6 @@ import Actor from '../actor.js';
 import Director from '../director.js';
 import Part from '../part.js';
 import Appearance from '../appearance.js';
-import ParticleEffect from '../particleeffect.js';
 import ParticleGenerator from '../particlegenerator.js';
 import Color from '../color.js';
 
@@ -100,7 +99,4 @@ export default function init() {
   }
   Director.addCreatorsFunction(doMyThing);
   Director.run();
-}
-function rnd(min, max) {
-  return Math.floor(min + (max - min) * Math.random());
 }

@@ -1,5 +1,6 @@
 import Quadtree from '../quadtree.js';
 import Boundry from '../boundry.js';
+import Rnd from '../rnd.js';
 
 // ----------> PRIME MOVER <-------------
 
@@ -22,7 +23,7 @@ export default function init() {
   actors.push({ "x": 200, "y": -300, "radius": 20 });
   actors.push({ "x": -150, "y": -350, "radius": 20 });*/
 
-  for (let i = 0; i < 50; i++) actors.push({"position":{"x":rnd (-399,399), "y":rnd (-399,399)}, "radius":rnd (2,20)});
+  for (let i = 0; i < 50; i++) actors.push({"position":{"x":Rnd.int (-399,399), "y":Rnd.int (-399,399)}, "radius":Rnd.int (2,20)});
 
   let actorIndex = 0;
   const intervalId = setInterval(() => {
@@ -31,8 +32,4 @@ export default function init() {
     actorIndex++;
     if (actorIndex === actors.length) clearInterval(intervalId);
   }, 1000);
-}
-
-function rnd(min, max) {
-  return Math.floor(min + (max - min) * Math.random());
 }

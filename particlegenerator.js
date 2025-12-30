@@ -2,6 +2,7 @@ import Color from './color.js';
 import Director from './director.js';
 import ParticleEffect from "./particleeffect.js";
 import Point from './point.js';
+import Rnd from './rnd.js';
 
 export default class ParticleGenertor {
   constructor(name, position, angleMin, angleMax, velMin, velMax, color, size, durMin, durMax, periodMillis, foreground) {
@@ -64,7 +65,7 @@ export default class ParticleGenertor {
     p.size = this.size;
     p.color = this.color;
     p.velocity= this.#getRandomVelocityComponents();
-    let life = rnd (this.durMin, this.durMax);
+    let life = Rnd.float (this.durMin, this.durMax);
     p.duration = life;
     p.life = life;
     p.generator = this;
@@ -73,7 +74,7 @@ export default class ParticleGenertor {
     let particle = new ParticleEffect(
       Point.from(this.position),
       this.#getRandomVelocityComponents(),
-      this.color, this.size, rnd(this.durMin, this.durMax)  //color, size, duration
+      this.color, this.size, Rnd.float(this.durMin, this.durMax)  //color, size, duration
     );
     particle.genertor = this;
     return particle;
@@ -91,8 +92,8 @@ export default class ParticleGenertor {
     }
   }
   #getRandomVelocityComponents() {
-    let a = this.anglePartOffset+rnd(this.angleMin, this.angleMax);
-    let m = rnd(this.velMin, this.velMax);
+    let a = this.anglePartOffset+Rnd.float(this.angleMin, this.angleMax);
+    let m = Rnd.float(this.velMin, this.velMax);
     return Point.fromPolar(a, m);
   }
   setPosition(newPosition) {
@@ -103,8 +104,4 @@ export default class ParticleGenertor {
     // Store rotation if you need it for particle generation
     this.anglePartOffset = angleInDegrees;
   }
-}
-
-function rnd(min, max) {
-  return Math.floor(min + (max - min) * Math.random());
 }

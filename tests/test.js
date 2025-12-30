@@ -6,6 +6,7 @@ import Actor from '../actor.js';
 import Director from '../director.js';
 import Part from '../part.js';
 import Appearance from '../appearance.js';
+import Rnd from '../rnd.js';
 
 // PRIME MOVER
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,11 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
 export default function init() {
   let rng = 10000;
   for (let i = 0; i < 1000; i++) {
-    let s1 = rnd(10, 100);
-    let poly = Polygon.makeIrregular(rnd(7, 15), s1, s1 * 1.5);
+    let s1 = Rnd.int(10, 100);
+    let poly = Polygon.makeIrregular(Rnd.int(7, 15), s1, s1 * 1.5);
     let a = new Actor(`testobject${i}`, poly);
-    a.position = new Point(rnd(-rng, rng), rnd(-rng, rng));
-    a.spin = 2 * rnd(-10, 10);
+    a.position = new Point(Rnd.int(-rng, rng), Rnd.int(-rng, rng));
+    a.spin = 2 * Rnd.int(-10, 10);
 
     let appearance = new Appearance('#420', '#660', '#fff');
     let hoveredAppearance = new Appearance('#ff0', '#f00');
@@ -30,8 +31,8 @@ export default function init() {
    
       let newlabel = `${this.actor.name} (${this.actor.position.x},${this.actor.position.y})`;
       this.actor.setLabel(newlabel, new Point(0, 0),appearance, 1);
-      this.actor.velocity = new Point(rnd(-50, 50), rnd(-50, 50));
-      this.actor.spin = rnd(-10, 10);
+      this.actor.velocity = new Point(Rnd.int(-50, 50), Rnd.int(-50, 50));
+      this.actor.spin = Rnd.int(-10, 10);
       }
     a.appearance = appearance;
     a.attachButton(b);
@@ -80,6 +81,4 @@ export default function init() {
   Director.addCreatorsFunction(rotateTheParts);
   Director.run();
 }
-function rnd(min, max) {
-  return Math.floor(min + Math.random() * (Math.abs(max) - min));
-}
+

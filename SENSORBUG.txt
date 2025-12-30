@@ -1,0 +1,4 @@
+SO... it works 90% of the time..
+
+-It seems to fail mostly when its in the 4th quadrant of an object (this could be coincidence)
+-

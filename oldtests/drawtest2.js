@@ -8,6 +8,7 @@ import Part from '../part.js';
 import Appearance from '../appearance.js';
 import LineEffect from '../lineeffect.js';
 import Color from '../color.js';
+import Rnd from '../rnd.js';
 
 // PRIME MOVER
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,11 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
 export default function init() {
   let rng = 100;
   for (let i = 0; i < 10; i++) {
-    let s1 = rnd(10, 100);
-    let poly = Polygon.makeIrregular(rnd(7, 15), s1, s1 * 1.5);
+    let s1 = Rnd.int(10, 100);
+    let poly = Polygon.makeIrregular(Rnd.int(7, 15), s1, s1 * 1.5);
     let actor = new Actor(`testobject${i}`, poly);
-    actor.position = new Point(rnd(-rng, rng), rnd(-rng, rng));
-    actor.spin = 2 * rnd(-10, 10);
+    actor.position = new Point(Rnd.int(-rng, rng), Rnd.int(-rng, rng));
+    actor.spin = 2 * Rnd.int(-10, 10);
 
     let appearance = new Appearance('#420', '#660', '#fff');
     let hoveredAppearance = new Appearance('#ff0', '#f00');
@@ -31,8 +32,8 @@ export default function init() {
     button.clickFn = function () {
       let newlabel = `${this.actor.name} (${this.actor.position.x},${this.actor.position.y})`;
       this.actor.setLabel(newlabel, new Point(0, 0), appearance, 1);
-      this.actor.velocity = new Point(rnd(-10, 10), rnd(-10, 10));
-      this.actor.spin = rnd(-10, 10);
+      this.actor.velocity = new Point(Rnd.int(-10, 10), Rnd.int(-10, 10));
+      this.actor.spin = Rnd.int(-10, 10);
     }
     actor.appearance = appearance;
     actor.attachButton(button);
@@ -110,13 +111,5 @@ export default function init() {
     }
   }
   Director.addCreatorsFunction(doMyThing);
-
-
-
   Director.run();
-}
-
-
-function rnd(min, max) {
-  return Math.floor(min + Math.random() * (Math.abs(max) - min));
 }

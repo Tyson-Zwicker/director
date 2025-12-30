@@ -36,7 +36,3 @@ Director.keyboard.setKeyFunction('a', () => {
   Director.run();
 }
 
-
-function rnd(min, max) {
-  return Math.floor(min + Math.random() * (Math.abs(max) - min));
-}

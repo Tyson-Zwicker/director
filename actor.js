@@ -28,6 +28,7 @@ export default class Actor {
     this.appearance = appearance;
     this._mass = mass;
     this.radius = polygon.radius;
+    if (this._mass<=0 || this.radius<=0) throw new Error (`Actors must have a phsyical presence.  mass: [${_this.mass}] radius [${this.radius}]`)
   }
   setLabel(text, position, appearance, size) {
     this.#label = new Label (this, position, appearance, size, text);

@@ -24,7 +24,3 @@ export default function init() {
   Director.run();
 }
 
-
-function rnd(min, max) {
-  return Math.floor(min + Math.random() * (Math.abs(max) - min));
-}

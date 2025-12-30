@@ -7,7 +7,7 @@ import Part from '../part.js';
 import Appearance from '../appearance.js';
 import ParticleEffect from '../particleeffect.js';
 import Color from '../color.js';
-
+import Rnd from '../rnd.js';
 // PRIME MOVER
 document.addEventListener('DOMContentLoaded', () => {
   Director.initialize();
@@ -54,13 +54,13 @@ export default function init() {
     //position, velocity, color, size, durationInSeconds)
     let particleEffect1 = new ParticleEffect(
       new Point(0, 0),                //origin
-      new Point(rnd (-20,20),20),      //compnent velocity
-      Color.random(12), 2, rnd (2,6)  //color, size, duration
+      new Point(Rnd.int (-20,20),20),      //compnent velocity
+      Color.random(12), 2, Rnd.int (2,6)  //color, size, duration
     );
     let particleEffect2 = new ParticleEffect(
       new Point(0, 0),
-      new Point(rnd (-10,10),50),
-      Color.random(12), 1, rnd (2,4)  //color, size, duration
+      new Point(Rnd.int (-10,10),50),
+      Color.random(12), 1, Rnd.int (2,4)  //color, size, duration
     );
     Director.addForegroundEffect(particleEffect1);
     Director.addBackgroundEffect(particleEffect2);
@@ -69,7 +69,4 @@ export default function init() {
   }
   Director.addCreatorsFunction(doMyThing);
   Director.run();
-}
-function rnd(min, max) {
-  return Math.floor(min + (max - min) * Math.random());
 }

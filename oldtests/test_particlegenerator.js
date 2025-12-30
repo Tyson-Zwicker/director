@@ -98,6 +98,3 @@ export default function init() {
   Director.addCreatorsFunction(doMyThing);
   Director.run();
 }
-function rnd(min, max) {
-  return Math.floor(min + (max - min) * Math.random());
-}

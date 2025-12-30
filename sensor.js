@@ -68,7 +68,6 @@ export default class Sensor {
     return candidates.sort((a, b) => { return a.distance - b.distance });
   }
   #sweep(delta) {
-    console.log (this.sweepAngle, this.lastSweepAngle);
     if (this.sweepAngle >= this.halfArc) {
       this.sweepAngle = this.halfArc;
       this.sweepDirectionOfRotation = -1;

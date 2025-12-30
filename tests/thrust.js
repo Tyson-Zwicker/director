@@ -6,9 +6,9 @@ import Actor from '../actor.js';
 import Director from '../director.js';
 import Part from '../part.js';
 import Appearance from '../appearance.js';
-import ParticleEffect from '../particleeffect.js';
 import ParticleGenerator from '../particlegenerator.js';
 import Color from '../color.js';
+import Rnd from '../rnd.js';
 
 // PRIME MOVER
 document.addEventListener('DOMContentLoaded', () => {
@@ -20,23 +20,23 @@ export default function init() {
 
    let rng = 10000;
     for (let i = 0; i < 1000; i++) {
-      let s1 = rnd(10, 100);
-      let poly = Polygon.makeIrregular(rnd(7, 15), s1, s1 * 1.5);
+      let s1 = Rnd.int(10, 100);
+      let poly = Polygon.makeIrregular(Rnd.int(7, 15), s1, s1 * 1.5);
       let a = new Actor(
         `testobject${i}`,
          poly,
           new Appearance('#420', '#660', '#fff')
       );
-      a.position = new Point(rnd(-rng, rng), rnd(-rng, rng));
-      a.spin = 2 * rnd(-10, 10);
+      a.position = new Point(Rnd.int(-rng, rng), Rnd.int(-rng, rng));
+      a.spin = 2 * Rnd.int(-10, 10);
       let hoveredAppearance = new Appearance('#ff0', '#f00');
       let pressedAppearance = new Appearance('#0ff', '#00f');
       let button = new Button(hoveredAppearance, pressedAppearance);
       button.clickFn = function () {
         let newlabel = `${this.actor.name} (${this.actor.position.x},${this.actor.position.y})`;
         this.actor.setLabel(newlabel, new Point(0, 0), a.appearance, 1);
-        this.actor.velocity = new Point(rnd(-50, 50), rnd(-50, 50));
-        this.actor.spin = rnd(-10, 10);
+        this.actor.velocity = new Point(Rnd.int(-50, 50), Rnd.int(-50, 50));
+        this.actor.spin = Rnd.int(-10, 10);
         }
       a.attachButton(button);
       a.setLabel(i.toString(), new Point(0, 50),a.appearance, 1);
@@ -158,7 +158,4 @@ export default function init() {
   }
   Director.addCreatorsFunction(doMyThing);
   Director.run();
-}
-function rnd(min, max) {
-  return Math.floor(min + (max - min) * Math.random());
 }

@@ -1,3 +1,5 @@
+import Rnd from './rnd.js';
+
 export default class Color {
   //We are going to store the values, internally, as decimal between 1 and 0.
   //Well give them back either as #RBGA Strings.
@@ -73,14 +75,7 @@ export default class Color {
   }
   static random(min) {
     if (!min || min < 0 || min > 15) min = 6;
-    return new Color(this.#rnd(0, 15), this.#rnd(0, 15), this.#rnd(0, 15));
-  }
-  static #rnd(min, max) {
-    let n = Math.random() * (max + 1); //random float between could be anything from 0 to 15.99999.. random is exclusive..
-    let i = Math.floor(n);  //an integer between 0 and 15.
-    i = Math.max(i, min);   //an integer between min and "i".
-    i = Math.min(i, max);   // an integer between max and "i".
-    return i;
+    return new Color(Rnd.int (0,15), Rnd.int (0,15), Rnd.int (0,15));
   }
   toString() {
     let r = `r:${this.r} g:${this.g} b:${this.b} a:${this.opacity} hex:${this.asHex()}`;
