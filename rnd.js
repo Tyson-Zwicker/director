@@ -8,9 +8,18 @@ export default class Rnd {
     if (!min) min = 0;
     return min + Math.random() * (Math.abs(max) - min);
   }
-  static hex(min, max) { //0-16 in string..
-    if (!min) min =0;
+  static hex(min, max, digits) { //0->15 but 0->F
+    if (!min) min = 0;
     if (!max) max = 16;
+    if (digits && digits>1){
+      let d = 0;
+      let s= '';
+      while (d<digits){
+        s+=Rnd.hex (min,max);
+        d++;
+      }
+      return s;
+    }
     return Number.toString(Rnd.int(min, max));
   }
   static norm() {//A normalized vector
