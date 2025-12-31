@@ -60,7 +60,7 @@ export default class Sensor {
     Director.addBackgroundEffect(ray);
   }
   #getSortedObjectsWithinRange(rayEndPoint) {
-    let sensorBoundry = new Boundry(this.owner.position.x, this.owner.position.y, rayEndPoint.x, rayEndPoint.y);//TODO: FIGURE THIS OUT BASED ON THE FACING AND RANGE    
+    let sensorBoundry = new Boundry(this.owner.position.x, this.owner.position.y, rayEndPoint.x, rayEndPoint.y);  
     let candidates = Director.quadtree.findInRange(sensorBoundry);
     for (let candidate of candidates) {
       candidate["distance"] = Point.distance(this.owner.position, candidate.position);
