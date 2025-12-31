@@ -25,11 +25,19 @@ export default class Boundry {
       y < this.y2) return true;
     return false;
   }
-    touches(otherBoundry) {
-    return (
-      ((otherBoundry.x2 = this.x1 && otherBoundry.x2 <= this.x2) ||
-        (otherBoundry.x1 >= this.x1 && otherBoundry.x1 <= this.x2)) ||
-      ((otherBoundry.y2 >=this.y1 && otherBoundry.y2 <= this.y2) ||
-        (otherBoundry.y1 >= this.y1 && otherBoundry.y1 <= this.y2)));
+  touches(boundry) {
+    // Check each corner
+    const corners = [
+      { x: boundry.x1, y: boundry.y1 }, // top-left
+      { x: boundry.x2, y: boundry.y1 }, // top-right
+      { x: boundry.x1, y: boundry.y2 }, // bottom-left
+      { x: boundry.x2, y: boundry.y2 }  // bottom-right
+    ];
+
+    corners.forEach(corner => {
+      if (boundry.isInside(corner.x, corner.y)) {
+        return true;
+      }
+    });
   }
 }
