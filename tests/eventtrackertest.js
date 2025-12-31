@@ -1,4 +1,4 @@
-import EventTracker from '../eventtracker.js';
+import EventTracker from '../classes/eventtracker.js';
 
 startTest();
 

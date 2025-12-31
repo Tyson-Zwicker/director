@@ -1,14 +1,14 @@
-import Point from '../point.js';
-import Polygon from '../polygon.js';
-import Button from '../button.js';
-import Keyboard from '../keyboard.js';
-import Actor from '../actor.js';
-import Director from '../director.js';
-import Part from '../part.js';
-import Appearance from '../appearance.js';
-import ParticleGenerator from '../particlegenerator.js';
-import Color from '../color.js';
-import Rnd from '../rnd.js';
+import Point from '../classes/point.js';
+import Polygon from '../classes/polygon.js';
+import Button from '../classes/button.js';
+import Keyboard from '../classes/keyboard.js';
+import Actor from '../classes/actor.js';
+import Director from '../classes/director.js';
+import Part from '../classes/part.js';
+import Appearance from '../classes/appearance.js';
+import ParticleGenerator from '../classes/particlegenerator.js';
+import Color from '../classes/color.js';
+import Rnd from '../classes/rnd.js';
 
 // PRIME MOVER
 document.addEventListener('DOMContentLoaded', () => {

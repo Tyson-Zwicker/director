@@ -1,6 +1,6 @@
-import Draw from '../draw.js';
-import Line from '../line.js';
-import Point from '../point.js';
+import Draw from '../classes/draw.js';
+import Line from '../classes/line.js';
+import Point from '../classes/point.js';
 
 // ----------> PRIME MOVER <-------------
 init();

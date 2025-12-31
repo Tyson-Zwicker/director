@@ -1,7 +1,6 @@
-import Point from '../point.js';
-import Line from '../line.js';
-import Draw from '../draw.js';
-import Boundry from '../boundry.js'
+import Point from '../classes/point.js';
+import Draw from '../classes/draw.js';
+import Boundry from '../classes/boundry.js'
 
 let canvas = document.getElementById('canvas');
 canvas.width = 800;

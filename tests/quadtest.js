@@ -1,6 +1,6 @@
-import Quadtree from '../quadtree.js';
-import Boundry from '../boundry.js';
-import Rnd from '../rnd.js';
+import Quadtree from '../classes/quadtree.js';
+import Boundry from '../classes/boundry.js';
+import Rnd from '../classes/rnd.js';
 
 // ----------> PRIME MOVER <-------------
 

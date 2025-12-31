@@ -1,4 +1,4 @@
-import Point from '../point.js';
+import Point from '../classes/point.js';
 
 runTest();
 
