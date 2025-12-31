@@ -75,7 +75,7 @@ function drawCornersInside() {
   ];
 
   corners.forEach(corner => {
-    if (boundry1.isInside(corner.x, corner.y)) {
+    if (boundry1.isPointInside(corner)) {
       draw.circle2(corner.x, corner.y, 8, '#ff6b6b');
     }
   });
