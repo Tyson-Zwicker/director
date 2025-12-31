@@ -1,4 +1,0 @@
-I think the tangent line isn't being formed properly in some combination of quadrants.
-Make a THOROUGH test of the how Atan2 actually works because I think you missed something.
-It literally only sees 1/2 of things, depending on which angle it looks at it from...
-THAT Has to be a quadrant bug.
