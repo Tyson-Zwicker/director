@@ -1,5 +1,6 @@
 import Point from './point.js';
 import Director from './director.js';
+import Rnd from './rnd.js';
 export default class Polygon {
   points = [];
   drawnPoints = [];
@@ -75,7 +76,7 @@ export default class Polygon {
     let parray = []
     let a = 0;
     for (let i = 0; i < side; i++) {
-      let r = minRadius + Math.random() * (maxRadius - minRadius);
+      let r = Rnd.int (minRadius, maxRadius);
       parray.push(new Point(Math.cos(a) * r, Math.sin(a) * r));
       a = a + Math.PI * 2 / side;
     }
