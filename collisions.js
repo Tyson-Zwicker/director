@@ -24,13 +24,11 @@ export default class Collisions {
     let collisions = new Map();
     for (let actor of Director.actors.values()) {
       if (actor.collides) {
-        let bounds = new Boundry(
-          actor.position.x - actor.radius,
-          actor.position.y - actor.radius,
-          actor.radius * 2,
-          actor.radius * 2
+         let actorBoundry =  new Boundry(
+          actor.position.x - actor.radius, actor.position.y - actor.radius, //upper left
+          actor.position.x + actor.radius, actor.position.y + actor.radius//lower right
         );
-        let potentialCollisions = quadTree.findInRange(bounds);
+        let potentialCollisions = quadTree.findInRange(actorBoundry);
         for (let otherActor of potentialCollisions) {
           if (actor !== otherActor) {
             let overlap = (actor.radius + otherActor.radius) - Point.distance(actor.position, otherActor.position);
