@@ -41,6 +41,5 @@ export default function init() {
       count++;
     }
   }
-
   Director.run();
 }
