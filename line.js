@@ -1,7 +1,7 @@
 import Point from './point.js';
 export default class Line {
   constructor(point0, point1) {
-    this.p0 = point0;
+    this.p0 = point0; 
     this.p1 = point1;
   }
 
