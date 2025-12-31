@@ -9,8 +9,9 @@ let ctx = canvas.getContext('2d');
 let draw = new Draw(ctx);
 let canvasCenter = new Point(canvas.height / 2, canvas.width / 2);
 
-let boundry1 = new Boundry(-200, -200, 200, 200);
-let boundry2 = new Boundry(-100, -100, 100, 100);
+//Using poorly defined (not topleft/bottomright points..)
+let boundry1 = new Boundry(200, 200, -200, -200);
+let boundry2 = new Boundry(100, -100, -100, 100);
 
 let mouseDown = false;
 let mouseX = 0;
