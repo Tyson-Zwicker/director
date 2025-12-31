@@ -7,7 +7,8 @@ import Part from '../part.js';
 import Appearance from '../appearance.js';
 import RadialEffect from '../radialeffect.js';
 import Color from '../color.js';
-import Rnd from '/rnd.js';
+import Rnd from '../rnd.js';
+
 // PRIME MOVER
 document.addEventListener('DOMContentLoaded', () => {
   Director.initialize();
@@ -29,14 +30,13 @@ export default function init() {
     let button = new Button(hoveredAppearance, pressedAppearance);
     button.clickFn = function () {
       let newlabel = `${this.actor.name} (${this.actor.position.x},${this.actor.position.y})`;
-      //  setLabel(text, position, appearance, emSize)
-      this.actor.setLabel(newlabel, new Point(0, 50), appearance,1);
+      this.actor.setLabel(newlabel, new Point(0, 0),appearance, 1);
       this.actor.velocity = new Point(Rnd.int(-10, 10), Rnd.int(-10, 10));
       this.actor.spin = Rnd.int(-10, 10);
     }
     actor.appearance = appearance;
     actor.attachButton(button);
-    actor.setLabel(i.toString(), new Point(0, 50), appearance,1);
+    actor.setLabel(i.toString(), new Point(0, 50),appearance, 1);
     Director.addActor(actor);
   }
   let a = new Actor(`A1`, Polygon.triangle(50, 100));

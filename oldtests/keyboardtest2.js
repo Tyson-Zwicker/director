@@ -1,11 +1,4 @@
-
-import Point from '../point.js';
-import Polygon from '../polygon.js';
-import Button from '../button.js';
-import Actor from '../actor.js';
 import Director from '../director.js';
-import Part from '../part.js';
-import Appearance from '../appearance.js';
 
 // PRIME MOVER
 document.addEventListener('DOMContentLoaded', () => {
@@ -35,4 +28,3 @@ Director.keyboard.setKeyFunction('a', () => {
   */
   Director.run();
 }
-
