@@ -1,5 +1,5 @@
 // Scene Builder JavaScript
-import Color from '../color.js';
+import Color from '../classes/color.js';
 
 // Get canvas and context
 const canvas = document.getElementById('mapCanvas');
