@@ -24,7 +24,6 @@ export default class Line {
   }
   //returns a line prependicular to the line parameter, with the given length.
   //The Mid-Point of the returned line will be p1 of the line.
-  //If angle has been calculated somewhere you can pass it (efficiency!) otherwise it calculates it.
   static getPerpendicular(line, origin, desiredLength) {
     //calculate then angle
     let dx = line.p0.x - line.p1.x;
