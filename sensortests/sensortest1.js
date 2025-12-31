@@ -1,7 +1,6 @@
 import Point from '../classes/point.js';
 import Polygon from '../classes/polygon.js';
 import Button from '../classes/button.js';
-import Keyboard from '../classes/keyboard.js';
 import Actor from '../classes/actor.js';
 import Director from '../classes/director.js';
 import Part from '../classes/part.js';
