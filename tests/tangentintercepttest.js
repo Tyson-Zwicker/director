@@ -39,7 +39,10 @@ export default function init() {
     draw.line2(s2,'#f00');
 
     let ip1 = Line.getPointOfInterception (t, s1);
-    draw.circle2 (ip1.x, ip1.y, 5,'#0ff');
+    draw.circle2 (ip1.x, ip1.y, 5,'#f00');
+
+     let ip2 = Line.getPointOfInterception (t, s2);
+    draw.circle2 (ip2.x, ip2.y, 5,'#0f0');
   }
 
 }
