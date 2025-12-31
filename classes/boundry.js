@@ -1,10 +1,32 @@
 import Point from './point.js';
 export default class Boundry {
   constructor(x1, y1, x2, y2) {
-    this.x1 = x1;
-    this.y1 = y1;
-    this.x2 = x2;
-    this.y2 = y2;
+    //Ensure (this.x1,this.y1) is upper right and (this.x2, this.y2) is lower left
+
+    if (x2 - x1 > 0 && y2 - y1 > 0) { //x1,y1 = upper left, and x2,y2 = bottom right..
+      this.x1 = x1;
+      this.x2 = x2;
+      this.y1 = y1;
+      this.y2 = y2;
+    }
+    if (x2 - x1 < 0 && y2 - y1 > 0) {  //x1,y1 = upper right, and x2,y2 = bottom left
+      this.x1 = x2;
+      this.x2 = x1;
+      this.y1 = y1;
+      this.y2 = y2;
+    }
+    if (x2 - x1 > 0 && y2 - y1 < 0) { //x1,y1 = bottom left, x2,y2 == upper right
+      this.x1 = x1;
+      this.x2 = x2;
+      this.y1 = y2;
+      this.y2 = y1;
+    }
+    if (x2 - x1 < 0 && y2 - y1 < 0) {// x1,y1 = bottom right, x2,y2 = upper left}
+      this.x1 = x2;
+      this.x2 = x1;
+      this.y1 = y2;
+      this.y2 = y1;
+    }
   }
 
   get width() {
@@ -35,7 +57,7 @@ export default class Boundry {
       if (this.isPointInside(point) || this.isPointOnEdge(point)) {
         return true;
       }
-    }    
+    }
     return false;
   }
 }
