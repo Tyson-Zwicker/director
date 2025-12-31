@@ -1,0 +1,431 @@
+{
+  "name": "sc1",
+  "shortDescription": "sd1",
+  "missionText": "mt1",
+  "actors": [
+    {
+      "name": "no part actor",
+      "mass": 1,
+      "polygonName": "Polygon 1766436312857",
+      "appearanceName": "blue appearance",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0
+      },
+      "facing": 0,
+      "spin": 0,
+      "parts": []
+    },
+    {
+      "name": "part actor",
+      "mass": 1,
+      "polygonName": "Polygon 1766439622270",
+      "appearanceName": "green appearance",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0
+      },
+      "facing": 0,
+      "spin": 0,
+      "parts": [
+        {
+          "name": "test part 1",
+          "xOffset": 10,
+          "yOffset": 10
+        },
+        {
+          "name": "test part 1",
+          "xOffset": -10,
+          "yOffset": 10
+        },
+        {
+          "name": "test part2",
+          "xOffset": 50,
+          "yOffset": 0
+        }
+      ]
+    },
+    {
+      "name": "part actor2",
+      "mass": 1,
+      "polygonName": "Polygon 1766439622270",
+      "appearanceName": "green appearance",
+      "position": {
+        "x": 300,
+        "y": 300
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0
+      },
+      "facing": 0,
+      "spin": 0,
+      "parts": [
+        {
+          "name": "test part 1",
+          "xOffset": 10,
+          "yOffset": 10
+        },
+        {
+          "name": "test part 1",
+          "xOffset": -10,
+          "yOffset": 10
+        },
+        {
+          "name": "test part2",
+          "xOffset": 50,
+          "yOffset": 0
+        }
+      ]
+    }
+  ],
+  "parts": [
+    {
+      "name": "test part 1",
+      "polygonName": "small",
+      "appearanceName": "green appearance"
+    },
+    {
+      "name": "test part2",
+      "polygonName": "small",
+      "appearanceName": "red appearance"
+    }
+  ],
+  "polygons": [
+    {
+      "name": "Polygon 1766436312857",
+      "points": [
+        {
+          "x": 80,
+          "y": 140
+        },
+        {
+          "x": -320,
+          "y": 160
+        },
+        {
+          "x": -140,
+          "y": -160
+        },
+        {
+          "x": 180,
+          "y": -140
+        },
+        {
+          "x": 260,
+          "y": 180
+        },
+        {
+          "x": 320,
+          "y": -120
+        },
+        {
+          "x": 320,
+          "y": 100
+        },
+        {
+          "x": 380,
+          "y": -60
+        }
+      ]
+    },
+    {
+      "name": "Polygon 1766439622270",
+      "points": [
+        {
+          "x": 160,
+          "y": 80
+        },
+        {
+          "x": 60,
+          "y": 80
+        },
+        {
+          "x": -140,
+          "y": 60
+        },
+        {
+          "x": -180,
+          "y": -80
+        },
+        {
+          "x": -160,
+          "y": -140
+        },
+        {
+          "x": 80,
+          "y": -180
+        },
+        {
+          "x": 220,
+          "y": -160
+        }
+      ]
+    },
+    {
+      "name": "Polygon 1766439632779",
+      "points": [
+        {
+          "x": 120,
+          "y": 140
+        },
+        {
+          "x": -200,
+          "y": 120
+        },
+        {
+          "x": -200,
+          "y": -160
+        },
+        {
+          "x": 300,
+          "y": -180
+        }
+      ]
+    },
+    {
+      "name": "small",
+      "points": [
+        {
+          "x": -60,
+          "y": 40
+        },
+        {
+          "x": 60,
+          "y": 60
+        },
+        {
+          "x": 20,
+          "y": -40
+        },
+        {
+          "x": -120,
+          "y": -60
+        }
+      ]
+    }
+  ],
+  "appearances": [
+    {
+      "name": "red appearance",
+      "fill": {
+        "r": 8,
+        "g": 0,
+        "b": 0
+      },
+      "stroke": {
+        "r": 15,
+        "g": 0,
+        "b": 0
+      },
+      "text": {
+        "r": 8,
+        "g": 7,
+        "b": 7
+      }
+    },
+    {
+      "name": "blue appearance",
+      "fill": {
+        "r": 0,
+        "g": 0,
+        "b": 10
+      },
+      "stroke": {
+        "r": 0,
+        "g": 4,
+        "b": 15
+      },
+      "text": {
+        "r": 9,
+        "g": 10,
+        "b": 9
+      }
+    },
+    {
+      "name": "green appearance",
+      "fill": {
+        "r": 0,
+        "g": 5,
+        "b": 0
+      },
+      "stroke": {
+        "r": 0,
+        "g": 15,
+        "b": 0
+      },
+      "text": {
+        "r": 9,
+        "g": 9,
+        "b": 9
+      }
+    }
+  ]
+}
+
+// Appearances used in this scene:
+[
+  {
+    "name": "red appearance",
+    "fill": {
+      "r": 8,
+      "g": 0,
+      "b": 0
+    },
+    "stroke": {
+      "r": 15,
+      "g": 0,
+      "b": 0
+    },
+    "text": {
+      "r": 8,
+      "g": 7,
+      "b": 7
+    }
+  },
+  {
+    "name": "blue appearance",
+    "fill": {
+      "r": 0,
+      "g": 0,
+      "b": 10
+    },
+    "stroke": {
+      "r": 0,
+      "g": 4,
+      "b": 15
+    },
+    "text": {
+      "r": 9,
+      "g": 10,
+      "b": 9
+    }
+  },
+  {
+    "name": "green appearance",
+    "fill": {
+      "r": 0,
+      "g": 5,
+      "b": 0
+    },
+    "stroke": {
+      "r": 0,
+      "g": 15,
+      "b": 0
+    },
+    "text": {
+      "r": 9,
+      "g": 9,
+      "b": 9
+    }
+  }
+]
+
+// Parts used in this scene:
+[
+  {
+    "name": "test part 1",
+    "polygonName": "small",
+    "appearanceName": "green appearance"
+  },
+  {
+    "name": "test part2",
+    "polygonName": "small",
+    "appearanceName": "red appearance"
+  }
+]
+
+// Actors in this scene:
+[
+  {
+    "name": "no part actor",
+    "mass": 1,
+    "polygonName": "Polygon 1766436312857",
+    "appearanceName": "blue appearance",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "velocity": {
+      "x": 0,
+      "y": 0
+    },
+    "facing": 0,
+    "spin": 0,
+    "parts": []
+  },
+  {
+    "name": "part actor",
+    "mass": 1,
+    "polygonName": "Polygon 1766439622270",
+    "appearanceName": "green appearance",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "velocity": {
+      "x": 0,
+      "y": 0
+    },
+    "facing": 0,
+    "spin": 0,
+    "parts": [
+      {
+        "name": "test part 1",
+        "xOffset": 10,
+        "yOffset": 10
+      },
+      {
+        "name": "test part 1",
+        "xOffset": -10,
+        "yOffset": 10
+      },
+      {
+        "name": "test part2",
+        "xOffset": 50,
+        "yOffset": 0
+      }
+    ]
+  },
+  {
+    "name": "part actor2",
+    "mass": 1,
+    "polygonName": "Polygon 1766439622270",
+    "appearanceName": "green appearance",
+    "position": {
+      "x": 300,
+      "y": 300
+    },
+    "velocity": {
+      "x": 0,
+      "y": 0
+    },
+    "facing": 0,
+    "spin": 0,
+    "parts": [
+      {
+        "name": "test part 1",
+        "xOffset": 10,
+        "yOffset": 10
+      },
+      {
+        "name": "test part 1",
+        "xOffset": -10,
+        "yOffset": 10
+      },
+      {
+        "name": "test part2",
+        "xOffset": 50,
+        "yOffset": 0
+      }
+    ]
+  }
+]
