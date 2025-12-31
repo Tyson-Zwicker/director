@@ -1,5 +1,5 @@
-import Draw from '../draw.js';
-import Color from '../color.js';
+import Draw from '../classes/draw.js';
+import Color from '../classes/color.js';
 // ----------> PRIME MOVER <-------------
 init();
 export default function init() {

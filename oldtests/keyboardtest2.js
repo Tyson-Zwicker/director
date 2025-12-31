@@ -1,4 +1,4 @@
-import Director from '../director.js';
+import Director from '../classes/director.js';
 
 // PRIME MOVER
 document.addEventListener('DOMContentLoaded', () => {
