@@ -20,9 +20,14 @@ export default class Quadtree {
       this.divided = false;
     }
   }
-  findInRange(otherBoundry, found = []) {
-    
-    if (!this.bounds.touches(otherBoundry)) return found; //Safely ignore this whole quadrant..
+  findInRange(rangeBoundry, found = []) {    
+    let rangeBoundryPoints = [
+        {x:rangeBoundry.x1, y:rangeBoundry.y1},
+        {x:rangeBoundry.x1, y:rangeBoundry.y2},
+        {x:rangeBoundry.x2, y:rangeBoundry.y1},
+        {x:rangeBoundry.x2, y:rangeBoundry.y1}
+      ];
+    if (!this.bounds.touches(rangeBoundryPoints)) return found; //Safely ignore this whole quadrant..
     for (let actor of this.actors) {
       let actorBoundry = new Boundry(
         actor.position.x - actor.radius,
@@ -30,27 +35,28 @@ export default class Quadtree {
         actor.position.x + actor.radius,
         actor.position.y + actor.radius
       );
-      if (actorBoundry.touches(otherBoundry)) {
+      if (actorBoundry.touches(rangeBoundryPoints)) {
         found.push(actor);                                //Anything in the same quadrant is worth looking at more closely..
       }
     }
     if (this.divided) {                                   //Probably nothing in the top level quadrant because it has been subdivided,
-      this.northwest.findInRange(otherBoundry, found);    //and the actors moved to other locations, so we check the subquadants
-      this.northeast.findInRange(otherBoundry, found);
-      this.southwest.findInRange(otherBoundry, found);
-      this.southeast.findInRange(otherBoundry, found);
+      this.northwest.findInRange(rangeBoundry, found);    //and the actors moved to other locations, so we check the subquadants
+      this.northeast.findInRange(rangeBoundry, found);
+      this.southwest.findInRange(rangeBoundry, found);
+      this.southeast.findInRange(rangeBoundry, found);
     }
     return found;                                         //Recurse..
   }
   insert(actor) {
     //If the object is not in the quadtree, check if it is within the bounds
-    let actorBoundry = new Boundry(
-      actor.position.x - actor.radius,  ///<--- actor.position....
-      actor.position.y - actor.radius,
-      actor.position.x + actor.radius,
-      actor.position.y + actor.radius
-    );
-    if (!this.bounds.touches(actorBoundry)) return false;
+    let actorBoundryPoints =  [
+      {"x":actor.position.x - actor.radius, "y":actor.position.y - actor.radius}, //upper left
+      {"x":actor.position.x + actor.radius, "y":actor.position.y - actor.radius}, //upper right
+      {"x":actor.position.x - actor.radius, "y":actor.position.y + actor.radius}, //lower left
+      {"x":actor.position.x + actor.radius, "y":actor.position.y + actor.radius}];//lower right
+    
+    let actorTouchesThisBoundry = this.bounds.touches(actorBoundryPoints);
+    if (!actorTouchesThisBoundry) return false;
     //If this cannot be put into a subquadrant because it would be to big... it gets an exemption!
     let toBigtoSplit = actor.radius >= Math.min(this.bounds.width / 2, this.bounds.height / 2);
     //Insert the actor in this quadrant ONLY if there is room, BUT exceed the capacity rule if:

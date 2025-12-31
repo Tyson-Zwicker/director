@@ -18,26 +18,24 @@ export default class Boundry {
   isBoundry() {
     return (this.x2 > this.x1) && (this.y2 > this.y1) && (!isNaN(this.x1 + this.x2 + this.y1 + this.y2));
   }
-  isInside(x, y) {
-    if (x > this.x1 &&
-      x < this.x2 &&
-      y > this.y1 &&
-      y < this.y2) return true;
+  isPointInside(point) {
+    let { x, y } = point;
+    return (x > this.x1 && x < this.x2 && y > this.y1 && y < this.y2);
+  }
+  isPointOnEdge(point) {
+    let { x, y } = point;
+    if (x === this.x1 && y > this.y1 && y < this.y2) return true; //left edge
+    if (x === this.x2 && y > this.y1 && y < this.y2) return true; //right edge
+    if (y === this.y1 && x > this.x1 && x < this.x2) return true //top edge
+    if (y === this.y2 && x > this.x1 && x < this.x2) return true //top edge
     return false;
   }
-  touches(boundry) {
-    // Check each corner
-    const corners = [
-      { x: boundry.x1, y: boundry.y1 }, // top-left
-      { x: boundry.x2, y: boundry.y1 }, // top-right
-      { x: boundry.x1, y: boundry.y2 }, // bottom-left
-      { x: boundry.x2, y: boundry.y2 }  // bottom-right
-    ];
-
-    corners.forEach(corner => {
-      if (boundry.isInside(corner.x, corner.y)) {
+  touches(points) {
+    for (let point of points) {
+      if (this.isPointInside(point) || this.isPointOnEdge(point)) {
         return true;
       }
-    });
+    }    
+    return false;
   }
 }
