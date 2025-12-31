@@ -81,30 +81,30 @@ export default function init() {
     part1.facing += 1;
     part2.facing -= 3;
     let spread = 400;
-    if (count === 100) {
+    if (count === 10) {
       let lineEffect = new LineEffect(
         new Point(
-          -spread / 2 + Math.random() * spread,
-          -spread / 2 + Math.random() * spread
+          -spread / 2 + Rnd.int(spread),
+          -spread / 2 + Rnd.int(spread)
         ),
         new Point (
-          spread / 2 + Math.random() * spread,
-          spread / 2 + Math.random() * spread
+          spread / 2 + Rnd.int(spread),
+          spread / 2 + Rnd.int(spread)
         ),
-        4, new Color(15, 0, 15), Math.random()*10
+        4, new Color(15, 0, 15), Rnd.float (.3,2)
       );
       count =0;
       Director.addBackgroundEffect(lineEffect);
       lineEffect = new LineEffect(
         new Point(
-          -spread / 2 + Math.random() * spread,
-          -spread / 2 + Math.random() * spread
+          -spread / 2 +Rnd.int(spread),
+          -spread / 2 +Rnd.int(spread)
         ),
         new Point (
-          spread / 2 + Math.random() * spread,
-          spread / 2 + Math.random() * spread
+          spread / 2 + Rnd.int(spread),
+          spread / 2 + Rnd.int(spread)
         ),
-        4, new Color(15, 15, 0), Math.random()*10
+        4, new Color(15, 15, 0), Rnd.float (.3,2)
       );
       count =0;
       Director.addForegroundEffect(lineEffect);

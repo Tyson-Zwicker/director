@@ -83,21 +83,21 @@ export default function init() {
     if (count === 100) {      
       let radialEffect = new RadialEffect(
         new Point(
-          Math.random() * spread,
-          Math.random() * spread
+          Rnd.int (spread),
+          Rnd.int (spread)
         ),
-        10 + Math.random() * 50,
-        new Color(0, 15, 8), Math.random() * 10
+        Rnd.int (10,50),
+        new Color(0, 15, 8), Rnd.float (0.3,2)
       );
       count = 0;
       Director.addBackgroundEffect(radialEffect);
       radialEffect = new RadialEffect(
         new Point(
-          Math.random() * spread,
-          Math.random() * spread
+          Rnd.int (spread),
+          Rnd.int (spread)
         ),
-        10 + Math.random() * 50,
-        new Color(8, 15, 0), Math.random() * 10
+        Rnd.int (10,50),
+        new Color(8, 15, 0), Rnd.float (.3,2)
       );
       count = 0;
       Director.addForegroundEffect(radialEffect);

@@ -1,11 +1,10 @@
 import Point from '../classes/point.js';
 import Polygon from '../classes/polygon.js';
-import Button from '../classes/button.js';
 import Actor from '../classes/actor.js';
 import Director from '../classes/director.js';
-import Part from '../classes/part.js';
 import Appearance from '../classes/appearance.js';
 import Color from '../classes/color.js';
+import Rnd from '../classes/rnd.js';
 // ----------> PRIME MOVER <-------------
 document.addEventListener('DOMContentLoaded', () => {
   Director.initialize();
@@ -24,23 +23,23 @@ export default function init() {
   for (let i = 0; i < 16; i++) {
     for (let j = 0; j < 16; j++) {
       let name = `A${count}`;
-      let poly = Polygon.makeRegular(20, 5 + Math.floor(Math.random() * 50));
+      let poly = Polygon.makeRegular(20, Rnd.int(5, 50));
       let a = new Actor(name, poly);
       a.position = new Point(startX + i * spacing, startY + j * spacing);
-      a.spin = Math.random() * 20 - 10;
-      a.facing = Math.random() * 360;
+      a.spin = Rnd.int (-10,10);
+      a.facing = Rnd.int (360);
       a.appearance = new Appearance(
         Color.random(8).asHex(),
         Color.random(8).asHex(),
         Color.random(8).asHex()
       );
-      let angle = Math.random() * Math.PI * 2;
-      let speed = 0// + Math.random() * 15;
+      let angle = Rnd.float ( Math.PI * 2);
+      let speed = 0;
       a.velocity = Point.zero();
-      a.bounceCoefficient = Math.random();
+      a.bounceCoefficient = Rnd.float (0.5,1);
       a.setLabel(name, new Point(0, 0),a.appearance, 1);
       Director.addActor(a);
-      Director.addFieldToActor(a, -a.mass() * 10);
+      Director.addFieldToActor(a, -a.mass() * 40);
       count++;
     }
   }
