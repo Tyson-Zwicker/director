@@ -23,15 +23,15 @@ export default class Director {
     Director.signals = new EventTracker();
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
-    Director.view = new View();
+    Director.view = undefined;  //THIS IS DEFINED AT when RUN is called!
     Director.keyboard.bindEvents();
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(
       new Boundry(
-        - Number.MAX_SAFE_INTEGER / 2,
-        - Number.MAX_SAFE_INTEGER / 2,
-        Number.MAX_SAFE_INTEGER / 2,
-        Number.MAX_SAFE_INTEGER / 2
+        - 1000000,
+        - 1000000,
+          1000000,
+          1000000
       ),
       1, 1  // Default capacity and minimum size for the quadtree
     );
@@ -113,7 +113,7 @@ export default class Director {
     let survivingForegroundEffects = [];
     for (let effect of Director.fgEffects) {
       if (effect instanceof LineEffect) {       //----------lines
-        if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
+        if (Director.view.canSee(effect.p0) || Director.view.canSee(effect.p1)) {
           if (effect.draw(Director.view.context, delta)) {
             survivingForegroundEffects.push(effect);
           }
@@ -146,7 +146,7 @@ export default class Director {
     let survivingBackgroundEffects = [];
     for (let effect of Director.bgEffects) {
       if (effect instanceof LineEffect) {
-        if (Director.view.canSee(effect.p1) || Director.view.canSee(effect.p2)) {
+        if (Director.view.canSee(effect.p0) || Director.view.canSee(effect.p1)) {
           if (effect.draw(Director.view.context, delta)) {
             survivingBackgroundEffects.push(effect);
           }
@@ -191,7 +191,8 @@ export default class Director {
         for (let sensor of actor.sensors) {
           let result = sensor.detect(delta);
           if (result) {
-            //TODO:  Store the results with the sensor owner.         
+            //TODO:  Store the results with the sensor owner.    
+            //TODO: Use event tracker to store data on active sensors
           }
         }
       }
@@ -201,6 +202,7 @@ export default class Director {
   //------------------------- loop
   static loop(currentTime) {
     const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
+    Director.delta = delta; //Need to be able to see this from external JS sometimes..
     Director.lastFrameTime = currentTime;
     Director.kinematics(delta); //This redraws the entire quadtree.
     Director.applyActorField(delta);
@@ -217,11 +219,30 @@ export default class Director {
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }
   //------------------------- runners
-  static run() {
+  static run(canvas, canvasContainer) {
+    if (!canvas && !canvasContainer){
+      console.log ('making own canvas')
+      Director.view = new View ('#000');
+    }
+    else if (!canvas || !canvasContainer){
+      throw new Error (`Define both a canvas and container, or neither! ${canvas}, ${container}`);
+    }
+    else{
+      Director.view = new View ('#000',canvas, canvasContainer);
+    }
     Director.continueAnimationLoop = true;
     requestAnimationFrame(Director.loop.bind(Director));
   }
-  static runOnce() {
+  static runOnce(canvas, canvasContainer) {
+     if (!canvas && !canvasContainer){
+      Director.view = new View ('#000');
+    }
+    else if (!canvas || !canvasContainer){
+      throw new Error (`Define both a canvas and container, or neither! ${canvas}, ${container}`);
+    }
+    else{
+      Director.view = new View ('#124',canvas, canvasContainer);
+    }
     Director.continueAnimationLoop = false;
     requestAnimationFrame(Director.loop.bind(Director));
   }
