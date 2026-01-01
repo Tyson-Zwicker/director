@@ -11,7 +11,7 @@ let canvasCenter = new Point(canvas.height / 2, canvas.width / 2);
 
 //Using poorly defined (not topleft/bottomright points..)
 let boundry1 = new Boundry(200, 200, -200, -200);
-let boundry2 = new Boundry(100, -100, -100, 100);
+let boundry2 = new Boundry(300, -100, -200, 100);
 
 let mouseDown = false;
 let mouseX = 0;
@@ -62,10 +62,25 @@ function drawBox1() {
 }
 
 function drawBox2() {
-  draw.box2(boundry2.x1, boundry2.y1, boundry2.x2, boundry2.y2, '#4a90e2');
+  const touching = Boundry.touches(boundry1, boundry2);
+  const color = touching ? '#ff6b6b' : '#4a90e2';
+  draw.box2(boundry2.x1, boundry2.y1, boundry2.x2, boundry2.y2, color);
 }
 
 function drawCornersInside() {
+  const corners1 = [
+    { x: boundry1.x1, y: boundry1.y1 }, // top-left
+    { x: boundry1.x2, y: boundry1.y1 }, // top-right
+    { x: boundry1.x1, y: boundry1.y2 }, // bottom-left
+    { x: boundry1.x2, y: boundry1.y2 }  // bottom-right
+  ];
+
+  corners1.forEach(corner => {
+    if (boundry2.isPointInside(corner.x,corner.y)) {
+      draw.circle2(corner.x, corner.y, 8, '#666bbb');
+    }
+  });
+
   // Check each corner of boundry2
   const corners = [
     { x: boundry2.x1, y: boundry2.y1 }, // top-left
@@ -75,7 +90,7 @@ function drawCornersInside() {
   ];
 
   corners.forEach(corner => {
-    if (boundry1.isPointInside(corner)) {
+    if (boundry1.isPointInside(corner.x,corner.y)) {
       draw.circle2(corner.x, corner.y, 8, '#ff6b6b');
     }
   });
@@ -83,16 +98,16 @@ function drawCornersInside() {
 
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
+
   ctx.save();
   ctx.translate(canvas.width / 2, canvas.height / 2);
-  
+
   drawBox1();
   drawBox2();
   drawCornersInside();
-  
+
   ctx.restore();
-  
+
   requestAnimationFrame(animate);
 }
 

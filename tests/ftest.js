@@ -34,7 +34,7 @@ export default function init() {
       a.bounceCoefficient = Rnd.float (0.5,1);
       a.setLabel(name, new Point(0, 0),a.appearance, 1);
       Director.addActor(a);
-      Director.addFieldToActor(a, -a.mass() * 10);
+      Director.addFieldToActor(a, -a.mass() * 500);
       count++;
     }
   }
