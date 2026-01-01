@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUI Test 1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100vh;
+            width: 100vw;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-rows: 10% 80% 10%;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .top-row {
+            background-color: #2d2d2d;
+            padding: 0px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .middle-row {
+            background-color: #1e1e1e;
+            padding: 0px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 20% 60% 20%;
+            gap: 0px;
+        }
+
+        .bottom-row {
+            background-color: #2d2d2d;
+            border-top: 1px solid #404040;
+            display: flex;
+            align-items: center;
+        }
+
+        .column {
+            background-color: #1a4d2e;
+            border: none;
+            padding: 0px;
+            overflow: hidden;
+        }
+
+        .middle-column {
+            padding: 0;
+            display: flex;
+            background-color: #252525;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-color: #1a3a4d;
+        }
+
+        
+
+        button {
+            background-color: #0e639c;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #1177bb;
+        }
+
+        button:active {
+            background-color: #0d5a8f;
+        }
+    </style>
+    
+    <script type="module" src="guitest1.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="top-row">
+            <button id="testBtn">test</button>
+        </div>
+        <div class="middle-row">
+            <div class="column"><!-- Left column --></div>
+            <div class="column middle-column" id = "canvasContainer"><canvas id="mainCanvas"></canvas></div>
+            <div class="column"><!-- Right column --></div>
+        </div>
+        <div class="bottom-row">
+            <!-- Footer content -->
+        </div>
+    </div>    
+</body>
+</html>
