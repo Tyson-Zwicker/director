@@ -51,9 +51,9 @@ export default function init() {
     part2.appearance = new Appearance('#ff0', '#f00', '#fff');
     a.attachPart(part2);
     Director.addActor(a);
-    let sensor1 = new Sensor (a, 3000, 46, 0, 15, true);
-    let sensor2 = new Sensor (a, 400, 33, 270, 5, true);
-    let sensor3 = new Sensor (a, 400, 33, 90, 5, true);
+    let sensor1 = new Sensor (a, 2000, 33, 0, 10, true);
+    let sensor2 = new Sensor (a, 600, 45, 270, 10, true);
+    let sensor3 = new Sensor (a, 600, 45, 90, 10, true);
     a.attachSensor (sensor1);
     a.attachSensor (sensor2);
     a.attachSensor (sensor3);
