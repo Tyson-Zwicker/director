@@ -20,14 +20,9 @@ export default class Quadtree {
       this.divided = false;
     }
   }
-  findInRange(rangeBoundry, found = []) {    
-    let rangeBoundryPoints = [
-        {x:rangeBoundry.x1, y:rangeBoundry.y1},
-        {x:rangeBoundry.x1, y:rangeBoundry.y2},
-        {x:rangeBoundry.x2, y:rangeBoundry.y1},
-        {x:rangeBoundry.x2, y:rangeBoundry.y1}
-      ];
-    if (!this.bounds.touches(rangeBoundryPoints)) return found; //Safely ignore this whole quadrant..
+  findInRange(rangeBoundry, found = []) {
+    let touchesThisBoundry = Boundry.touches(rangeBoundry, this.bounds)
+    if (!touchesThisBoundry) return found; //Safely ignore this whole quadrant..
     for (let actor of this.actors) {
       let actorBoundry = new Boundry(
         actor.position.x - actor.radius,
@@ -35,7 +30,7 @@ export default class Quadtree {
         actor.position.x + actor.radius,
         actor.position.y + actor.radius
       );
-      if (actorBoundry.touches(rangeBoundryPoints)) {
+      if (Boundry.touches(rangeBoundry, actorBoundry)) {
         found.push(actor);                                //Anything in the same quadrant is worth looking at more closely..
       }
     }
@@ -49,13 +44,13 @@ export default class Quadtree {
   }
   insert(actor) {
     //If the object is not in the quadtree, check if it is within the bounds
-    let actorBoundryPoints =  [
-      {"x":actor.position.x - actor.radius, "y":actor.position.y - actor.radius}, //upper left
-      {"x":actor.position.x + actor.radius, "y":actor.position.y - actor.radius}, //upper right
-      {"x":actor.position.x - actor.radius, "y":actor.position.y + actor.radius}, //lower left
-      {"x":actor.position.x + actor.radius, "y":actor.position.y + actor.radius}];//lower right
-    
-    let actorTouchesThisBoundry = this.bounds.touches(actorBoundryPoints);
+    let actorBoundry = new Boundry(
+      actor.position.x - actor.radius,
+      actor.position.y - actor.radius,
+      actor.position.x + actor.radius,
+      actor.position.y + actor.radius);
+
+    let actorTouchesThisBoundry = Boundry.touches(this.bounds, actorBoundry);
     if (!actorTouchesThisBoundry) return false;
     //If this cannot be put into a subquadrant because it would be to big... it gets an exemption!
     let toBigtoSplit = actor.radius >= Math.min(this.bounds.width / 2, this.bounds.height / 2);
