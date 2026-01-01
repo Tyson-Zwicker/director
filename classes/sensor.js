@@ -4,6 +4,8 @@ import Point from './point.js';
 import Director from './director.js'
 import LineEffect from './lineeffect.js';
 import Color from './color.js';
+import RadialEffect from './radialeffect.js';
+
 export default class Sensor {
   constructor(owner, range, sweepArc, facing, sweepSpeed, active) {
     this.sweepArc = sweepArc;
@@ -20,7 +22,7 @@ export default class Sensor {
   }
   detect(delta) {
     this.#sweep(delta);
-    let moved  = Math.abs (Math.abs(this.sweepAngle) - Math.abs (this.lastSweepAngle));    
+    let moved = Math.abs(Math.abs(this.sweepAngle) - Math.abs(this.lastSweepAngle));
     if (moved >= 1) {
       this.lastSweepAngle = this.sweepAngle;
       let trueFacing = this.owner.facing + this.facing + this.sweepAngle;
@@ -30,18 +32,20 @@ export default class Sensor {
       let candidates = this.#getSortedObjectsWithinRange(rayEndPoint);
       for (let candidate of candidates) {
         if (candidate != this.owner) { //don't detect yourself
+          Director.addBackgroundEffect(new RadialEffect(candidate.position, candidate.radius , '#000', 0.5));
           let seenPosition = this.#canSee(candidate, rayLine);
-          if (seenPosition != false) {            
+          if (seenPosition != false) {
             this.#drawPingReturned(seenPosition);
             return candidate; //leave loop early - don't look past the first one you see, because anything else will be blocked.        
           }
         }
       }
       this.#drawPingToEdge(rayEndPoint);
-    
+
       return false;
     }
   }
+
   #canSee(candidate, rayLine) {
     //Form an imaginary line from this.owner to candidate.
     let imgLine = new Line(this.owner.position, candidate.position);
@@ -49,18 +53,40 @@ export default class Sensor {
     let tanLine = Line.getPerpendicular(imgLine, candidate.position, candidate.radius * 2);
     //If the rayLine intersects this tangent line, it is detected    
     let seenPosition = Line.getPointOfInterception(tanLine, rayLine);
+    /*
+    DEBUG:  DRAW THE PERPLINE, DRAW THE INTERCEPTION IF ANY..
+    let taneffect = new LineEffect(tanLine.p0, tanLine.p1, 2, '#fff', 5);
+    Director.addBackgroundEffect(taneffect);
+    */
     return seenPosition; //false if no interception found.
   }
   #drawPingReturned(seenPosition) {
-    let ray = new LineEffect(this.owner.position, seenPosition, 2, new Color(0, 15, 0, 1), 2);
+    let ray = new LineEffect(this.owner.position, seenPosition, 2, new Color(0, 15, 0, 1), 3);
     Director.addBackgroundEffect(ray);
   }
   #drawPingToEdge(rayEndPoint) {
     let ray = new LineEffect(this.owner.position, rayEndPoint, 1, new Color(15, 0, 0, 1), 1);
     Director.addBackgroundEffect(ray);
   }
+  /*
+      Keep for know its good for debugging the quadtree..
+      #draw_sensorBoundry(boundry){
+        let top = new LineEffect(new Point (boundry.x1,boundry.y1),new Point(boundry.x2,boundry.y1),1,'#0ff',0.06);
+        let bottom = new LineEffect(new Point (boundry.x1,boundry.y2),new Point(boundry.x2,boundry.y2),1,'#0ff',0.06);
+        let left = new LineEffect(new Point (boundry.x1,boundry.y1),new Point(boundry.x1,boundry.y2),1,'#0ff',0.06);
+        let right = new LineEffect(new Point (boundry.x2,boundry.y1),new Point(boundry.x2,boundry.y2),1,'#0ff',0.06);
+        Director.addBackgroundEffect(top);
+        Director.addBackgroundEffect(bottom);
+        Director.addBackgroundEffect(left);    
+        Director.addBackgroundEffect(right);
+      }
+  */
   #getSortedObjectsWithinRange(rayEndPoint) {
-    let sensorBoundry = new Boundry(this.owner.position.x, this.owner.position.y, rayEndPoint.x, rayEndPoint.y);  
+    //let sensorBoundry = new Boundry(this.owner.position.x, this.owner.position.y, rayEndPoint.x, rayEndPoint.y);  
+    let op = this.owner.position;
+    let sb = this.owner.sensorBoundry;
+    let sensorBoundry = new Boundry(op.x + sb.x1, op.y + sb.y1, op.x + sb.x2, op.y + sb.x2);  //boundry moves with owner
+
     let candidates = Director.quadtree.findInRange(sensorBoundry);
     for (let candidate of candidates) {
       candidate["distance"] = Point.distance(this.owner.position, candidate.position);
