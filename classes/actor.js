@@ -1,6 +1,7 @@
 import Point from './point.js';
 import EventTracker from './eventtracker.js';
 import Label from './label.js';
+import Boundry from './boundry.js';
 import Transpose from './transpose.js';
 export default class Actor {
   _mass = undefined;
@@ -21,7 +22,8 @@ export default class Actor {
   velocity = new Point(0, 0); // Point used as a component vector because they are the same thing.
   #label = undefined;
   radius = undefined;
-  
+  sensorBoundry = undefined;
+  maxSensorRange =0;
   constructor(name, polygon, appearance, mass) {
     this.name = name;
     this.polygon = polygon;
@@ -44,10 +46,15 @@ export default class Actor {
   attachSensor(sensor) {
     if (!this.sensors) this['sensors'] = [];
     sensor['actor'] = this;
+    if (sensor.range > this.maxSensorRange){
+      this.maxSensorRange = sensor.range;
+      this.sensorBoundry = new Boundry (-sensor.range, -sensor.range, sensor.range, sensor.range);
+    }
     this.sensors.push(sensor);
     return this.sensors.length;
   }
   removeSensor(i) {
+    //TODO: recalc range and boundry..
     this.sensors.splice(i, 1);
   }
   draw(view) {
