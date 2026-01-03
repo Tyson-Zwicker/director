@@ -1,3 +1,4 @@
+import Appearance from './Appearance';
 import View from './view.js';
 import Quadtree from './quadtree.js';
 import Collisions from './collisions.js';
@@ -9,43 +10,111 @@ import KeyBoard from './keyboard.js';
 import LineEffect from './lineeffect.js';
 import RadialEffect from './radialeffect.js';
 import ParticleEffect from './particleeffect.js';
+import Polygon from './polygon.js';
 
 export default class Director {
   static keyboard = new KeyBoard();
   static initialize() {
     Director.MILLISECONDS = 1000;
     Director.continueAnimationLoop = false;
+    Director.appearanceBank = new Map();
+    Director.polygonBank = new Map();
     Director.actors = new Map();
     Director.actorFields = new Map();
+    Director.partTypes = new Map();
     Director.bgEffects = [];
     Director.fgEffects = [];
     Director.pGenerators = new Map();
     Director.signals = new EventTracker();
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
-    Director.view = undefined;  //THIS IS DEFINED AT when RUN is called!
+    Director.view = undefined;  //Defined by a call to run() the director. If none is specified, the window is assumed empty and one is created to fill that window.
     Director.keyboard.bindEvents();
     Director.creatorFn = undefined;
-    Director.quadtree = new Quadtree(
-      new Boundry(
-        - 1000000,
-        - 1000000,
-          1000000,
-          1000000
-      ),
-      1, 1  // Default capacity and minimum size for the quadtree
-    );
+    Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
   }
+  //json has "name (a string) and "points" an array, of {x,y}
+  static importPolygonBank(json) {
+    try {
+      let jsonObj = JSON.parse(json);
+    } catch (e) {
+      throw new Error("Director.importPolyBank. Bad JSON.");
+    }
+    for (let poly of jsonObj.polygons) {
+      Director.polygonBank.set(poly.name, new Polygon(poly.points));
+    }
+  }
+  static importAppearanceBank(json) {
+    try {
+      let jsonObj = json.parse(json);
+    } catch (e) {
+      throw new Error("Director.importAppearanceBank. Bad JSON.");
+    }
+    for (let appr of jsonObj.appearances) {
+      Director.AppearanceBank.set(appr.name, new Appearance(appr.fill, appr.stroke, appr.text, appr.width));
+    }
+  }
+
   static addCreatorsFunction(fn) {
     Director.creatorFn = fn
   }
   static addActor(actor) {
+    if (Director.actors.has(actor.name)) throw Error(`Director:addActor: actor named [${actor.name}] already exists.`)
     Director.actors.set(actor.name, actor);
     Director.quadtree.insert(actor);
   }
-  static removeActor(actor) {
-    if (Director.actorFields.has(actor.name)) Director.actorFields.delete(actor.name);
+  static removeActor(actorName) {
+    if (!Director.actorFields.has(actorName)) throw new Error(`Director.removeActor: unknown actor [${actorName}]`)
+    Director.actorFields.delete(actorName);
   }
+  static addAppearance(name, fillHexColor, strokeHexColor, textHexColor, lineWidth) {
+    if (Director.appearanceBank.has(name)) throw new Error(`Appearance [${name}] already exists.`);
+    let appearance = new Appearance(fillHexColor, strokeHexColor, textHexColor, lineWidth);
+    Director.appearanceBank.set(name, appearance);
+  }
+  static getAppearance (appearanceName){
+    if (!Director.appearanceBank.has (appearanceName)) throw new Error (`Director.getAppearance: appearance [${appearanceName}] already exists.`);
+    return Director.appearanceBank.get (appearanceName);
+  }
+  static addPartType(part) {
+    if (Director.partTypes.has(part.partTypeName)) throw new Error(`Part Type [${part.partTypeName}] already added.`);
+    Director.partTypes.set(part.typeName, part);
+  }
+  static addPartTypeToActor(partTypeName, actorName, partName, offsetFromActorOrigin, facing, appearanceName) {
+    if (!Director.partTypes.has(partTypeName)) throw new Error(`Director.addPartTypeToActor: Unknown part type [${partTypeName}]`);
+    if (!Director.actors.has(actorName)) throw new Error(`Director.addPartTypeToActor: Unknown actor ${actorName}`);
+    let actor = Director.get(actorName);
+    let appearance = Director.getAppearance (appearanceName);
+    let partType = Director.partTypes.get (partType);
+    let part = partType.createInstance(actor, partName, offsetFromActorOrigin, facing, appearance);
+    actor.attachPart (part);
+  }
+  static getPartOfActor(actorName, partName) {
+    if (!Director.actors.has(actorName)) throw new Error(`Director.addPartTypeToActor: Unknown actor ${actorName}`);
+    let actor = Director.actors.get (actorName);
+    return actor.getPart (partName);
+  }
+  static removePartOfActor(actorName, partName) {
+    if (!Director.actors.has(actorName)) throw new Error(`Director.addPartTypeToActor: Unknown actor ${actorName}`);
+    let actor = Director.actors.get (actorName);
+    actor.removePart (partName);
+  }
+
+  /* MOVE THIS TO DIRECTOR FROM PART
+  attachParticleGenerator(generator) {
+    this.particleGenerator = generator;
+    generator.attachedPart = this;
+    return this;
+  }
+  
+  updateParticleGenerator() {
+    if (this.particleGenerator) {      
+      let worldCoords = Transpose.childToWorld (this,this.parent);
+      this.particleGenerator.setPosition(worldCoords);
+      this.particleGenerator.setFacing(this.parent.facing + this.facing);
+    }
+  }
+    */
   static addFieldToActor(actor, strength) {
     if (!(actor instanceof Actor)) throw Error(`Director.addFieldToActor: actor is not an actor. [${actor}]`);
     Director.actorFields.set(actor.name, new ActorField(actor, strength));
@@ -53,6 +122,7 @@ export default class Director {
   static removeFieldFromActor(actor) {
     if (Director.actorFields.has(actor.name)) Director.actorFields.delete(actor.name);
   }
+
   static addBackgroundEffect(effect) {
     Director.bgEffects.push(effect);
   }
@@ -220,28 +290,28 @@ export default class Director {
   }
   //------------------------- runners
   static run(canvas, canvasContainer) {
-    if (!canvas && !canvasContainer){
-      console.log ('making own canvas')
-      Director.view = new View ('#000');
+    if (!canvas && !canvasContainer) {
+      console.log('making own canvas')
+      Director.view = new View('#000');
     }
-    else if (!canvas || !canvasContainer){
-      throw new Error (`Define both a canvas and container, or neither! ${canvas}, ${container}`);
+    else if (!canvas || !canvasContainer) {
+      throw new Error(`Define both a canvas and container, or neither! ${canvas}, ${container}`);
     }
-    else{
-      Director.view = new View ('#000',canvas, canvasContainer);
+    else {
+      Director.view = new View('#000', canvas, canvasContainer);
     }
     Director.continueAnimationLoop = true;
     requestAnimationFrame(Director.loop.bind(Director));
   }
   static runOnce(canvas, canvasContainer) {
-     if (!canvas && !canvasContainer){
-      Director.view = new View ('#000');
+    if (!canvas && !canvasContainer) {
+      Director.view = new View('#000');
     }
-    else if (!canvas || !canvasContainer){
-      throw new Error (`Define both a canvas and container, or neither! ${canvas}, ${container}`);
+    else if (!canvas || !canvasContainer) {
+      throw new Error(`Define both a canvas and container, or neither! ${canvas}, ${container}`);
     }
-    else{
-      Director.view = new View ('#124',canvas, canvasContainer);
+    else {
+      Director.view = new View('#124', canvas, canvasContainer);
     }
     Director.continueAnimationLoop = false;
     requestAnimationFrame(Director.loop.bind(Director));
