@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Look at the Console</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+
+    div {
+      font-size: 48px;
+      color: #333;
+    }
+  </style>
+</head>
+
+<body">
+  <div>look at the console</div>
+  <script>
+
+    document.addEventListener('DOMContentLoaded', doTest);
+    function doTest() {
+      console.log('doing test');
+      let jsonText = `
+                  {"polygons":[
+                    {
+                    "name": "TestPolygon1",
+                    "points": [{"x":160,"y":80},{"x":60,"y":80},{"x":-140,"y":60},{"x":-180,"y":-80},{"x":-160,"y":-140}]
+                    },    
+                    {
+                    "name":"testpolygon2",
+                    "points": [{"x":80,"y":-180},{"x":220,"y":-160}, {"x":-100, "y":400}]
+                    }
+                  ]}`;
+      let obj = JSON.parse(jsonText);
+      
+      console.log(obj); 
+      console.log (obj.polygons[1].x,obj.polygons[1].x,);
+      console.log('test complete');
+    }
+    
+  </script>
+  </body>
+
+</html>
