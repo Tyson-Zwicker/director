@@ -12,7 +12,7 @@ export default class Actor {
   collisionFn = undefined;
   moves = true;
   name = undefined;
-  parts = [];
+  parts = new Map();
   polygon = undefined;
   position = new Point(0, 0); // world coordinates, defined in pixels.
   facing = 0; // Defined in degrees
@@ -30,7 +30,7 @@ export default class Actor {
     this.appearance = appearance;
     this._mass = mass;
     this.radius = polygon.radius;
-    if (this._mass<=0 || this.radius<=0) throw new Error (`Actors must have a phsyical presence.  mass: [${_this.mass}] radius [${this.radius}]`)
+    if (this._mass<=0 || this.radius<=0) throw new Error (`Actor.constructor: Actors must have a phsyical presence.  mass: [${_this.mass}] radius [${this.radius}]!`)
   }
   setLabel(text, position, appearance, size) {
     this.#label = new Label (this, position, appearance, size, text);
@@ -39,9 +39,18 @@ export default class Actor {
     this.button = b;
     b.actor = this;
   }
-  attachPart(prt) {
-    prt.owner = this;
-    this.parts.push(prt);
+  attachPart(part) {
+    if (this.parts.has (part.name)) throw new Error (`Actor.attachPart: part names [${part.name}] already exists.`);
+    this.parts.set (part.name, part);
+
+  }
+  getPart (partName){
+    if (!this.parts.has (partName)) throw new Error (`Actor.getPart: part names [${partName}] does not exist`);
+    return this.parts.get (partName)
+  }
+  removePart (partName){
+    if (!this.parts.has (partName)) throw new Error (`Actor.removePart: part names [${partName}] does not exist`);
+    this.parts.delete (partName);
   }
   attachSensor(sensor) {
     if (!this.sensors) this['sensors'] = [];
