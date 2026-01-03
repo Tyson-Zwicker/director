@@ -63,9 +63,13 @@ export default class Director {
     Director.actors.set(actor.name, actor);
     Director.quadtree.insert(actor);
   }
+  static getActor (actorName){
+    if (!Director.actors.has(actorName)) throw new Error(`Director.removeActor: unknown actor [${actorName}]`)
+    return Director.actors(actorName);
+  }
   static removeActor(actorName) {
-    if (!Director.actorFields.has(actorName)) throw new Error(`Director.removeActor: unknown actor [${actorName}]`)
-    Director.actorFields.delete(actorName);
+    if (!Director.actors.has(actorName)) throw new Error(`Director.removeActor: unknown actor [${actorName}]`)
+    Director.actors.delete(actorName);
   }
   static addAppearance(name, fillHexColor, strokeHexColor, textHexColor, lineWidth) {
     if (Director.appearanceBank.has(name)) throw new Error(`Appearance [${name}] already exists.`);
