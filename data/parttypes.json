@@ -1,0 +1,12 @@
+{
+  "partTypes": [
+    {
+      "name": "partType1",
+      "polygon": "smalltriangle"
+    },
+    {
+      "name": "partType2",
+      "polygon": "smallbox"
+    }
+  ]
+}

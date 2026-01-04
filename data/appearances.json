@@ -1,0 +1,25 @@
+{
+  "appearances": [
+    {
+      "name": "red",
+      "fill": "#900",
+      "stroke": "#f00",
+      "text": "#fff",
+      "width": 1
+    },
+    {
+      "name": "green",
+      "fill": "#090",
+      "stroke": "#0f0",
+      "text": "#fff",
+      "width": 1
+    },
+    {
+      "name": "blue",
+      "fill": "#009",
+      "stroke": "#00f",
+      "text": "#fff",
+      "width": 1
+    }
+  ]
+}
