@@ -117,6 +117,30 @@ export default class Director {
       Director.actors.set (act.name, act);
     }
   }
+  static importScene (sceneData){
+    let jsonObj = undefined;
+    try {
+      jsonObj = JSON.parse(json);
+    } catch (e) {
+      throw new Error("Director.importScene. Bad JSON.");
+    }
+    Director.scene = {
+      name: jsonObj.name,
+      description : jsonObj.description,
+      text: jsonObj.text,      
+    };
+      for (let appearance of jsonObj.appearances){
+        if (!Director.appearanceBank.has (appearance.name)) throw new Error (`Director.importScene: appearance ${appearance.name} does not exist`);
+      }
+      for (let polygon of jsonObj.appearances){
+         if (!Director.appearanceBank.has (polygon.name)) throw new Error (`Director.importScene: polygon ${polygon.name} does not exist`);
+
+      }
+      for (let actor of jsonObj.appearances){
+         if (!Director.appearanceBank.has (actor.name)) throw new Error (`Director.importScene: actor ${actor.name} does not exist`);
+      }
+    Director.sce
+  }
   static addCreatorsFunction(fn) {
     Director.creatorFn = fn
   }
