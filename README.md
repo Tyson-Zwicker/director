@@ -1,7 +1,9 @@
 //
                                                   This Branch is Breaking Stuff
+
   
-  Specifically breaking how parts work in relation to themselves, the actors and the director. Parts are learning to be "generic" and then "speceific" when attached to an actor. Also all attachment goes through the Director from now on.  Part "specific to actor" names, and their offset are assigned there, and that's also the only place that sets the part's "owner".
+Director is becoming central librarian (it was always supposed to be).  I added methods to store&get Appearances, Parts and Polygons.  Also you can do it with JSON, which also how it has always supposed to be...
+So I'm moving all the increasingly anachronistic and cumbersome binding/appending/adding logic into the Director, and simplifying how these work on the "per-thing" level, so the Director still works with them (and they can be used without it), but its a lot easier to just pre-load all of it with JSON.
 
 // 
 
