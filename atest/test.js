@@ -139,10 +139,12 @@ function init() {
   `;
   let sceneData = `
   {
-    "sceneName:": "exampleScene1",
-    "appearances": [{"name": "red"},{"name": "green"},{"name": "blue"}],
-    "polygons": [{"name":"triangle"},{"name":"smallbox"}],
-    "actors": [{"name": "testActor1"},{"name": "testActor2"}]
+    "name": "exampleScene1",
+    "description": "a short description.",
+    "text": "Long winded instructions or something..",
+    "appearances": [ {"name": "red"}, {"name": "green"}, {"name": "blue"} ],
+    "polygons": [ {"name":"triangle"}, {"name":"smallbox"} ],
+    "actors": [ {"name": "testActor1"}, {"name": "testActor2"}]
   }
   `;
   console.log('Adding appearances..');

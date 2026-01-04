@@ -1,5 +1,5 @@
   {
-    "sceneName:": "exampleScene1",
+    "name": "exampleScene1",
     "description": "a short description.",
     "text": "Long winded instructions or something..",
     "appearances": [
