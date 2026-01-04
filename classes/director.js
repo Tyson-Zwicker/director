@@ -1,4 +1,5 @@
-import Appearance from './Appearance';
+import Appearance from './appearance.js';
+import Part from './part.js';
 import View from './view.js';
 import Quadtree from './quadtree.js';
 import Collisions from './collisions.js';
@@ -11,6 +12,7 @@ import LineEffect from './lineeffect.js';
 import RadialEffect from './radialeffect.js';
 import ParticleEffect from './particleeffect.js';
 import Polygon from './polygon.js';
+import Point from './point.js';
 
 export default class Director {
   static keyboard = new KeyBoard();
@@ -35,8 +37,9 @@ export default class Director {
   }
   //json has "name (a string) and "points" an array, of {x,y}
   static importPolygonBank(json) {
+    let jsonObj = undefined;
     try {
-      let jsonObj = JSON.parse(json);
+      jsonObj = JSON.parse(json);
     } catch (e) {
       throw new Error("Director.importPolyBank. Bad JSON.");
     }
@@ -45,16 +48,75 @@ export default class Director {
     }
   }
   static importAppearanceBank(json) {
+    let jsonObj = undefined;
     try {
-      let jsonObj = json.parse(json);
+      jsonObj = JSON.parse(json);
     } catch (e) {
       throw new Error("Director.importAppearanceBank. Bad JSON.");
     }
     for (let appr of jsonObj.appearances) {
-      Director.AppearanceBank.set(appr.name, new Appearance(appr.fill, appr.stroke, appr.text, appr.width));
+      console.log(appr);
+      Director.appearanceBank.set(appr.name, new Appearance(appr.fill, appr.stroke, appr.text, appr.width));
     }
   }
+  static importPartTypes(json) {
+    let jsonObj = undefined;
+    try {
+      jsonObj = JSON.parse(json);
+    } catch (e) {
+      throw new Error("Director.importPartTypes. Bad JSON.");
+    }
+    for (let partType of jsonObj.partTypes) {
+      console.log(partType);
+      Director.partTypes.set(partType.name, new Part(partType.name, partType.polygon));
+    }
+  }
+  static importActors(json){
+    let jsonObj = undefined;
+    try {
+      jsonObj = JSON.parse(json);
+    } catch (e) {
+      throw new Error("Director.importActors. Bad JSON.");
+    }
+    for (let actor of jsonObj.actors){
+      if (!Director.polygonBank.has (actor.polygon)){
+        throw new Error (`Director.importActors: unknown polygon name [${actor.polygon}]`);
+      }
+      if (!Director.appearanceBank.has(actor.appearance)) {
+        throw new Error (`Director.importActors: unknown polygon name [${actor.appearance}]`);
+      }
+      let poly = Director.polygonBank.get (actor.polygon);
+      let act = new Actor (
+        actor.name,
+        poly,
+        Director.appearanceBank.get(actor.appearance),
+        actor.mass
+      );
+      act.bounceCoefficient = actor.bounceCoefficient;
+      act.collides = actor.collides;
+      act.moves = true;
+      act.position = new Point (actor.position.x, actor.position.y);
+      act.facing = actor.facing;
+      act.spin = actor.spin;
+      act.velocity = new Point (actor.velocity.x, actor.velocity.y);
 
+      for (let part of actor.parts){
+          if (!Director.partTypes.has (part.partType)){
+            throw new Error (`Director.importActors: unknown part Type [${part.partType}] for part [${part.name}]`);    
+          }
+          let prtType = Director.partTypes.get (part.partType);
+          let prt = prtType.createInstance (
+          act,
+          part.name,
+          new Point (part.position.x, part.position.y),
+          part.facing,
+          Director.appearanceBank.get (part.appearance)
+        );
+        act.attachPart (prt);
+      }      
+      Director.actors.set (act.name, act);
+    }
+  }
   static addCreatorsFunction(fn) {
     Director.creatorFn = fn
   }
@@ -63,9 +125,9 @@ export default class Director {
     Director.actors.set(actor.name, actor);
     Director.quadtree.insert(actor);
   }
-  static getActor (actorName){
+  static getActor(actorName) {
     if (!Director.actors.has(actorName)) throw new Error(`Director.removeActor: unknown actor [${actorName}]`)
-    return Director.actors(actorName);
+    return Director.actors.get(actorName);
   }
   static removeActor(actorName) {
     if (!Director.actors.has(actorName)) throw new Error(`Director.removeActor: unknown actor [${actorName}]`)
@@ -76,9 +138,9 @@ export default class Director {
     let appearance = new Appearance(fillHexColor, strokeHexColor, textHexColor, lineWidth);
     Director.appearanceBank.set(name, appearance);
   }
-  static getAppearance (appearanceName){
-    if (!Director.appearanceBank.has (appearanceName)) throw new Error (`Director.getAppearance: appearance [${appearanceName}] already exists.`);
-    return Director.appearanceBank.get (appearanceName);
+  static getAppearance(appearanceName) {
+    if (!Director.appearanceBank.has(appearanceName)) throw new Error(`Director.getAppearance: appearance [${appearanceName}] already exists.`);
+    return Director.appearanceBank.get(appearanceName);
   }
   static addPartType(part) {
     if (Director.partTypes.has(part.partTypeName)) throw new Error(`Part Type [${part.partTypeName}] already added.`);
@@ -87,21 +149,21 @@ export default class Director {
   static addPartTypeToActor(partTypeName, actorName, partName, offsetFromActorOrigin, facing, appearanceName) {
     if (!Director.partTypes.has(partTypeName)) throw new Error(`Director.addPartTypeToActor: Unknown part type [${partTypeName}]`);
     if (!Director.actors.has(actorName)) throw new Error(`Director.addPartTypeToActor: Unknown actor ${actorName}`);
-    let actor = Director.get(actorName);
-    let appearance = Director.getAppearance (appearanceName);
-    let partType = Director.partTypes.get (partType);
+    let actor = Director.getActor(actorName);
+    let appearance = Director.getAppearance(appearanceName);
+    let partType = Director.partTypes.get(partTypeName);
     let part = partType.createInstance(actor, partName, offsetFromActorOrigin, facing, appearance);
-    actor.attachPart (part);
+    actor.attachPart(part);
   }
   static getPartOfActor(actorName, partName) {
     if (!Director.actors.has(actorName)) throw new Error(`Director.addPartTypeToActor: Unknown actor ${actorName}`);
-    let actor = Director.actors.get (actorName);
-    return actor.getPart (partName);
+    let actor = Director.actors.get(actorName);
+    return actor.getPart(partName);
   }
   static removePartOfActor(actorName, partName) {
     if (!Director.actors.has(actorName)) throw new Error(`Director.addPartTypeToActor: Unknown actor ${actorName}`);
-    let actor = Director.actors.get (actorName);
-    actor.removePart (partName);
+    let actor = Director.actors.get(actorName);
+    actor.removePart(partName);
   }
 
   /* MOVE THIS TO DIRECTOR FROM PART

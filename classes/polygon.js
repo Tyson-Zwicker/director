@@ -9,7 +9,7 @@ export default class Polygon {
     if (!Array.isArray(points)) throw new Error(`${points} is not an array`);
     if (points.length < 3) throw new Error(`Polygon constructor: points length is less than 3`);
     for (let p of points) {
-      if (!(p instanceof Point)) throw new Error(`${p} is not a Point`);
+      if (!Point.isPointy(p)) throw new Error(`${p} is not a Point`);
     }
     this.points = points;
     for (let p of this.points) {
