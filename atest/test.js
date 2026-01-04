@@ -137,6 +137,14 @@ function init() {
     }
   ]}
   `;
+  let sceneData = `
+  {
+    "sceneName:": "exampleScene1",
+    "appearances": [{"name": "red"},{"name": "green"},{"name": "blue"}],
+    "polygons": [{"name":"triangle"},{"name":"smallbox"}],
+    "actors": [{"name": "testActor1"},{"name": "testActor2"}]
+  }
+  `;
   console.log('Adding appearances..');
   Director.importAppearanceBank(appearanceData);
   console.log(Director.appearanceBank);
@@ -154,5 +162,9 @@ function init() {
   Director.importActors(actorData);
   console.log(Director.actors);
 
-  //bind them.
+  //Add a Actor to the director
+  console.log('creating scene');
+  Director.importScene(sceneData);
+  console.log(Director.scene);
+  
 }
