@@ -1,0 +1,46 @@
+{
+  "actorsTypes": [
+    {
+      "name": "actorTypeOne",
+      "polygon": "triangle",
+      "mass": 100,
+      "bounceCoefficient": 0.5,
+      "collides": true,
+      "moves": true,
+      "parts": [
+        {
+          "partType": "partType1",
+          "name": "blueTriangle",
+          "position": {
+            "x": 0,
+            "y": -50
+          },
+          "facing": -60,
+          "appearance": "blue"
+        },
+        {
+          "partType": "partType2",
+          "name": "greenbox",
+          "position": {
+            "x": 0,
+            "y": 50
+          },
+          "facing": 45,
+          "appearance": "green"
+        }
+      ]
+      
+    },
+    {
+      "name": "testActor2",
+      "appearance": "green",
+      "polygon": "triangle",
+      "mass": 100,
+      "bounceCoefficient": 0.5,
+      "collides": true,
+      "moves": true,
+      "parts": []
+      
+    }
+  ]
+}

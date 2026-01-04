@@ -2,34 +2,8 @@
   "actors": [
     {
       "name": "testActor1",
+      "typeName": "actorTypeOne",
       "appearance": "red",
-      "polygon": "triangle",
-      "mass": 100,
-      "bounceCoefficient": 0.5,
-      "collides": true,
-      "moves": true,
-      "parts": [
-        {
-          "partType": "partType1",
-          "name": "blueTriangle",
-          "position": {
-            "x": 0,
-            "y": -50
-          },
-          "facing": -60,
-          "appearance": "blue"
-        },
-        {
-          "partType": "partType2",
-          "name": "greenbox",
-          "position": {
-            "x": 0,
-            "y": 50
-          },
-          "facing": 45,
-          "appearance": "green"
-        }
-      ],
       "position": {
         "x": -500,
         "y": 0
@@ -43,13 +17,8 @@
     },
     {
       "name": "testActor2",
+      "typeName": "actorTypeOne",
       "appearance": "green",
-      "polygon": "triangle",
-      "mass": 100,
-      "bounceCoefficient": 0.5,
-      "collides": true,
-      "moves": true,
-      "parts": [],
       "position": {
         "x": 0,
         "y": 500
