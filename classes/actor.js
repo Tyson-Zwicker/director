@@ -4,33 +4,48 @@ import Label from './label.js';
 import Boundry from './boundry.js';
 import Transpose from './transpose.js';
 export default class Actor {
-  _mass = undefined;
+  typeName = undefined;
+  name = undefined;
+  mass = undefined;
+  polygon = undefined;
   appearance = undefined;
   bounceCoefficient = 0.5; // How much velocity is retained after a collision.
   button = undefined;
   collides = true;
   collisionFn = undefined;
   moves = true;
-  name = undefined;
   parts = new Map();
-  polygon = undefined;
+  
   position = new Point(0, 0); // world coordinates, defined in pixels.
   facing = 0; // Defined in degrees
-  sensorData = new EventTracker();
-  sensors = undefined;
   spin = 0; // Defined in degrees per second.
   velocity = new Point(0, 0); // Point used as a component vector because they are the same thing.
   #label = undefined;
   radius = undefined;
+  sensorData = new EventTracker();
+  sensors = undefined;
   sensorBoundry = undefined;
   maxSensorRange =0;
-  constructor(name, polygon, appearance, mass) {
-    this.name = name;
+  constructor(typeName, polygon, mass, bounceCoefficient=0.5, collides=true, moves=true) {
+    this.typeName = typeName;
     this.polygon = polygon;
-    this.appearance = appearance;
-    this._mass = mass;
+    this.appearance = Appearance.default;
+    this.mass = mass;
+    this.bounceCoefficient = bounceCoefficient;
+    this.collides = collides;
+    this.moves = moves;
     this.radius = polygon.radius;
-    if (this._mass<=0 || this.radius<=0) throw new Error (`Actor.constructor: Actors must have a phsyical presence.  mass: [${_this.mass}] radius [${this.radius}]!`)
+    if (this.mass<=0 || this.radius<=0) throw new Error (`Actor.constructor: Actors must have a phsyical presence.  mass: [${_this.mass}] radius [${this.radius}]!`)
+  }
+  createInstanceOf (name, appearance, position, velocity, facing,spin){
+    let actor = new Actor (this.actorTypeName, this.polygon, this.mass, this.bounceCoefficient, this.collides, this.moves);
+    actor.name = name;
+    actor.appearance = appearance;
+    actor.position =position;
+    actor.velocity = velocity;
+    actor.facing = facing;
+    actor.spin = spin;
+    return actor;
   }
   setLabel(text, position, appearance, size) {
     this.#label = new Label (this, position, appearance, size, text);

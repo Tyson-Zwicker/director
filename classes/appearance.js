@@ -1,6 +1,7 @@
 import Color from './color.js';
 
 export default class Appearance {
+  static  default = new Appearance ('#555','#bbb','#fff');
   constructor(fill, stroke, text, width) {
     this.fill = Color.fromHex(fill);
     this.stroke = Color.fromHex(stroke);

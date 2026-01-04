@@ -14,9 +14,9 @@ export default class Part {
     this.partTypeName = partTypeName;    
     this.polygon = polygon;  
   }
-  createInstance (owner, name, offsetFromActorOrigin, facing, appearance){
-    let attachedPart = new Part(this.partTypeName, this.polygon);
-    attachedPart.owner = owner;
+  createInstance ( name, offsetFromActorOrigin, facing, appearance){
+    //owner is set when part is attached by actor or director..
+    let attachedPart = new Part(this.partTypeName, this.polygon);    
     attachedPart.name = name;
     attachedPart.position = offsetFromActorOrigin;
     attachedPart.facing = facing;

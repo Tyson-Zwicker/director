@@ -71,71 +71,87 @@ function init() {
       {"name" : "partType2", "polygon": "smallbox"}
     ]}
   `;
-  let actorData = `
-  {
-  "actors": [
+  let actorTypeData = `
     {
-      "name": "testActor1",
-      "appearance": "red",
-      "polygon" : "triangle",
-      "bounceCoefficient": 0.5,
-      "mass": 100,
-      "collides": true,
-      "moves": true,
-      "parts": [       
-        {
-          "partType": "partType1",
-          "name": "blueTriangle",
-          "position": {
-            "x": 0,
-            "y": -50
+    "actorsTypes": [
+      {
+        "name": "actorTypeOne",
+        "polygon": "triangle",
+        "mass": 100,
+        "bounceCoefficient": 0.5,
+        "collides": true,
+        "moves": true,
+        "parts": [
+          {
+            "partType": "partType1",
+            "name": "blueTriangle",
+            "position": {
+              "x": 0,
+              "y": -50
+            },
+            "facing": -60,
+            "appearance": "blue"
           },
-          "facing": -60,                    
-          "appearance": "blue"
+          {
+            "partType": "partType2",
+            "name": "greenbox",
+            "position": {
+              "x": 0,
+              "y": 50
+            },
+            "facing": 45,
+            "appearance": "green"
+          }
+        ]
+        
+      },
+      {
+        "name": "testActor2",
+        "appearance": "green",
+        "polygon": "triangle",
+        "mass": 100,
+        "bounceCoefficient": 0.5,
+        "collides": true,
+        "moves": true,
+        "parts": []
+        
+      }
+    ]}
+  `;
+  let actorData = `
+    {
+    "actors": [
+      {
+        "name": "testActor1",
+        "typeName": "actorTypeOne",
+        "appearance": "red",
+        "position": {
+          "x": -500,
+          "y": 0
         },
-        {
-          "partType": "partType2",
-          "name": "greenbox",
-          "position": {
-            "x": 0,
-            "y": 50
-          },
-          "facing": 45,                    
-          "appearance": "green"
-        }     
-      ],
-      "position": {
-        "x": -500,
-        "y": 0
+        "facing": 45,
+        "spin": -10,
+        "velocity": {
+          "x": 0,
+          "y": 0
+        }
       },
-      "facing": 45,
-      "spin": -10,
-      "velocity": {
-        "x": 0,
-        "y": 0
+      {
+        "name": "testActor2",
+        "typeName": "actorTypeOne",
+        "appearance": "green",
+        "position": {
+          "x": 0,
+          "y": 500
+        },
+        "facing": 0,
+        "spin": 5,
+        "velocity": {
+          "x": 0,
+          "y": 0
+        }
       }
-    },
-     {
-      "name": "testActor2",
-      "appearance": "green",
-      "polygon": "triangle",
-      "mass": 100,
-      "bounceCoefficient": 0.5,
-      "collides": true,
-      "moves": true,
-      "parts": [],
-      "position": {
-        "x": 0,
-        "y": 500
-      },
-      "facing": 0,
-      "spin": 5,
-      "velocity": {
-        "x": 0,
-        "y": 0
-      }
-    }
-  ]}
+    ]}
   `;
   let sceneData = `
   {
@@ -158,15 +174,17 @@ function init() {
   console.log('adding partTypes');
   Director.importPartTypes(partTypeData);
   console.log(Director.partTypes);
-
+  //Add  ActorTypes to the director
+  console.log('adding actorTypes');
+  Director.importActors(actorTypeData);
+  console.log(Director.actorTypes);
   //Add a Actor to the director
   console.log('adding actors');
   Director.importActors(actorData);
   console.log(Director.actors);
-
-  //Add a Actor to the director
+  //Add a Scene to the director
   console.log('creating scene');
   Director.importScene(sceneData);
   console.log(Director.scene);
-  
+
 }

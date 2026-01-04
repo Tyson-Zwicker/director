@@ -21,6 +21,7 @@ export default class Director {
     Director.continueAnimationLoop = false;
     Director.appearanceBank = new Map();
     Director.polygonBank = new Map();
+    Director.actorTypes = new Map();
     Director.actors = new Map();
     Director.actorFields = new Map();
     Director.partTypes = new Map();
@@ -71,76 +72,96 @@ export default class Director {
       Director.partTypes.set(partType.name, new Part(partType.name, partType.polygon));
     }
   }
-  static importActors(json){
+  static importActorTypes(json) {
+    let jsonObj = undefined;
+    try {
+      jsonObj = JSON.parse(json);
+    } catch (e) {
+      throw new Error("Director.importActorTypes. Bad JSON.");
+    }
+    for (let actor of jsonObj.actors) {
+      if (!Director.polygonBank.has(actorType.polygon)) {
+        throw new Error(`Director.importActors: unknown polygon name [${actorType.polygon}]`);
+      }
+      let poly = Director.polygonBank.get(actorType.polygon);
+      let actType = new Actor(
+        actor.typeName,
+        poly,
+        Director.appearanceBank.get(actor.appearance),
+        actor.mass
+      );
+      actType.bounceCoefficient = actor.bounceCoefficient;
+      actType.collides = actor.collides;
+      actType.moves = true;
+
+      for (let part of actor.parts) {
+        if (!Director.partTypes.has(part.partType)) {
+          throw new Error(`Director.importActors: unknown part Type [${part.partType}] for part [${part.name}]`);
+        }
+        let prtType = Director.partTypes.get(part.partType);
+        let prt = prtType.createInstance(
+          part.name,
+          new Point(part.position.x, part.position.y),
+          part.facing,
+          Director.appearanceBank.get(part.appearance)
+        );
+        actType.attachPart(prt);
+        Director.actorTypes.set(actType.typeName, actType);
+      }
+    }
+  }
+  static importActors(json) {
     let jsonObj = undefined;
     try {
       jsonObj = JSON.parse(json);
     } catch (e) {
       throw new Error("Director.importActors. Bad JSON.");
     }
-    for (let actor of jsonObj.actors){
-      if (!Director.polygonBank.has (actor.polygon)){
-        throw new Error (`Director.importActors: unknown polygon name [${actor.polygon}]`);
+    for (let actor of jsonObj.actors) {
+      if (!Director.appearanceBank.has(actorType.appearance)) {
+        throw new Error(`Director.importActors: unknown polygon name [${actorType.appearance}]`);
       }
-      if (!Director.appearanceBank.has(actor.appearance)) {
-        throw new Error (`Director.importActors: unknown polygon name [${actor.appearance}]`);
+      if (!Director.actorTypes.has(actor.typeName)) {
+        throw new Error(`Director.importActors: unknown actor typeName [${actorType.typeName}]`);
       }
-      let poly = Director.polygonBank.get (actor.polygon);
-      let act = new Actor (
-        actor.name,
-        poly,
-        Director.appearanceBank.get(actor.appearance),
-        actor.mass
-      );
-      act.bounceCoefficient = actor.bounceCoefficient;
-      act.collides = actor.collides;
-      act.moves = true;
-      act.position = new Point (actor.position.x, actor.position.y);
+      let app = Director.appearanceBank.get(jsonObj.appearance);
+      let actType = Director.actorTypes.get(jsonObj.typeName);
+      let act =actType.createInstance (
+        actor.name, app, 
+        new Point (actor.position.x, actor.position.y),
+        new Point (actor.velocity.x, actor.velocity.y),
+        actor.facing,actor.spin);
+      act.position = new Point(actor.position.x, actor.position.y);
       act.facing = actor.facing;
       act.spin = actor.spin;
-      act.velocity = new Point (actor.velocity.x, actor.velocity.y);
-
-      for (let part of actor.parts){
-          if (!Director.partTypes.has (part.partType)){
-            throw new Error (`Director.importActors: unknown part Type [${part.partType}] for part [${part.name}]`);    
-          }
-          let prtType = Director.partTypes.get (part.partType);
-          let prt = prtType.createInstance (
-          act,
-          part.name,
-          new Point (part.position.x, part.position.y),
-          part.facing,
-          Director.appearanceBank.get (part.appearance)
-        );
-        act.attachPart (prt);
-      }      
-      Director.actors.set (act.name, act);
+      act.velocity = new Point(actor.velocity.x, actor.velocity.y);
+      Director.actors.set(act.name, act);
     }
   }
-  static importScene (json){
+  static importScene(json) {
     let jsonObj = undefined;
     try {
       jsonObj = JSON.parse(json);
     } catch (e) {
       throw new Error("Director.importScene. Bad JSON.");
     }
-    console.log (jsonObj);
+    console.log(jsonObj);
     Director["scene"] = {
       name: jsonObj.name,
-      description : jsonObj.description,
-      text: jsonObj.text,      
+      description: jsonObj.description,
+      text: jsonObj.text,
     };
-      for (let appearance of jsonObj.appearances){
-        if (!Director.appearanceBank.has (appearance.name)) throw new Error (`Director.importScene: appearance ${appearance.name} does not exist`);
-      }
-      for (let polygon of jsonObj.polygons){
-         if (!Director.polygonBank.has (polygon.name)) throw new Error (`Director.importScene: polygon ${polygon.name} does not exist`);
+    for (let appearance of jsonObj.appearances) {
+      if (!Director.appearanceBank.has(appearance.name)) throw new Error(`Director.importScene: appearance ${appearance.name} does not exist`);
+    }
+    for (let polygon of jsonObj.polygons) {
+      if (!Director.polygonBank.has(polygon.name)) throw new Error(`Director.importScene: polygon ${polygon.name} does not exist`);
 
-      }
-      for (let actor of jsonObj.actors){
-         if (!Director.actors.has (actor.name)) throw new Error (`Director.importScene: actor ${actor.name} does not exist`);
-      }
-    
+    }
+    for (let actor of jsonObj.actors) {
+      if (!Director.actors.has(actor.name)) throw new Error(`Director.importScene: actor ${actor.name} does not exist`);
+    }
+
   }
   static addCreatorsFunction(fn) {
     Director.creatorFn = fn
