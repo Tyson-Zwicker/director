@@ -56,7 +56,6 @@ export default class Director {
       throw new Error("Director.importAppearanceBank. Bad JSON.");
     }
     for (let appr of jsonObj.appearances) {
-      console.log(appr);
       Director.appearanceBank.set(appr.name, new Appearance(appr.fill, appr.stroke, appr.text, appr.width));
     }
   }
@@ -68,7 +67,6 @@ export default class Director {
       throw new Error("Director.importPartTypes. Bad JSON.");
     }
     for (let partType of jsonObj.partTypes) {
-      console.log(partType);
       Director.partTypes.set(partType.name, new Part(partType.name, partType.polygon));
     }
   }
@@ -79,24 +77,23 @@ export default class Director {
     } catch (e) {
       throw new Error("Director.importActorTypes. Bad JSON.");
     }
-    for (let actor of jsonObj.actors) {
+    for (let actorType of jsonObj.actorsTypes) {
       if (!Director.polygonBank.has(actorType.polygon)) {
-        throw new Error(`Director.importActors: unknown polygon name [${actorType.polygon}]`);
+        throw new Error(`Director.importActorTypes: unknown polygon name [${actorType.polygon}]`);
       }
       let poly = Director.polygonBank.get(actorType.polygon);
       let actType = new Actor(
-        actor.typeName,
+        actorType.typeName,
         poly,
-        Director.appearanceBank.get(actor.appearance),
-        actor.mass
+        actorType.mass
       );
-      actType.bounceCoefficient = actor.bounceCoefficient;
-      actType.collides = actor.collides;
+      actType.bounceCoefficient = actorType.bounceCoefficient;
+      actType.collides = actorType.collides;
       actType.moves = true;
 
-      for (let part of actor.parts) {
+      for (let part of actorType.parts) {
         if (!Director.partTypes.has(part.partType)) {
-          throw new Error(`Director.importActors: unknown part Type [${part.partType}] for part [${part.name}]`);
+          throw new Error(`Director.importActorTypes: unknown part Type [${part.partType}] for part [${part.name}]`);
         }
         let prtType = Director.partTypes.get(part.partType);
         let prt = prtType.createInstance(
@@ -106,26 +103,30 @@ export default class Director {
           Director.appearanceBank.get(part.appearance)
         );
         actType.attachPart(prt);
-        Director.actorTypes.set(actType.typeName, actType);
       }
+      Director.actorTypes.set(actorType.typeName, actType);
     }
   }
   static importActors(json) {
+    
     let jsonObj = undefined;
     try {
       jsonObj = JSON.parse(json);
     } catch (e) {
       throw new Error("Director.importActors. Bad JSON.");
     }
+    console.log (jsonObj);
     for (let actor of jsonObj.actors) {
-      if (!Director.appearanceBank.has(actorType.appearance)) {
-        throw new Error(`Director.importActors: unknown polygon name [${actorType.appearance}]`);
+      console.log (actor);
+      if (!Director.appearanceBank.has(actor.appearance)) {
+        throw new Error(`Director.importActors: unknown appearance name [${actor.appearance}]`);
       }
       if (!Director.actorTypes.has(actor.typeName)) {
-        throw new Error(`Director.importActors: unknown actor typeName [${actorType.typeName}]`);
+        throw new Error(`Director.importActors: unknown actor typeName [${actor.typeName}]`);
       }
-      let app = Director.appearanceBank.get(jsonObj.appearance);
-      let actType = Director.actorTypes.get(jsonObj.typeName);
+    
+      let app = Director.appearanceBank.get(actor.appearance);
+      let actType = Director.actorTypes.get(actor.typeName);
       let act =actType.createInstance (
         actor.name, app, 
         new Point (actor.position.x, actor.position.y),

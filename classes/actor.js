@@ -3,6 +3,7 @@ import EventTracker from './eventtracker.js';
 import Label from './label.js';
 import Boundry from './boundry.js';
 import Transpose from './transpose.js';
+import Appearance from './appearance.js'
 export default class Actor {
   typeName = undefined;
   name = undefined;
@@ -27,6 +28,7 @@ export default class Actor {
   sensorBoundry = undefined;
   maxSensorRange =0;
   constructor(typeName, polygon, mass, bounceCoefficient=0.5, collides=true, moves=true) {
+    if (!(typeof typeName === 'string') || typeName==="" ) throw new Error (`Actor.constructor: invalid typeName [${typeName}]`);
     this.typeName = typeName;
     this.polygon = polygon;
     this.appearance = Appearance.default;
@@ -37,8 +39,8 @@ export default class Actor {
     this.radius = polygon.radius;
     if (this.mass<=0 || this.radius<=0) throw new Error (`Actor.constructor: Actors must have a phsyical presence.  mass: [${_this.mass}] radius [${this.radius}]!`)
   }
-  createInstanceOf (name, appearance, position, velocity, facing,spin){
-    let actor = new Actor (this.actorTypeName, this.polygon, this.mass, this.bounceCoefficient, this.collides, this.moves);
+  createInstance (name, appearance, position, velocity, facing,spin){
+    let actor = new Actor (this.typeName, this.polygon, this.mass, this.bounceCoefficient, this.collides, this.moves);
     actor.name = name;
     actor.appearance = appearance;
     actor.position =position;
