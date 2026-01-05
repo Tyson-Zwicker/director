@@ -72,10 +72,9 @@ function init() {
     ]}
   `;
   let actorTypeData = `
-    {
-    "actorsTypes": [
+   {"actorsTypes": [
       {
-        "name": "actorTypeOne",
+        "typeName": "actorTypeOne",
         "polygon": "triangle",
         "mass": 100,
         "bounceCoefficient": 0.5,
@@ -102,12 +101,10 @@ function init() {
             "facing": 45,
             "appearance": "green"
           }
-        ]
-        
+        ]  
       },
       {
-        "name": "testActor2",
-        "appearance": "green",
+        "typeName": "testActor2",
         "polygon": "triangle",
         "mass": 100,
         "bounceCoefficient": 0.5,
@@ -176,7 +173,7 @@ function init() {
   console.log(Director.partTypes);
   //Add  ActorTypes to the director
   console.log('adding actorTypes');
-  Director.importActors(actorTypeData);
+  Director.importActorTypes(actorTypeData);
   console.log(Director.actorTypes);
   //Add a Actor to the director
   console.log('adding actors');
