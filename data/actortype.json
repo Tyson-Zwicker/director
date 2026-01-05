@@ -1,7 +1,7 @@
 {
   "actorsTypes": [
     {
-      "name": "actorTypeOne",
+      "typeName": "actorTypeOne",
       "polygon": "triangle",
       "mass": 100,
       "bounceCoefficient": 0.5,
@@ -32,8 +32,7 @@
       
     },
     {
-      "name": "testActor2",
-      "appearance": "green",
+      "typeName": "testActor2",
       "polygon": "triangle",
       "mass": 100,
       "bounceCoefficient": 0.5,
