@@ -8,27 +8,31 @@ table.
 */
 const otherTable = {
   "things": [
-    { "name": "this thing", "otherproperty": "something" },
-    { "name": "some thing", "otherproperty": "something more" },
-    { "name": "the other thing", "otherproperty": "something less" }
+    { "name": "thing1", "othrprop1": "something", "otherprop2": "apple" },
+    { "name": "thing2", "othrprop1": "something more", "otherprop2": "apple" },
+    { "name": "thing3", "othrprop1": "something less", "otherprop2": "apple" },
   ]
 };
 localStorage.setItem("things", JSON.stringify(otherTable));
 
+const dbKey = 'templates';//Table name, and also the name of the one (and only) "outerfield" of 
+// the JSON object that holds the array of items.
+// FieldNames MUST match the element name, and are also going to be used as the json property 
+// that will be used to deserialize things in the Director,
+// SO the element name = the json name = class property
+localStorage.removeItem (dbKey);
+if (localStorage.getItem(dbKey)===null) {
+  localStorage.setItem(dbKey, `{"${dbKey}":[]}`);
+  console.log ('localstorage initialized');
+  console.log (localStorage.getItem (dbKey));
+  console.log (JSON.parse (localStorage.getItem (dbKey)));
+}
 
-const dbKey = 'templates';//Table name, and also the name of the one (and only) "outerfield" of the JSON object that holds the array of items.
-//FieldNames MUST match the element name, and are also going to be used as the json property 
-//that will be used to deserialize things in the Director, SO the element name = json name = director deserializer field name..
 const fieldNames = ['name', 'property1', 'property2', 'things'];
 const items = new Map();
 const fieldElements = new Map();
 const dropDownFields = new Map();
-const foreignTables = map();
-
-console.log(dropDownFields);
-console.log('--');
-console.log(fieldElements);
-
+const foreignTables = new Map();
 const itemList = document.getElementById('itemList');
 const btnClear = document.getElementById('btnClear');
 const btnAdd = document.getElementById('btnAdd');
@@ -111,6 +115,7 @@ function populateDropDownLists() {
 }
 function loadItems() {
   const dataRead = localStorage.getItem(dbKey); //used as db key..
+  console.log (dataRead);
   if (dataRead) {
     const storedItems = JSON.parse(dataRead);
     for (let item of storedItems[dbKey]) {
