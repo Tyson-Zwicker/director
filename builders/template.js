@@ -30,20 +30,43 @@ const fieldNames = ['name', 'property1', 'property2', 'foreign', 'parts'];
 const items = new Map(); //items are Javascript objects
 const fieldElements = new Map(); //items are HTML elements
 const dropDownFields = new Map(); // items are HTML select elements with size<=1
-const listBoxFields = new Map();  // items are HTML select elements with size>1
 const foreignTables = new Map();  // should contain tables for listbox-> not required for drop downs.
-const itemList = document.getElementById('itemList');
+const listBoxFields = new Map();  // items are HTML select elements with size>1
+//key is childtable name
+// value is inner Map
+//   inner key is child-table-record NAME property, 
+//   inner value is js object containing childtable-record.
+const childTables = new Map();
+//key childtable name, value is MAP 
+//  inner map values are HTML fields, keyed by childtable-record NAME
+const childTableDivs = new Map(); //Items are HTML DIV elements belonging belonging to a listbox
+//key childtable name, value is MAP 
+//  inner map values are HTML fields, keyed by childtable-record NAME
+const childTableFields = new Map();
+//key childtable name, value is MAP 
+//  inner map values are HTML fields, keyed by childtable-record NAME
+const childTableDropDownLists = new Map();
+getAllFields();
+getListFields(); //must come aftter get All fields..
+
+
+
+getChildTables(); //must come after getListFields();
+getchildTableDivs(); //must come after getChildTables..
+getChildFields(); //must come after getChildTables..
+getChildDropDownLists();//must come after getChildFieldsTables..
+findAndWireChildAddandRemoveButtons();
 const btnClear = document.getElementById('btnClear');
 const btnAdd = document.getElementById('btnAdd');
 const btnRemove = document.getElementById('btnRemove');
+const itemsListBox = document.getElementById('itemsListBox');
 
-getAllFields();
-getListFields();
-
-itemList.addEventListener('change', () => {
-  populateFields(itemList.value);
+itemsListBox.addEventListener('change', () => {
+  populateFields(itemsListBox.value);
 });
-btnClear.addEventListener('click', () => {
+btnRemove.addEventListener('click', () => {
+  deleteItem(itemsListBox.value);
+  populateItemsListBox();
   clearFields();
 });
 btnAdd.addEventListener('click', () => {
@@ -53,26 +76,27 @@ btnAdd.addEventListener('click', () => {
   };
   if (storeFields()) {
     clearFields();
-    populateItemList();
+    populateItemsListBox();
   } else {
     alert('Name already in use.');
   }
 });
-btnRemove.addEventListener('click', () => {
-  deleteItem(itemList.value);
-  populateItemList();
+btnClear.addEventListener('click', () => {
   clearFields();
 });
 
+
+
 loadItems();
-//loadForeignTables();
-populateDropDownLists();
-populateItemList();
+populateItemsListBox(); //must come after loadItems
+loadForeignTables();
+populateDropDownLists(); //must come after loadForeignTables
+
 
 function getAllFields() {
   for (let fieldName of fieldNames) {
     const element = document.getElementById(fieldName);
-    if (element===undefined || element===null) {
+    if (element === undefined || element === null) {
       alert(`HTML element with name [${fieldName}] not found.`);
     }
     fieldElements.set(fieldName, element);
@@ -81,7 +105,7 @@ function getAllFields() {
 function getListFields() {
   for (let fieldName of fieldNames) {
     const element = document.getElementById(fieldName);
-    if (element===undefined || element===null) {
+    if (element === undefined || element === null) {
       alert(`HTML element with name [${fieldName}] not found.`);
     }
     if (element.localName === 'select') {
@@ -93,16 +117,37 @@ function getListFields() {
     }
   }
 }
-function getDropDownFields() {
-  for (let fieldName of fieldNames) {
-    const element = document.getElementById(fieldName);
-    if (!element) {
-      alert(`HTML element with name [${fieldName}] not found.`);
+function getchildTableDivs() {
+  for (let listName of listBoxFields.keys()) {
+    const divElement = fieldElements.get(listName + '_');
+    if (element === undefined || element === null) {
+      alert(`HTML list with name [${listName}] not found.`);
     }
-    if (element.localName === 'select') {
-      dropDownFields.set(fieldName, element);
+    if (!element.localName === 'div') {
+      alert(`element id corresponds to expected list div, but it is not a div [${list}_]`);
     }
-    fieldElements.set(fieldName, element);
+    childTableDivs.add(listName, element);
+  }
+}
+function getInnerChildFields() {
+  for (let tableName of childTables.keys()) {
+    const divElement = fieldElements.get(tableName + '_');
+    if (element === undefined || element === null) {
+      alert(`HTML list with name [${listName}] not found.`);
+    }
+    if (!element.localName === 'div') {
+      alert(`element id corresponds to expected list div, but it is not a div [${list}_]`);
+    }
+    childTableDivs.add(listName, element);
+  }
+}
+function findAndWireChildAddandRemoveButtons() {
+  for (let tableName of childTables.keys()) {
+    const divElement = fieldElements.get(tableName + '_');
+    if (element === undefined || element === null) {
+      alert(`HTML list with name [${listName}] not found.`);
+    }
+    childTableDivs.add(listName, element);
   }
 }
 function loadForeignTables() {
@@ -121,7 +166,7 @@ function loadForeignTables() {
   console.log('load foreign tables:');
   console.log(foreignTables);
 }
-function populateListBoxes(){
+function populateListBoxes() {
 
 }
 function populateDropDownLists() {
@@ -136,10 +181,10 @@ function populateDropDownLists() {
   }
 }
 
-function populateItemList() {
-  itemList.length = 0; //clears the list element..
+function populateItemsListBox() {
+  itemsListBox.length = 0; //clears the list element..
   for (let itemName of items.keys()) {
-    itemList.appendChild(new Option(itemName, itemName));
+    itemsListBox.appendChild(new Option(itemName, itemName));
   }
 }
 
