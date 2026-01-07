@@ -7,10 +7,10 @@ that will be used to fill dropdown lists in the primary
 table.
 */
 const otherTable = {
-  "things": [
-    { "name": "thing1", "othrprop1": "something", "otherprop2": "apple" },
-    { "name": "thing2", "othrprop1": "something more", "otherprop2": "apple" },
-    { "name": "thing3", "othrprop1": "something less", "otherprop2": "apple" },
+  "foreign": [
+    { "name": "foreign1", "othrprop1": "something", "otherprop2": "apple" },
+    { "name": "foreign2", "othrprop1": "something more", "otherprop2": "banana" },
+    { "name": "foreign3", "othrprop1": "something less", "otherprop2": "orange" },
   ]
 };
 localStorage.setItem("things", JSON.stringify(otherTable));
@@ -32,10 +32,9 @@ const fieldElements = new Map(); //items are HTML elements
 const dropDownFields = new Map(); // items are HTML select elements with size<=1
 const foreignTables = new Map();  // should contain tables for listbox-> not required for drop downs.
 const listBoxFields = new Map();  // items are HTML select elements with size>1
-//key is childtable name
-// value is inner Map
-//   inner key is child-table-record NAME property, 
-//   inner value is js object containing childtable-record.
+
+// key is childtable name
+// value is ARRAY of childtable's field names.
 const childTables = new Map();
 //key childtable name, value is MAP 
 //  inner map values are HTML fields, keyed by childtable-record NAME
@@ -48,14 +47,10 @@ const childTableFields = new Map();
 const childTableDropDownLists = new Map();
 getAllFields();
 getListFields(); //must come aftter get All fields..
-
-
-
-getChildTables(); //must come after getListFields();
-getchildTableDivs(); //must come after getChildTables..
-getChildFields(); //must come after getChildTables..
+getChildTablesandFields(); //must come after getListFields();
+getChildDivs(); //must come after getChildTables..
 getChildDropDownLists();//must come after getChildFieldsTables..
-findAndWireChildAddandRemoveButtons();
+findAndWireChildButtons(); //must come after get ChildTables()..
 const btnClear = document.getElementById('btnClear');
 const btnAdd = document.getElementById('btnAdd');
 const btnRemove = document.getElementById('btnRemove');
@@ -117,37 +112,65 @@ function getListFields() {
     }
   }
 }
-function getchildTableDivs() {
-  for (let listName of listBoxFields.keys()) {
-    const divElement = fieldElements.get(listName + '_');
-    if (element === undefined || element === null) {
-      alert(`HTML list with name [${listName}] not found.`);
+function getChildTablesandFields() {
+  for (let childTableName in listBoxFields.keys()) {    
+    var allInputElements = document.getElementsByTagName("input");
+    for (var i = 0; i < allInputElements.length; i++) {
+      if (allInputElements[i].name.indexOf(childTableName+'_') == 0) {         
+        if (childTables.get(childTableName)===null) childTables.set (childTableName, []);
+        if (childTableFields.get(childTableName)===null) childTables.set (childTableName, new Map());
+        let fieldName = allInputElements[i].name.substring (allInputElements[i].indexOf('_')+1);
+        childTables.get(childTableName).push (fieldName);
+        childTableFields.get(childTableName).set(fieldName, allInputElements[i]);
+      }
+    }
+  }
+}
+function getChildDropDownLists() {//TODO: LAST -> Then uncomment the HTML field that goes with it..
+}
+
+function getChildDivs() {
+  for (let tableName of childTables.keys()) {
+    const divElement = fieldElements.get(tableName + '_');
+    if (divElement === undefined || divElement === null) {
+      alert(`getChildDivs: HTML list with name [${tableName}_] not found.`);
     }
     if (!element.localName === 'div') {
-      alert(`element id corresponds to expected list div, but it is not a div [${list}_]`);
+      alert(`getChildDivs: element id corresponds to expected list div, but it is not a div [${tableName}_].`);
     }
     childTableDivs.add(listName, element);
   }
 }
-function getInnerChildFields() {
-  for (let tableName of childTables.keys()) {
-    const divElement = fieldElements.get(tableName + '_');
-    if (element === undefined || element === null) {
-      alert(`HTML list with name [${listName}] not found.`);
-    }
-    if (!element.localName === 'div') {
-      alert(`element id corresponds to expected list div, but it is not a div [${list}_]`);
-    }
-    childTableDivs.add(listName, element);
-  }
-}
-function findAndWireChildAddandRemoveButtons() {
-  for (let tableName of childTables.keys()) {
-    const divElement = fieldElements.get(tableName + '_');
-    if (element === undefined || element === null) {
-      alert(`HTML list with name [${listName}] not found.`);
-    }
-    childTableDivs.add(listName, element);
+
+function findAndWireChildButtons() {
+  //TODO: FINISH
+  //ALSO: have it change the innerText attribute of the button say Add {ChildTable name}
+  //to help differentiate it from the add button below it.
+  for (let childTableName of childTables.keys()) {
+    let addButton = document.getElementById(childTableName+'_addBtn');
+    let cancelButton = document.getElementById(childTableName+'_cancelBtn');
+    let removeButton = document.getElementById(childTableName+'_removeBtn');
+    let newButton = document.getElementById(childTableName+'_newBtn');
+    newButton.innerText = 'New '+childTableName;
+    newButton.addEventListener ('click',()=>{
+      childTableDivs.get (childTableName).hidden = false;
+      for (let childFieldName of childTableFields.get (childTableName).keys()){
+        childTableFields.value = '';
+      }
+    });
+    cancelButton.addEventListener ('click' , ()=>{
+      childTableDivs.get (childTableName).hidden = true;
+      for (let childFieldName of childTableFields.get (childTableName).keys()){
+        childTableFields.value = '';
+      }
+    });
+    addButton.innerText = 'Add '+childTableName;
+    addButton.addEventListener ('click', ()=>{
+      //TODO: Tomorrow..
+    });
+    removeButton.addEventListener ('click', ()=>{
+      //TODO:Tomorrow..
+    });
   }
 }
 function loadForeignTables() {
@@ -166,9 +189,7 @@ function loadForeignTables() {
   console.log('load foreign tables:');
   console.log(foreignTables);
 }
-function populateListBoxes() {
 
-}
 function populateDropDownLists() {
   console.log(dropDownFields.keys);
   //Find the drop down fields, and fill them from their own table
@@ -189,6 +210,7 @@ function populateItemsListBox() {
 }
 
 function loadItems() {
+  //TODO: account for child tables.
   const dataRead = localStorage.getItem(dbKey); //used as db key..
   if (dataRead) {
     const storedItems = JSON.parse(dataRead);
@@ -198,6 +220,7 @@ function loadItems() {
   }
 }
 function saveItems() {
+  //TODO account for child tables
   const dataObj = {};
   dataObj[dbKey] = [];
   for (let item of items.values()) {
@@ -212,6 +235,7 @@ function deleteItem(itemName) {
 }
 
 function storeFields(replace) {
+  //TODO account for child tables
   let name = fieldElements.get('name').value;  //REMEMBER: Everything has name.
   if (items.has(name) && replace != true) {
     return false;
