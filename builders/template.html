@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <link rel="stylesheet" href="style.css">
   <script type="module" src="template.js"></script>
 </head>
+
 <body>
   <div id="title">
     <h1> Template Page </h1>
@@ -25,18 +27,61 @@
         <input id="property2" type="text"></text>
       </div>
       <div class="fieldRow">
-        <label for="things">things</label>
-        <select id="things">          
-        </select>
+        <label for="foreign">foreign</label>
+        <select id="foreign" size="1"> </select>
       </div>
       <div class="fieldRow">
-        <button id="btnClear" style="background-color:#883300; border:2px solid #cc0000; color:#002211"> Clear </text>
-          <button id="btnAdd">Add</button>
+        <label for="parts">part</label>
+        <select id="parts" size="5"></select>
+      </div>
+      
+      <div class="fieldRow">
+        
+        <button id="parts_addRemove" style="background-color:#883300; border:2px solid #cc0000; color:#002211">
+          Remove
+        </button>
+      <button id="parts_NewButton">New</button>
+      
+      </div>
+      
+      
+      <div class="daughterRow">
+        <button id="part_cancelBtn" >Cancel↳</button>        
+
+        <div id="parts" class="daughter_fields">
+          <label for="parts_name">name</label>
+          <input type="text" id="parts_name">
+
+          <label for="parts_otherprop1">otherprop1</label>
+          <input type="text" id="parts_otherprop1">
+
+          <label for="parts_otherprop2">otherprop2</label>
+          <input type="text" id="things_otherprop2">
+          
+          
+          <button id="part_AddBtn" >Add</button>
+
+          
+          <!--Test Later
+          <label for="things_otherprop3">otherprop3</label>
+          <select id="things_otherprop3" size = 0></select>
+        -->
+        </div>
+
+        
+
+      </div>
+
+
+      <div class="fieldRow">
+        <button id="btnClear" style="background-color:#883300; border:2px solid #cc0000; color:#002211"> Clear </button>
+        <button id="btnAdd">Add</button>
+        
       </div>
     </div>
     <div id="column2">
       <h2>Stored Items</h2>
-      <select id="itemList" size="10" class="full-height-listbox">       
+      <select id="itemList" size="10" class="full-height-listbox">
       </select>
       <button id="btnRemove" style="background-color:#883300; border:2px solid #cc0000; color:#002211">Remove</button>
     </div>

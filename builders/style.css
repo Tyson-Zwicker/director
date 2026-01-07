@@ -11,6 +11,16 @@
   --control-selected-background:#00aaff;
   --control-selected-border: #22ccff;
   --control-selected-text: #001144;
+  --button-background: #003355;
+  --button-border: #0088ff;
+  --button-text: #ffffff;
+  --button-hover-background:#004422;
+  --button-hover-border: #005511;
+  --button-hover-text: #ffff99;
+  --button-selected-background:#00aaff;
+  --button-selected-border: #22ccff;
+  --button-selected-text: #001144;
+  
   --title: #50aaff;
   --danger-border :#ddaa00;
   --danger-background: #ff9900;
@@ -62,6 +72,13 @@ h3 {
   display: contents;
   font-weight: normal
 }
+.daughterRow {
+  display: grid;  
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  border: 2px solid var(--control-border);
+  padding: 5px 10px 10px 15px
+}
 
 .fieldRow:hover {
   display: contents;
@@ -93,7 +110,7 @@ h3 {
 
 #column1 input,
 #column1 select {
-  justify-self: start;
+  justify-self: stretch;
 }
 
 #column2 {
@@ -139,16 +156,16 @@ button {
   margin: 5px px;
   font-size: 18px;
   cursor: pointer;
-  background-color: var(--control-background);
+  background-color: var(--button-background);
   color: var(--control-text);
-  border: 2px solid var(--control-border);
+  border: 2px solid var(--button-border);
   border-radius: 4px;
 }
 
 button:hover {
   color: var (--control-hover-text);
-  background-color: var(--control-hover-background);
-  border-color: var(--control-hover-border);
+  background-color: var(--button-hover-background);
+  border-color: var(--button-hover-border);
 }
 
 select {
@@ -180,4 +197,10 @@ option:hover {
 option:checked {
   color: var(--control-selected-text);  
   background-color: var(--control-selected-background);
+}
+
+.daughter_fields {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }

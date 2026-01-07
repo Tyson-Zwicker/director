@@ -20,23 +20,25 @@ const dbKey = 'templates';//Table name, and also the name of the one (and only) 
 // FieldNames MUST match the element name, and are also going to be used as the json property 
 // that will be used to deserialize things in the Director,
 // SO the element name = the json name = class property
-localStorage.removeItem (dbKey);
-if (localStorage.getItem(dbKey)===null) {
+localStorage.removeItem(dbKey);
+if (localStorage.getItem(dbKey) === null) {
   localStorage.setItem(dbKey, `{"${dbKey}":[]}`);
-  console.log ('localstorage initialized');
-  console.log (localStorage.getItem (dbKey));
-  console.log (JSON.parse (localStorage.getItem (dbKey)));
 }
 
-const fieldNames = ['name', 'property1', 'property2', 'things'];
-const items = new Map();
-const fieldElements = new Map();
-const dropDownFields = new Map();
-const foreignTables = new Map();
+const fieldNames = ['name', 'property1', 'property2', 'foreign', 'parts'];
+
+const items = new Map(); //items are Javascript objects
+const fieldElements = new Map(); //items are HTML elements
+const dropDownFields = new Map(); // items are HTML select elements with size<=1
+const listBoxFields = new Map();  // items are HTML select elements with size>1
+const foreignTables = new Map();  // should contain tables for listbox-> not required for drop downs.
 const itemList = document.getElementById('itemList');
 const btnClear = document.getElementById('btnClear');
 const btnAdd = document.getElementById('btnAdd');
 const btnRemove = document.getElementById('btnRemove');
+
+getAllFields();
+getListFields();
 
 itemList.addEventListener('change', () => {
   populateFields(itemList.value);
@@ -63,11 +65,34 @@ btnRemove.addEventListener('click', () => {
 });
 
 loadItems();
-loadForeignTables();
+//loadForeignTables();
 populateDropDownLists();
 populateItemList();
 
-
+function getAllFields() {
+  for (let fieldName of fieldNames) {
+    const element = document.getElementById(fieldName);
+    if (element===undefined || element===null) {
+      alert(`HTML element with name [${fieldName}] not found.`);
+    }
+    fieldElements.set(fieldName, element);
+  }
+}
+function getListFields() {
+  for (let fieldName of fieldNames) {
+    const element = document.getElementById(fieldName);
+    if (element===undefined || element===null) {
+      alert(`HTML element with name [${fieldName}] not found.`);
+    }
+    if (element.localName === 'select') {
+      if (element.size <= 1) {
+        dropDownFields.set(fieldName, element);
+      } else {
+        listBoxFields.set(fieldName, element);
+      }
+    }
+  }
+}
 function getDropDownFields() {
   for (let fieldName of fieldNames) {
     const element = document.getElementById(fieldName);
@@ -81,7 +106,9 @@ function getDropDownFields() {
   }
 }
 function loadForeignTables() {
-  //The elementName of a dropdown IS the dbKey for the table it derives its values from..
+  //Currently only used to show the names of the things
+  //in the other table (like appearance)
+  //The elementName of a dropdown IS/MUST be the dbKey for the table it derives its values from..
   for (let foreignDbKey of dropDownFields.keys()) {
     const foreignTable = JSON.parse(localStorage.getItem(foreignDbKey));
     foreignTables.set(foreignDbKey, new Map());
@@ -91,31 +118,33 @@ function loadForeignTables() {
       }
     }
   }
+  console.log('load foreign tables:');
+  console.log(foreignTables);
 }
-function populateItemList() {
-  itemList.length = 0; //clears the list element..
-  for (let itemName of items.keys()) {
-    let option =
-      itemList.appendChild(new Option(itemName, itemName));
-  }
+function populateListBoxes(){
+
 }
 function populateDropDownLists() {
+  console.log(dropDownFields.keys);
   //Find the drop down fields, and fill them from their own table
   for (let elementName of dropDownFields.keys()) {
     const dropDownList = fieldElements.get(elementName);
     const foreignTable = JSON.parse(localStorage.getItem(elementName));
-    const innerArray = foreignTable[elementName];
-    console.log('inner array');
-    console.log(innerArray);
-
     for (let foreignItem of foreignTable[elementName]) {
       dropDownList.appendChild(new Option(foreignItem.name, foreignItem.name));
     }
   }
 }
+
+function populateItemList() {
+  itemList.length = 0; //clears the list element..
+  for (let itemName of items.keys()) {
+    itemList.appendChild(new Option(itemName, itemName));
+  }
+}
+
 function loadItems() {
   const dataRead = localStorage.getItem(dbKey); //used as db key..
-  console.log (dataRead);
   if (dataRead) {
     const storedItems = JSON.parse(dataRead);
     for (let item of storedItems[dbKey]) {
