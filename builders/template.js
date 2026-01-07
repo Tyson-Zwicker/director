@@ -36,6 +36,10 @@ const listBoxFields = new Map();  // items are HTML select elements with size>1
 // key is childtable name
 // value is ARRAY of childtable's field names.
 const childTables = new Map();
+// key is childtable name
+// value is map (key is childrecord.name (like a part's Name), value is
+// a JAVASCRIPT object containing the data (sub fields for part INCLUDING name because that's a subfield..)
+const childTableData = new Map();
 //key childtable name, value is MAP 
 //  inner map values are HTML fields, keyed by childtable-record NAME
 const childTableDivs = new Map(); //Items are HTML DIV elements belonging belonging to a listbox
@@ -69,7 +73,10 @@ btnAdd.addEventListener('click', () => {
     alert('No name specified.');
     return;
   };
-  if (storeFields()) {
+  //This will add primary table fields..
+  let success = storeFields();
+  //TODO: add child table data..
+  if (success) {
     clearFields();
     populateItemsListBox();
   } else {
@@ -113,14 +120,15 @@ function getListFields() {
   }
 }
 function getChildTablesandFields() {
-  for (let childTableName in listBoxFields.keys()) {    
+  for (let childTableName in listBoxFields.keys()) {
     var allInputElements = document.getElementsByTagName("input");
     for (var i = 0; i < allInputElements.length; i++) {
-      if (allInputElements[i].name.indexOf(childTableName+'_') == 0) {         
-        if (childTables.get(childTableName)===null) childTables.set (childTableName, []);
-        if (childTableFields.get(childTableName)===null) childTables.set (childTableName, new Map());
-        let fieldName = allInputElements[i].name.substring (allInputElements[i].indexOf('_')+1);
-        childTables.get(childTableName).push (fieldName);
+      if (allInputElements[i].name.indexOf(childTableName + '_') == 0) {
+        if (childTables.get(childTableName) === null) childTables.set(childTableName, []);
+        if (childTableData.get(childTableName === null)) childTableData.set(childTableName, new Map());
+        if (childTableFields.get(childTableName) === null) childTables.set(childTableName, new Map());
+        let fieldName = allInputElements[i].name.substring(allInputElements[i].indexOf('_') + 1);
+        childTables.get(childTableName).push(fieldName);
         childTableFields.get(childTableName).set(fieldName, allInputElements[i]);
       }
     }
@@ -144,31 +152,35 @@ function getChildDivs() {
 
 function findAndWireChildButtons() {
   //TODO: FINISH
-  //ALSO: have it change the innerText attribute of the button say Add {ChildTable name}
-  //to help differentiate it from the add button below it.
   for (let childTableName of childTables.keys()) {
-    let addButton = document.getElementById(childTableName+'_addBtn');
-    let cancelButton = document.getElementById(childTableName+'_cancelBtn');
-    let removeButton = document.getElementById(childTableName+'_removeBtn');
-    let newButton = document.getElementById(childTableName+'_newBtn');
-    newButton.innerText = 'New '+childTableName;
-    newButton.addEventListener ('click',()=>{
-      childTableDivs.get (childTableName).hidden = false;
-      for (let childFieldName of childTableFields.get (childTableName).keys()){
+    let addButton = document.getElementById(childTableName + '_addBtn');
+    let cancelButton = document.getElementById(childTableName + '_cancelBtn');
+    let removeButton = document.getElementById(childTableName + '_removeBtn');
+    let newButton = document.getElementById(childTableName + '_newBtn');
+    newButton.innerText = 'New ' + childTableName;
+    newButton.addEventListener('click', () => {
+      childTableDivs.get(childTableName).hidden = false;
+      for (let childFieldName of childTableFields.get(childTableName).keys()) {
         childTableFields.value = '';
       }
     });
-    cancelButton.addEventListener ('click' , ()=>{
-      childTableDivs.get (childTableName).hidden = true;
-      for (let childFieldName of childTableFields.get (childTableName).keys()){
+    cancelButton.addEventListener('click', () => {
+      childTableDivs.get(childTableName).hidden = true;
+      for (let childFieldName of childTableFields.get(childTableName).keys()) {
         childTableFields.value = '';
       }
     });
-    addButton.innerText = 'Add '+childTableName;
-    addButton.addEventListener ('click', ()=>{
-      //TODO: Tomorrow..
+    addButton.innerText = 'Add ' + childTableName;
+    addButton.addEventListener('click', () => {      
+      for (let tableName of childTables.keys()) {
+        let childObj = {};
+        for (let fieldName of childTableFields.get(tableName).keys()) {
+          childObj[fieldName] = childTableFields.get(tableName).get(fieldName).value;
+        }
+        childTableData.get(tableName).set(childObj.name, childObj);
+      }
     });
-    removeButton.addEventListener ('click', ()=>{
+    removeButton.addEventListener('click', () => {
       //TODO:Tomorrow..
     });
   }
