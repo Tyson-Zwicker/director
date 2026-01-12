@@ -19,6 +19,38 @@
         <input id="name" type="text"></text> <!-- REMEMBER: Everything has a name -->
       </div>
       <div class="fieldRow">
+        <label for="parts2">parts2</label>
+        <select id="parts2" size="5"></select>
+      </div>
+      <div class="fieldRow">
+        <button id="parts2_removeButton" style="background-color:#883300; border:2px solid #cc0000; color:#002211"> Remove
+        </button>
+        <button id="parts2_newButton">New</button>
+
+      </div>
+      <div id="parts2_div" class="daughterRow">
+        <button id="parts2_cancelButton">Cancel↳</button>
+
+        <div id="parts2_subDiv" class="daughter_fields">
+          <label for="parts_name">name</label>
+          <input type="text" id="parts2_name">
+
+          <label for="parts2_fieldA">otherprop1</label>
+          <input type="text" id="parts2_fieldA">
+
+          <label for="parts2_fieldB">otherprop2</label>
+          <input type="text" id="parts2_fieldB">
+
+          <!--Test Later
+          <label for="parts_otherprop3">otherprop3</label>
+          <select id="parts_otherprop3" size = 0></select>
+          -->
+
+          <button id="parts2_addButton">Add</button>
+
+        </div>
+      </div>
+      <div class="fieldRow">
         <label for="property1">property1</label>
         <input id="property1" type="text"></text>
       </div>
@@ -31,8 +63,8 @@
         <select id="foreign" size="1"> </select>
       </div>
       <div class="fieldRow">
-        <label for="parts_list">part</label>
-        <select id="parts_list" size="5"></select>
+        <label for="parts">parts</label>
+        <select id="parts" size="5"></select>
       </div>
 
       <div class="fieldRow">
@@ -43,10 +75,10 @@
       </div>
 
 
-      <div class="daughterRow">
-        <button id="part_cancelButton">Cancel↳</button>
+      <div id="parts_div" class="daughterRow">
+        <button id="parts_cancelButton">Cancel↳</button>
 
-        <div id="parts_div" class="daughter_fields">
+        <div id="parts_subDiv" class="daughter_fields">
           <label for="parts_name">name</label>
           <input type="text" id="parts_name">
 
@@ -54,11 +86,11 @@
           <input type="text" id="parts_otherprop1">
 
           <label for="parts_otherprop2">otherprop2</label>
-          <input type="text" id="things_otherprop2">
+          <input type="text" id="parts_otherprop2">
 
           <!--Test Later
-          <label for="things_otherprop3">otherprop3</label>
-          <select id="things_otherprop3" size = 0></select>
+          <label for="parts_otherprop3">otherprop3</label>
+          <select id="parts_otherprop3" size = 0></select>
           -->
 
           <button id="parts_addButton">Add</button>
@@ -66,7 +98,7 @@
         </div>
       </div>
       <div class="fieldRow">
-        <button id="clearBtn" style="background-color:#883300; border:2px solid #cc0000; color:#002211"> Clear </button>
+        <button id="btnClear" style="background-color:#883300; border:2px solid #cc0000; color:#002211"> Clear </button>
         <button id="btnAdd">Add Item</button>
       </div>
     </div>
@@ -75,10 +107,12 @@
       <select id="itemsListBox" size="10" class="full-height-listbox">
       </select>
       <button id="btnRemove" style="background-color:#883300; border:2px solid #cc0000; color:#002211">Remove</button>
+      <button id="btnCopyDB" style="background-color:#338800; border:2px solid #009900; color:#002211">Copy DB</button>
+  
     </div>
     <div id="column3">
       <h2>Preview</h2>
-      <canvas id="canvas" width="700" height="700" class="canvas"></canvas>
+      <canvas id="canvas" width="100" height="100" class="canvas"></canvas>
     </div>
   </div>
 </body>
