@@ -85,6 +85,8 @@ h3 {
 }
 
 #canvas {
+  width: 400px;
+  height: 400px;
   background-color: #000719;
   border: 1px solid #2270a0;
   border-radius: 4px;
@@ -129,6 +131,88 @@ h3 {
   margin:0px;
 }
 
+.canvas-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.canvas-controls label {
+  padding: 0;
+  margin: 0;
+  min-width: auto;
+}
+
+.canvas-controls input[type="range"] {
+  flex: 1;
+  min-width: 200px;
+}
+
+.canvas-controls input[type="text"] {
+  width: 50px;
+  text-align: center;
+  padding: 2px;
+}
+
+.pan-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.pan-controls label {
+  padding: 0;
+  margin: 0;
+  min-width: auto;
+}
+
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 40px);
+  grid-template-rows: repeat(3, 40px);
+  gap: 2px;
+}
+
+.dpad button {
+  padding: 0;
+  margin: 0;
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dpad-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dpad-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dpad-center {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.dpad-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.dpad-down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
 label {
   padding: 0px 0px;
   margin: 0px 0x;
@@ -166,6 +250,12 @@ button:hover {
   color: var (--control-hover-text);
   background-color: var(--button-hover-background);
   border-color: var(--button-hover-border);
+}
+
+button.active {
+  color: var(--button-selected-text);
+  background-color: var(--button-selected-background);
+  border-color: var(--button-selected-border);
 }
 
 select {
@@ -218,4 +308,8 @@ option:checked {
 
 #part_AddBtn {
   grid-column: 1 / -1;
+}
+
+.is-hidden {
+  display: none !important;
 }

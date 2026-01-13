@@ -4,6 +4,7 @@
 <head>
   <link rel="stylesheet" href="style.css">
   <script type="module" src="template.js"></script>
+  <script type="module" src="polygoncanvas.js"></script>
 </head>
 
 <body>
@@ -32,13 +33,13 @@
         <button id="parts2_cancelButton">Cancel↳</button>
 
         <div id="parts2_subDiv" class="daughter_fields">
-          <label for="parts_name">name</label>
+          <label for="parts2_name">name</label>
           <input type="text" id="parts2_name">
 
-          <label for="parts2_fieldA">otherprop1</label>
+          <label for="parts2_fieldA">field A</label>
           <input type="text" id="parts2_fieldA">
 
-          <label for="parts2_fieldB">otherprop2</label>
+          <label for="parts2_fieldB">field B</label>
           <input type="text" id="parts2_fieldB">
 
           <!--Test Later
@@ -112,7 +113,32 @@
     </div>
     <div id="column3">
       <h2>Preview</h2>
-      <canvas id="canvas" width="100" height="100" class="canvas"></canvas>
+      <canvas id="canvas" width="400" height="400" class="canvas"></canvas>
+      <div id = "div_zoom" class="canvas-controls">
+        <label for="zoomRange">zoom</label>
+        <input type="range" id="zoomRange" min="0.1" max="10" step="0.1" value="1">
+        <input type="text" id="zoomValue" value="1" size="4" readonly>
+      </div>
+      <div id = "divi gridSize" class="canvas-controls">
+        <label for="gridSizeRange">grid size</label>
+        <input type="range" id="gridSizeRange" min="1" max="60" step="1" value="10">
+        <input type="text" id="gridSizeValue" value="10" size="4" readonly>
+      </div>
+      <div id ="div_symmetry" class="canvas-controls">
+        <label>Symmetry</label>
+        <button id="HorizontalSymmetry">Horizontal</button>
+        <button id="VerticalSymmetry">Vertical</button>
+      </div>
+      <div class="pan-controls">
+        <label>Pan</label>
+        <div class="dpad">
+          <button id="panUp" class="dpad-up">▲</button>
+          <button id="panLeft" class="dpad-left">◄</button>
+          <button id="panCenter" class="dpad-center">●</button>
+          <button id="panRight" class="dpad-right">►</button>
+          <button id="panDown" class="dpad-down">▼</button>
+        </div>
+      </div>
     </div>
   </div>
 </body>

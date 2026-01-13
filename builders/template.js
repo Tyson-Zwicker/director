@@ -1,5 +1,4 @@
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+
 
 const otherTable = {
   "foreign": [
@@ -11,31 +10,28 @@ const otherTable = {
 localStorage.setItem("foreign", JSON.stringify(otherTable));
 
 const dbKey = 'templates';
-localStorage.removeItem(dbKey);
+//localStorage.removeItem(dbKey);
 if (localStorage.getItem(dbKey) === null) localStorage.setItem(dbKey, `{"${dbKey}":[]}`);
 const fieldNames = ['name', 'parts2', 'property1', 'property2', 'foreign', 'parts'];
 
-let currentItem = undefined;
 const items = new Map(); //items are Javascript objects
 const fieldElements = new Map(); //items are HTML elements
 const dropDownFields = new Map(); // items are HTML select elements with size<=1
 const foreignTables = new Map();  // currently only used to fill drop boxes.
 const listBoxFields = new Map();  // items are HTML select elements with size>1
-
 getAllFieldElements();
 getListFields(); //must come after get All fields..
 const childTables = getChildTables(); //key is table name, has the HTML elements in a JS object.;
 
+let currentItem;
+makeNewCurrentItem();
 
 addEventListeners();
 loadItems();
-if (items.size === 0) {
-  makeNewCurrentItem();
-}
-
+populateItemsListBox();
 loadForeignTables();
 populateDropDownLists(); //must come after loadForeignTables
-hideAndClearListBoxes();//Do not populate listboxes until an item is selected from ItemList..
+hideAndClearListBoxFields();//Do not populate listboxes until an item is selected from ItemList..
 
 function makeNewCurrentItem() {
   //If there are no items.. (first use edge case)
@@ -50,11 +46,8 @@ function makeNewCurrentItem() {
   }
   newItem.name = 'New ' + dbKey;
   fieldElements.get('name').value = newItem.name;
-  items.set(newItem.name, newItem);
-  populateItemsListBox();
   newItem.saved = false;
   currentItem = newItem;
-  itemsListBox.value = newItem.name; //pick the one just added..
 }
 function makeCopyCurrentItem(newName) {
   //If there are field has changed, the current item should become a COPY of the old item.
@@ -64,11 +57,9 @@ function makeCopyCurrentItem(newName) {
     items.delete(currentItem.name);  //don't keep old unsaved version around..
   }
   newItem.name = newName;       //replace with new one..  
-  items.set(newItem.name, newItem);
-  populateItemsListBox();
   currentItem = newItem;
   currentItem.saved = false;    //mark this one as unsaved too
-  itemsListBox.selectedIndex = 0; //pick the one just added..
+  itemsListBox.selectedIndex = -1;
 }
 function getAllFieldElements() {
   for (let fieldName of fieldNames) {
@@ -100,7 +91,7 @@ function populateItemsListBox() { //This is the SECOND COLUMN list that drives t
     itemsListBox.appendChild(new Option(itemName, itemName));
   }
 }
-function hideAndClearListBoxes() {
+function hideAndClearListBoxFields() {
   for (let listBoxFieldName of listBoxFields.keys()) {
     let listBox = listBoxFields.get(listBoxFieldName);
     listBox.length = 0; //clear and..
@@ -135,15 +126,15 @@ function populateDropDownLists() {
   }
 }
 
-function populateListBoxes(itemName) {
-  let item = items.get(itemName);
+function populateListBoxes() {
   for (let childTableName of childTables.keys()) {
     let listbox = listBoxFields.get(childTableName);
     listbox.length = 0; //Clear it. Prevents duplicates from being added..
-    let records = item[childTableName]; //should return an array
+    let records = currentItem[childTableName]; //should return an array
     if (Array.isArray(records)) {
       for (let record of records) {
-        listbox.appendChild(new Option(record.name, record.name));
+        let option = new Option(record.name, record.name)
+        listbox.appendChild(option);
       }
     }
   }
@@ -157,7 +148,6 @@ function saveItems() {
   }
   localStorage.setItem(dbKey, JSON.stringify(dataObj));
 }
-
 function deleteItem(itemName) {
   items.delete(itemName);
   saveItems();
@@ -225,6 +215,133 @@ function setDivVisibility(divElement, visible) {
     // }
   }
 }
+function storeFields(replace = false) {
+  let name = fieldElements.get('name').value;  //REMEMBER: Everything has name.
+  if (items.has(name) && replace == false) {
+    alert('name is use.');
+    return false;
+  }
+  const newItem = {};
+  for (let fieldName of fieldElements.keys()) {
+    if (!listBoxFields.has(fieldName)) {// Drop downs and text fields..
+      try {
+        newItem[fieldName] = fieldElements.get(fieldName).value;
+      } catch (e) {
+        let errMsg = `Error in  storeFields: ${fieldName}`;
+        alert(errMsg);
+      }
+    } else {                                //Now handle child tables..      
+      newItem[fieldName] = currentItem[fieldName]; //We need to move all the children to the new item name.      
+    }
+  }
+
+  //Commit new item..
+  newItem.saved = true;
+  items.set(name, newItem);
+  saveItems();
+  return true;
+}
+function clearFields() {
+  for (let fieldName of fieldNames) {
+    const fieldElement = fieldElements.get(fieldName);
+    fieldElements.get(fieldName).value = '';
+  }
+  makeNewCurrentItem();
+  hideAndClearListBoxFields();
+}
+function populateFieldsFromItemList(itemName) {
+  //only called when itemsListBox is selected.
+  const item = items.get(itemName);
+  for (let fieldName of fieldNames) {
+    const element = fieldElements.get(fieldName);
+    element.value = item[fieldName];
+  }
+}
+
+function addEventListeners() {
+  //PRIMARY FUNCTION EVENSTS -not children..
+  const btnClear = document.getElementById('btnClear');
+  const btnAdd = document.getElementById('btnAdd');
+  const btnRemove = document.getElementById('btnRemove');
+  const itemsListBox = document.getElementById('itemsListBox');
+  const btnCopyDB = document.getElementById('btnCopyDB');
+  const fldName = document.getElementById('name');
+
+  //Name Field Change
+  fldName.addEventListener('change', (e) => {
+    let newName = e.target.value;
+    if (items.has(newName)) {
+      alert(`A ${dbKey} named [${newName}] already exists.`);
+      return;//Without DOING ANYTHING;
+    } else {
+      makeCopyCurrentItem(newName);
+      itemsListBox.selectedIndex = -1;
+    }
+  });
+  //PRIMARY COPY DB button
+  btnCopyDB.addEventListener('click', () => {
+    let itemsArray = [...items.values()];
+
+    let obj = {};
+    obj [dbKey] = itemsArray;
+    let jsonString = JSON.stringify (obj);
+    navigator.clipboard.writeText(jsonString).then(() => {
+      alert("JSON copied to clipboard");
+    });
+  });
+  //PRIMARY ListBox
+  itemsListBox.addEventListener('change', () => {
+    let selectedName = itemsListBox.value;
+    if (!items.has(selectedName)){
+      alert('list box is corrupted.');
+      return;
+    }
+    currentItem = items.get(selectedName);
+    if (currentItem===null) alert (`${selectedName} not found in items!`);
+    populateFieldsFromItemList(selectedName);
+    populateListBoxes();
+  });
+  itemsListBox.addEventListener('click', () => {
+    if (itemsListBox.length === 1) {
+      let selectedName = itemsListBox.options[0].value;
+      currentItem = items.get(selectedName);
+      populateFieldsFromItemList(selectedName);
+      populateListBoxes();
+    }
+  });
+  //PRIMARY Remove
+  btnRemove.addEventListener('click', () => {
+    deleteItem(itemsListBox.value);
+    populateItemsListBox();
+    clearFields();
+    hideAndClearListBoxFields();
+    itemsListBox.selectedIndex =-1;
+    currentItem = makeNewCurrentItem();
+  });
+  //PRIMARY ADD BUTTON
+  btnAdd.addEventListener('click', () => {
+    if (fieldElements.get('name').value.trim() === '') {
+      alert('No name specified.');
+      return;
+    };
+    //This will add primary table fields.
+    if (storeFields()) {
+      clearFields();
+      hideAndClearListBoxFields();
+      populateItemsListBox();
+      itemsListBox.selectedIndex =-1;
+      currentItem = makeNewCurrentItem();
+    } else {
+      alert('Name already in use.');
+    }
+  });
+  //PRIMARY Clear..
+  btnClear.addEventListener('click', () => {
+    clearFields();
+    hideAndClearListBoxFields();
+    populateItemsListBox();
+  });
+}
 function addChildElementEvents(listBox, newButton, addButton, cancelButton, removeButton) {
   //CHILD LISTBOX CHANGE
   listBox.addEventListener('change', (e) => {
@@ -247,7 +364,7 @@ function addChildElementEvents(listBox, newButton, addButton, cancelButton, remo
     }
     let div = childTables.get(childTableName).div;
     let subDiv = childTables.get(childTableName).subDiv;
-    setDivVisibility(div, subDiv, true);
+    setDivVisibility(div, true);
   });
   //CHILD NEW CHILD
   newButton.addEventListener('click', (e) => {
@@ -257,8 +374,8 @@ function addChildElementEvents(listBox, newButton, addButton, cancelButton, remo
     for (let element of fields) {
       element.value = ''; //clear the fields, deselect list boxes a new child record had been defined.
     }
-    let subDiv = childTables.get(tableName).subDiv;
-    setDivVisibility(div, subDiv, true);
+
+    setDivVisibility(div, true);
   });
   //CHILD CANCEL BUTTON
   cancelButton.addEventListener('click', (e) => {
@@ -269,37 +386,29 @@ function addChildElementEvents(listBox, newButton, addButton, cancelButton, remo
       element.value = ''; //clear the fields, deselect list boxes..
     }
     let subDiv = childTables.get(tableName).subDiv;
-    setDivVisibility(div, subDiv, false);
+    setDivVisibility(div, false);
   });
   //CHILD ADD CHILD
   addButton.addEventListener('click', (e) => {
     let childTableName = e.target.id.substring(0, e.target.id.indexOf('_'));
     let newObj = {};
     for (let fieldName of childTables.get(childTableName).fields.keys()) {
-      let realFieldName = fieldName.substring(fieldName.indexOf('_') + 1);
-      //get the value from html element, put in newObj..
-      newObj[realFieldName] = childTables.get(childTableName).fields.get(fieldName).value;
+      let realFieldName = fieldName.substring(fieldName.indexOf('_') + 1);      
+      newObj[realFieldName] = childTables.get(childTableName).fields.get(fieldName).value;//get the value from html element, put in newObj..
     }
-
     let childProperty = currentItem[childTableName]; //This is should be an array of childRecords..
-    //check to make sure name not already in use..
-    for (let i=0; i<childProperty.length;i++){
-      if (childProperty[i].name ===newObj.name){
-        alert (`${childTableName} already instance of [${newObj.name}]`);
+    for (let i = 0; i < childProperty.length; i++) {//check to make sure name not already in use..
+      if (childProperty[i].name === newObj.name) {
+        alert(`${childTableName} already instance of [${newObj.name}]`);
         return;
       }
     }
-    //Now we get push this in the array of the property called (childTableName) of the currently Selected Item.
-    childProperty.push(newObj);
-
+    childProperty.push(newObj);//Now we get push this in the array of the property called (childTableName) of the currently Selected Item.
     let div = childTables.get(childTableName).div;
     let subDiv = childTables.get(childTableName).subDiv;
-    setDivVisibility(div, subDiv, false);
-    populateListBoxes(itemsListBox.value);
-    hideAndClearListBoxes();
-    populateListBoxes(itemsListBox.value);
+    setDivVisibility(div, false);
+    populateListBoxes();
   });
-
   //CHILD REMOVE CHILD
   removeButton.addEventListener('click', (e) => {
     let childTableName = e.target.id.substring(0, e.target.id.indexOf('_'));
@@ -315,124 +424,6 @@ function addChildElementEvents(listBox, newButton, addButton, cancelButton, remo
     if (recordToRemove != -1) {
       childRecords.splice(recordToRemove, 1);
     }
-    populateListBoxes(itemsListBox.value);
-  });
-}
-
-function storeFields(replace) {
-  let name = fieldElements.get('name').value;  //REMEMBER: Everything has name.
-  if (items.has(name) && replace != true) {
-    return false;
-  }
-  const newItem = {};
-  for (let fieldName of fieldElements.keys()) {
-    if (!listBoxFields.has(fieldName)) {// Drop downs and text fields..
-      try {
-        newItem[fieldName] = fieldElements.get(fieldName).value;
-      } catch (e) {
-        let errMsg = `Error in  storeFields: ${fieldName}`;
-        console.log(errMsg);
-        alert(errMsg);
-      }
-    } else {                                //Now handle child tables..      
-      if (name !== itemsListBox.value) {
-        //The name was changed, so all/any child data will still be attached to item in items attached to the old name..
-        let oldName = itemsListBox.value;
-        newItem[fieldName] = items.get(oldName)[fieldName]; //We need to move all the children to the new item name.      
-      }
-    }
-  }
-  newItem.saved = true;
-  items.set(name, newItem);
-  saveItems();
-  return true;
-}
-function clearFields() {
-  for (let fieldName of fieldNames) {
-    const fieldElement = fieldElements.get(fieldName);
-    fieldElements.get(fieldName).value = '';
-  }
-}
-function populateFields(itemName) {
-  const item = items.get(itemName);
-  for (let fieldName of Object.getOwnPropertyNames(item)) {
-    const element = fieldElements.get(fieldName);
-    element.value = item[fieldName];
-  }
-}
-function addEventListeners() {
-  //PRIMARY FUNCTION EVENSTS -not children..
-  const btnClear = document.getElementById('btnClear');
-  const btnAdd = document.getElementById('btnAdd');
-  const btnRemove = document.getElementById('btnRemove');
-  const itemsListBox = document.getElementById('itemsListBox');
-  const btnCopyDB = document.getElementById('btnCopyDB');
-  const fldName = document.getElementById('name');
-  
-  //Name Field Change
-  fldName.addEventLister ('change', ()=>{
-    let newName = e.target.value;
-    console.log (`changing name to [${newName}]`);
-    if (items.has (newName)){
-      alert (`A ${dbKey} named [${newName}] already exists.`);
-      return;
-    }
-    currentItem = makeCopyCurrentItem (fldName.value);
-    itemsListBox.selectedIndex=-1;
-    
-  });
- //PRIMARY COPY DB
-  btnCopyDB.addEventListener('click', () => {
-    let jsonString = JSON.stringify(items);
-    navigator.clipboard.writeText(jsonString).then(() => {
-      alert("JSON copied to clipboard");
-    });
-    console.log('Text copied to clipboard successfully!');
-    alert('Copied the text: ' + textToCopy);
-  });
-  //PRIMARY ListBox
-  itemsListBox.addEventListener('change', () => {
-    let selectedName = itemsListBox.value;
-    currentItem = items.get(selectedName);
-    populateFields(selectedName);
-    populateListBoxes(selectedName);
-  });
-  itemsListBox.addEventListener('click', () => {
-    if (itemsListBox.length === 1) {
-      let selectedName = itemsListBox.options[0].value;
-      currentItem = items.get(selectedName);
-      populateFields(selectedName);
-      populateListBoxes(selectedName);
-    }
-  });
-  //PRIMARY Remove
-  btnRemove.addEventListener('click', () => {
-    deleteItem(itemsListBox.value);
-    populateItemsListBox();
-    clearFields();
-    hideAndClearListBoxes();
-    currentItem = undefiend;
-  });
-  //PRIMARY ADD BUTTON
-  btnAdd.addEventListener('click', () => {
-    if (fieldElements.get('name').value.trim() === '') {
-      alert('No name specified.');
-      return;
-    };
-    //This will add primary table fields.
-    if (storeFields()) {
-      clearFields();
-      hideAndClearListBoxes();
-      populateItemsListBox();
-      currentItem = undefined;
-    } else {
-      alert('Name already in use.');
-    }
-  });
-  //PRIMARY Clear..
-  btnClear.addEventListener('click', () => {
-    clearFields();
-    hideAndClearListBoxes();
-    populateItemsListBox();
+    populateListBoxes();
   });
 }
