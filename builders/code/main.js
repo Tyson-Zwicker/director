@@ -107,15 +107,17 @@ function getListFields() {
 function addDropDownCanvasEvents() {
   for (let fieldName of dropDownFields.keys()) {
     if (fieldName.indexOf('polygon') !== -1) {
+      console.log ('adding polygon field:'+fieldName);
       let element = dropDownFields.get(fieldName);
       element.addEventListener('change', () => {
-        let p = getPolygon(element.value);
+        console.log ('polygon field event fired');
+        let p = getPolygonPoints(element.value);
         drawPolygonFunction(p);
       });
     }
   }
 }
-function getPolygon(polygonName) {
+function getPolygonPoints(polygonName) {
   let table = JSON.parse(localStorage.getItem('polygons'));
   let records = table.polygons;
   for (let record of records) {
@@ -297,9 +299,10 @@ function storeFields(replace = false) {
   if (polygonPropertyName) {
     //Give it a copy of the current Polygon (don't just hand it a reference..)
     newItem[polygonPropertyName] = structuredClone(currentPolygonData);
+    console.log('store fields:');
+    console.log(newItem[polygonPropertyName]);
   }
-  console.log('store fields:');
-  console.log(newItem[polygonPropertyName]);
+
   //Commit new item..
   newItem.saved = true;
   items.set(name, newItem);
@@ -324,8 +327,17 @@ function populateFieldsFromItemList(itemName) {
     const element = fieldElements.get(fieldName);
     element.value = item[fieldName];
   }
+  
 }
-
+function findRecordInTable(tableName, recordName) {
+  let raw = localStorage.getItem(tableName);
+  let obj = JSON.parse(raw);
+  let array = obj[tableName];
+  for (let i = 0; i.array.length(); i++) {
+    if (array[i].name = recordName) return array[i];
+  }
+  return null;
+}
 function addEventListeners() {
   //PRIMARY FUNCTION EVENSTS -not children..
   const btnClear = document.getElementById('btnClear');
@@ -364,17 +376,24 @@ function addEventListeners() {
       alert('list box is corrupted.');
       return;
     }
-    polygonPropertyName
-
-
     currentItem = items.get(selectedName);
     if (currentItem === null) alert(`${selectedName} not found in items!`);
     populateFieldsFromItemList(selectedName);
     populateListBoxes();
-    if (polygonPropertyName != null) {
+    if (polygonPropertyName != null) {//This is for anything that directly draws.. currently that is only the polygon table but who knows?
+    
       currentPolygonData.length = 0;
       currentPolygonData.push(...currentItem[polygonPropertyName]);
       drawPolygonFunction(currentPolygonData);
+    }
+    //Now check for any "polygon dropdowns" to draw.. (currently actor and part type both have one).
+    for (let fieldName of fieldNames){
+      if (fieldName.indexOf('polygon'!==-1)){
+        console.log ('drawing field'+fieldName);
+        let element = fieldElements.get (fieldName);
+        let p = getPolygonPoints(element.value);
+        drawPolygonFunction(p);
+      }
     }
   });
   itemsListBox.addEventListener('click', () => {
@@ -447,7 +466,6 @@ function addChildElementEvents(listBox, newButton, addButton, cancelButton, remo
       field.value = record[localFieldName];
     }
     let div = childTables.get(childTableName).div;
-    let subDiv = childTables.get(childTableName).subDiv;
     setDivVisibility(div, true);
   });
   //CHILD NEW CHILD
@@ -521,25 +539,21 @@ function addEventsforActorTypesBuilder() {
         let x = parts[i].xOffset;
         let y = parts[i].yOffset;
         console.log(`part offset ${x},${y}`);
-        let partType = parts[i].partTypes;
-        let partTypesRaw = localStorage.getItem('partTypes');
-        let partTypes = JSON.parse(partTypesRaw);
-        let partTypeArray = partTypes.partType;
-        console.log(partTypeArray);
-        for (let part of partTypeArray) {
-          console.log(part);
-          console.log(part.polygon)
-          //This should already be in childTables because a "main field"
-          //drop down needs it.
-          console.log(childTables.get('polygons'));
-          //..todo: yadayada
-          let polygonPoints;
-          drawPolygonFunction(polygon.points, x, y);
+        let partType = findRecordInTable('partTypes', parts[i].partType);
+        if (partType && partType !== null) {
+          console.log(partType);
+          let polygon = findRecordInTable('polygons', partType.polygon);
+          if (polygon && polygon !== null) {
+            console.log(polygon);
+            drawPolygonFunction(polygonpolygon.points, x, y);
+          }
         }
       }
     }
   });
 }
+
+//Only for Polygon Builder
 
 function addEventsForPolygonBuilder() {
   for (let item of items.values()) {

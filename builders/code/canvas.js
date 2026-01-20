@@ -74,12 +74,8 @@ gridSizeRange.addEventListener('change', (e) => {
   drawCanvas();
 });
 usePointsBtn.addEventListener('click', () => {        //sets polygon in main.js
-  console.log('using:');
-  console.log(polygon);
   polygonReference.length = 0;
   polygonReference.push(...polygon);
-  console.log('ref is now:');
-  console.log(polygonReference);
   let name = nameField.value;
   alert(`Current polygon attached to: ${name}`);
 });
@@ -151,7 +147,12 @@ canvas.addEventListener('mousemove', (e) => {
   mouseCoordsY.value = Math.round(localCoord.y * 100) / 100;
 });
 function localToScreen(local, xOffset, yOffset) {  
-  let screen = { "x": local.x+xOffset, "y": local.y+yOffset }
+  screen = {"x":local.x,"y":local.y};
+  if (typeof xOffset ==='number' && typeof yOffset ==='number'){
+    screen.x += xOffset;
+    screen.y += yOffset;
+  }
+  
   screen.x += panX; screen.y += panY;  
   screen.x *= currentZoom; screen.y *= currentZoom;
   screen.x += (canvas.width / 2); screen.y += (canvas.height / 2);
@@ -165,12 +166,12 @@ function screenToLocal(screen) {
   return local;
 }
 function drawCanvas(poly, x, y) {
-  console.log (`drawCanvas: offset ${x},${y}`);
+  
   if (poly) { //Param is only used when called from main..
     polygon.length = 0;
     polygon.push(...poly);
   }
-  if (typeof x ==='number' && typeof y ==='number') {
+  if (typeof x ==='number' && typeof y ==='number') {    
     //this is an overlay with an offset- don't clear the screen and redraw the grid..
     //just draw the polygon that gave us with an offset.
     _drawPolygon(x, y);
@@ -191,13 +192,12 @@ function _drawBackground() {
     ctx.fillRect(0, cy, canvas.width, canvas.height - cy);
   }
 }
-function _drawPolygon(x, y) {
-  console.log (`_drawPolygon: offset ${x},${y}`);
+function _drawPolygon(xOffset, yOffset) {
   ctx.strokeStyle = color_lines;
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let i = 0; i < polygon.length; i++) {
-    let screen = localToScreen(polygon[i], x, y);
+    let screen = localToScreen(polygon[i], xOffset, yOffset);
     if (i === 0) ctx.moveTo(screen.x, screen.y);
     else ctx.lineTo(screen.x, screen.y);
   }
