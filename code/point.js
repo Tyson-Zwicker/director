@@ -8,16 +8,16 @@ export default class Point {
   static toDeg = 1 / (Math.PI / 180);
   constructor(x, y) {
     if (x === undefined || y === undefined) {
-      throw new Error(`Point constructor: x or y is undefined`);
+      throw new Error(`Point constructor: x or y is undefined ${x},${y}`);
     }
     if (typeof x !== 'number' || typeof y !== 'number') {
-      throw new Error(`Point constructor: x or y is not a number`);
+      throw new Error(`Point constructor: x or y is not a number ${x},${y}`);
     }
     if (x === null || y === null) {
-      throw new Error(`Point constructor: x or y is null`);
+      throw new Error(`Point constructor: x or y is null ${x},${y}`);
     }
     if (isNaN(x) || isNaN(y)) {
-      throw new Error(`Point constructor: x or y is NaN`);
+      throw new Error(`Point constructor: x or y is NaN ${x},${y}`);
     }
     this.x = x;
     this.y = y;
