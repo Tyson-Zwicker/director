@@ -36,7 +36,7 @@ export default class Director {
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
   }
-  //json has "name (a string) and "points" an array, of {x,y}
+
   static importPolygonBank(json) {
     let jsonObj = undefined;
     try {
@@ -77,20 +77,22 @@ export default class Director {
     } catch (e) {
       throw new Error("Director.importActorTypes. Bad JSON.");
     }
-    for (let actorType of jsonObj.actorsTypes) {
+    for (let actorType of jsonObj.actorTypes) {
       if (!Director.polygonBank.has(actorType.polygon)) {
         throw new Error(`Director.importActorTypes: unknown polygon name [${actorType.polygon}]`);
+      } else {
+        console.log(actorType);
       }
       let poly = Director.polygonBank.get(actorType.polygon);
       let actType = new Actor(
-        actorType.typeName,
+        actorType.name,
         poly,
         actorType.mass
       );
       actType.bounceCoefficient = actorType.bounceCoefficient;
       actType.collides = actorType.collides;
       actType.moves = true;
-
+      console.log (`actor type = ${actType}`);
       for (let part of actorType.parts) {
         if (!Director.partTypes.has(part.partType)) {
           throw new Error(`Director.importActorTypes: unknown part Type [${part.partType}] for part [${part.name}]`);
@@ -104,38 +106,35 @@ export default class Director {
         );
         actType.attachPart(prt);
       }
-      Director.actorTypes.set(actorType.typeName, actType);
+      console.log (`setting actor type ${actType.name}`);
+      Director.actorTypes.set(actType.name, actType);
     }
   }
   static importActors(json) {
-    
+
     let jsonObj = undefined;
     try {
       jsonObj = JSON.parse(json);
     } catch (e) {
       throw new Error("Director.importActors. Bad JSON.");
     }
-    console.log (jsonObj);
+    console.log(jsonObj);
     for (let actor of jsonObj.actors) {
-      console.log (actor);
-      if (!Director.appearanceBank.has(actor.appearance)) {
+      console.log(actor);
+      if (!Director.appearanceBank.has(actor.appearances)) {
         throw new Error(`Director.importActors: unknown appearance name [${actor.appearance}]`);
       }
       if (!Director.actorTypes.has(actor.typeName)) {
         throw new Error(`Director.importActors: unknown actor typeName [${actor.typeName}]`);
       }
-    
-      let app = Director.appearanceBank.get(actor.appearance);
+
+      let app = Director.appearanceBank.get(actor.appearances);
       let actType = Director.actorTypes.get(actor.typeName);
-      let act =actType.createInstance (
-        actor.name, app, 
-        new Point (actor.position.x, actor.position.y),
-        new Point (actor.velocity.x, actor.velocity.y),
-        actor.facing,actor.spin);
-      act.position = new Point(actor.position.x, actor.position.y);
-      act.facing = actor.facing;
-      act.spin = actor.spin;
-      act.velocity = new Point(actor.velocity.x, actor.velocity.y);
+      let act = actType.createInstance(
+        actor.name, app,
+        new Point(parseFloat(actor.positionX), parseFloat(actor.positionY)),
+        new Point(parseFloat(actor.velocityX), parseFloat(actor.velocityY)),
+        actor.facing, actor.spin);
       Director.actors.set(act.name, act);
     }
   }
@@ -213,7 +212,7 @@ export default class Director {
     actor.removePart(partName);
   }
 
-  /* MOVE THIS TO DIRECTOR FROM PART
+  /*TODO: MOVE THIS TO DIRECTOR FROM PART
   attachParticleGenerator(generator) {
     this.particleGenerator = generator;
     generator.attachedPart = this;
