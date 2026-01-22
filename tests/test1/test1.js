@@ -15,18 +15,15 @@ function runTest() {
   console.log (`Director polygons = ${Director.polygonBank.size}`);
   Director.importAppearanceBank (data.appearances_json);
   console.log (`Director appearances = ${Director.appearanceBank.size}`);
+  console.log (Director.appearanceBank);
   Director.importPartTypes (data.partTypes_json);
   console.log (`Director partTypes = ${Director.partTypes.size}`);
-
-  //TODO:  see notes in obsidian about the requirement for another class..
-  //Import actorTypes not working due to name fuckery.  
+  
   Director.importActorTypes (data.actorTypes_json);
   console.log (`Director actorTypes = ${Director.actorTypes.size}`);
+  console.log (Director.actorTypes);
   
   Director.importActors (data.actors_json);
   console.log (`Director actors = ${Director.actors.size}`);
-  console.log ('actor1:');
-  console.log (Director.actors.get('Actor1'));
-  console.log ('actor2:');
-  console.log (Director.actors.get('Actor2'));
+  console.log (Director.actors);
 }
