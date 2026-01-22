@@ -16,7 +16,7 @@ export default class Label {
   }
   draw() {
     let screenPosition = Transpose.childToScreen (this,this.parent);
-    Director.view.context.fillStyle = this.appearance.text;
+    Director.view.context.fillStyle = this.appearance.textHex;
     Director.view.context.textBaseline = 'middle';
     Director.view.context.textAlign = 'center';
     Director.view.context.font =  `${this.size}em monospace`;

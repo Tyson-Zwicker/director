@@ -1,4 +1,5 @@
 import Appearance from './appearance.js';
+import ActorType from './actortype.js';
 import Part from './part.js';
 import View from './view.js';
 import Quadtree from './quadtree.js';
@@ -44,8 +45,15 @@ export default class Director {
     } catch (e) {
       throw new Error("Director.importPolyBank. Bad JSON.");
     }
+    //You must convert EVERYTHING to a number manually or else it might do "Javascript" math with a string..
+
     for (let poly of jsonObj.polygons) {
-      Director.polygonBank.set(poly.name, new Polygon(poly.points));
+      let points = [];
+      for (let strPoint of poly.points) {
+        let point = { "x": parseFloat(strPoint.x), "y": parseFloat(strPoint.y) };
+        points.push(point);
+      }
+      Director.polygonBank.set(poly.name, new Polygon(points));
     }
   }
   static importAppearanceBank(json) {
@@ -56,7 +64,7 @@ export default class Director {
       throw new Error("Director.importAppearanceBank. Bad JSON.");
     }
     for (let appr of jsonObj.appearances) {
-      Director.appearanceBank.set(appr.name, new Appearance(appr.fill, appr.stroke, appr.text, appr.width));
+      Director.appearanceBank.set(appr.name, new Appearance(appr.fill, appr.stroke, appr.text, parseInt(appr.width)));
     }
   }
   static importPartTypes(json) {
@@ -67,7 +75,7 @@ export default class Director {
       throw new Error("Director.importPartTypes. Bad JSON.");
     }
     for (let partType of jsonObj.partTypes) {
-      Director.partTypes.set(partType.name, new Part(partType.name, partType.polygon));
+      Director.partTypes.set(partType.name, new Part(partType.name, Director.polygonBank.get(partType.polygon)));
     }
   }
   static importActorTypes(json) {
@@ -77,65 +85,66 @@ export default class Director {
     } catch (e) {
       throw new Error("Director.importActorTypes. Bad JSON.");
     }
-    for (let actorType of jsonObj.actorTypes) {
-      if (!Director.polygonBank.has(actorType.polygon)) {
-        throw new Error(`Director.importActorTypes: unknown polygon name [${actorType.polygon}]`);
-      } else {
-        console.log(actorType);
+    for (let actorTypeElement of jsonObj.actorTypes) {
+      if (!Director.polygonBank.has(actorTypeElement.polygon)) {
+        throw new Error(`Director.importActorTypes: unknown polygon name [${actorTypeElement.polygon}]`);
       }
-      let poly = Director.polygonBank.get(actorType.polygon);
-      let actType = new Actor(
-        actorType.name,
+      let poly = Director.polygonBank.get(actorTypeElement.polygon);
+      if (actorTypeElement.bounceCoefficient > 1 || actorTypeElement.bounceCoefficient < 0) {
+        throw error(`Director.importActorTypes: bounce Coefficient ${actorTypeElement.bounceCoefficient} out of bounds for ${actorTypeElement.name}`);
+      }
+      let actorType = new ActorType(
+        actorTypeElement.name,
         poly,
-        actorType.mass
+        parseInt(actorTypeElement.mass),
+        parseFloat(actorTypeElement.bounceCoefficient),
+        (actorTypeElement.collides === 'true'),
+        (actorTypeElement.moves === 'true')
       );
-      actType.bounceCoefficient = actorType.bounceCoefficient;
-      actType.collides = actorType.collides;
-      actType.moves = true;
-      console.log (`actor type = ${actType}`);
-      for (let part of actorType.parts) {
-        if (!Director.partTypes.has(part.partType)) {
-          throw new Error(`Director.importActorTypes: unknown part Type [${part.partType}] for part [${part.name}]`);
+      for (let partElement of actorTypeElement.parts) {
+        if (!Director.partTypes.has(partElement.partTypes)) {
+          throw new Error(`Director.importActorTypes: unknown part Type [${partElement.partTypes}] for part [${partElement.name}]`);
         }
-        let prtType = Director.partTypes.get(part.partType);
-        let prt = prtType.createInstance(
-          part.name,
-          new Point(part.position.x, part.position.y),
-          part.facing,
-          Director.appearanceBank.get(part.appearance)
+        if (!Director.appearanceBank.has(partElement.appearances)) {
+          throw new Error(`Director.importActorTypes: unknown appearance [${partElement.appearances} for part ${partElement.name}]`);
+        }
+        let partType = Director.partTypes.get(partElement.partTypes);
+        //createInstance ( name, appearance, offsetFromActorOrigin, facing, spin){
+        let part = partType.createInstance(
+          partElement.name,
+          Director.appearanceBank.get(partElement.appearances),
+          new Point(parseFloat(partElement.xOffset), parseFloat(partElement.yOffset)),
+          parseFloat(partElement.facing),
+          parseFloat(partElement.spin)
         );
-        actType.attachPart(prt);
+        actorType.attachPart(part);
       }
-      console.log (`setting actor type ${actType.name}`);
-      Director.actorTypes.set(actType.name, actType);
+      Director.actorTypes.set(actorType.name, actorType);
     }
   }
   static importActors(json) {
-
     let jsonObj = undefined;
     try {
       jsonObj = JSON.parse(json);
     } catch (e) {
       throw new Error("Director.importActors. Bad JSON.");
     }
-    console.log(jsonObj);
-    for (let actor of jsonObj.actors) {
-      console.log(actor);
-      if (!Director.appearanceBank.has(actor.appearances)) {
-        throw new Error(`Director.importActors: unknown appearance name [${actor.appearance}]`);
+    for (let actorElement of jsonObj.actors) {
+      if (!Director.appearanceBank.has(actorElement.appearances)) {
+        throw new Error(`Director.importActors: unknown appearance name [${actorElement.appearance}] for actor [${actorElement.name}]`);
       }
-      if (!Director.actorTypes.has(actor.typeName)) {
-        throw new Error(`Director.importActors: unknown actor typeName [${actor.typeName}]`);
+      if (!Director.actorTypes.has(actorElement.actorTypes)) {
+        throw new Error(`Director.importActors: unknown actor typeName [${actorElement.actorType}] for actor [${actorElement.name}]`);
       }
-
-      let app = Director.appearanceBank.get(actor.appearances);
-      let actType = Director.actorTypes.get(actor.typeName);
-      let act = actType.createInstance(
-        actor.name, app,
-        new Point(parseFloat(actor.positionX), parseFloat(actor.positionY)),
-        new Point(parseFloat(actor.velocityX), parseFloat(actor.velocityY)),
-        actor.facing, actor.spin);
-      Director.actors.set(act.name, act);
+      let appearance = Director.appearanceBank.get(actorElement.appearances);
+      let actorType = Director.actorTypes.get(actorElement.actorTypes);
+      // createActorInstance (name, appearance, position, velocity, facing, spin){
+      let actor = actorType.createActorInstance(
+        actorElement.name, appearance,
+        new Point(parseFloat(actorElement.positionX), parseFloat(actorElement.positionY)),
+        new Point(parseFloat(actorElement.velocityX), parseFloat(actorElement.velocityY)),
+        parseFloat(actorElement.facing), parseFloat(actorElement.spin));
+      Director.actors.set(actor.name, actor);
     }
   }
   static importScene(json) {
@@ -145,7 +154,6 @@ export default class Director {
     } catch (e) {
       throw new Error("Director.importScene. Bad JSON.");
     }
-    console.log(jsonObj);
     Director["scene"] = {
       name: jsonObj.name,
       description: jsonObj.description,
@@ -211,22 +219,9 @@ export default class Director {
     let actor = Director.actors.get(actorName);
     actor.removePart(partName);
   }
-
-  /*TODO: MOVE THIS TO DIRECTOR FROM PART
-  attachParticleGenerator(generator) {
-    this.particleGenerator = generator;
-    generator.attachedPart = this;
-    return this;
+  attachParticleGeneratorToPart(generator, part) {
+    part.attachParticleGenerator(generator);
   }
-  
-  updateParticleGenerator() {
-    if (this.particleGenerator) {      
-      let worldCoords = Transpose.childToWorld (this,this.parent);
-      this.particleGenerator.setPosition(worldCoords);
-      this.particleGenerator.setFacing(this.parent.facing + this.facing);
-    }
-  }
-    */
   static addFieldToActor(actor, strength) {
     if (!(actor instanceof Actor)) throw Error(`Director.addFieldToActor: actor is not an actor. [${actor}]`);
     Director.actorFields.set(actor.name, new ActorField(actor, strength));
@@ -286,6 +281,9 @@ export default class Director {
     Director.#draw_backgroundEffects(delta);
     for (let actor of Director.actors.values()) {
       if (Director.view.canSee(actor.position, actor.radius)) {
+        Director.view.context.textBaseline = 'top';
+        Director.view.context.setFillStyle = '#FFFF00';
+        Director.view.context.fillText(delta, 5, 5);
         actor.draw(Director.view);
       }
     }
@@ -360,8 +358,7 @@ export default class Director {
   static kinematics(delta) {
     for (let actor of Director.actors.values()) {
       actor.move(delta);
-      // Update particle generators attached to parts
-      for (let part of actor.parts) {
+      for (let part of actor.parts.values()) {
         part.updateParticleGenerator();
       }
       Director.quadtree.insert(actor);
@@ -388,7 +385,7 @@ export default class Director {
     Director.lastFrameTime = currentTime;
     Director.kinematics(delta); //This redraws the entire quadtree.
     Director.applyActorField(delta);
-    Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.    
+    Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.        
     Director.sensing(delta, currentTime); //<- do this before draw, because it adds effects..
     Director.runParticleGenerators(currentTime);
     Director.draw(delta);
@@ -396,35 +393,18 @@ export default class Director {
     if (Director.creatorFn) {
       Director.creatorFn(delta);
     }
-    Director.checkUserActorInteraction();
+    Director.checkUserActorInteraction();    
     Director.quadtree.clear();      //QuadTree is cleared (will be recreated begining next loop)
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }
   //------------------------- runners
-  static run(canvas, canvasContainer) {
-    if (!canvas && !canvasContainer) {
-      console.log('making own canvas')
-      Director.view = new View('#000');
-    }
-    else if (!canvas || !canvasContainer) {
-      throw new Error(`Define both a canvas and container, or neither! ${canvas}, ${container}`);
-    }
-    else {
-      Director.view = new View('#000', canvas, canvasContainer);
-    }
+  static run() {    
+    Director.view = new View('#505');
     Director.continueAnimationLoop = true;
     requestAnimationFrame(Director.loop.bind(Director));
   }
   static runOnce(canvas, canvasContainer) {
-    if (!canvas && !canvasContainer) {
-      Director.view = new View('#000');
-    }
-    else if (!canvas || !canvasContainer) {
-      throw new Error(`Define both a canvas and container, or neither! ${canvas}, ${container}`);
-    }
-    else {
-      Director.view = new View('#124', canvas, canvasContainer);
-    }
+    Director.view = new View('#055');
     Director.continueAnimationLoop = false;
     requestAnimationFrame(Director.loop.bind(Director));
   }

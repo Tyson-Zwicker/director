@@ -3,7 +3,7 @@ import Point from './point.js';
 export default class View {
   backgroundPressed = false;
   backgroundPressedCoordinate = null;
-  backgroundColor = "#000";
+  backgroundColor = "#555";
   bounds = undefined;
   camera = Point.zero();
   minimumZoom = 0.1;
@@ -11,36 +11,20 @@ export default class View {
   screenCenter = null; // Initialize as null
   zoomFactor = 10;
 
-  constructor(background, canvas, canvasContainer) {
-    if (!canvas) {
-      //assumes a blank page..
-      this.canvas = document.createElement('canvas');
-      this.canvas.style.margin = 0;
-      this.canvas.style.padding = 0;
-      this.canvas.id = 'canvas';
- 
-      this.canvasContainer = window;
-      this.externalGUI = false;
-    } else {
-      //when working within an HTML environment with its own controls..
-      this.canvas = canvas;
-      this.canvasContainer = canvasContainer;
-      this.externalGUI = true;
-    }
+  constructor(background) {
+    this.canvas = document.createElement('canvas');
+    this.canvas.style.margin = 0;
+    this.canvas.style.padding = 0;
+    this.canvas.id = 'canvas';
     this.context = this.canvas.getContext('2d');
     this.mouse.buttonDown = false;
     this.camera.zoom = 1; // Default zoom level
     this.context = this.canvas.getContext('2d');
     if (background) this.backgroundColor = background;
-    
-    // Only append canvas to body if we created it ourselves
-    if (!this.externalGUI) {
-      let body = document.getElementsByTagName('body')[0];
-      body.appendChild(this.canvas);
-      body.style.margin = 0;
-      body.style.padding = 0;
-    }
-    //this.canvas.onwheel = this.handleWheel;
+    let body = document.getElementsByTagName('body')[0];
+    body.appendChild(this.canvas);
+    body.style.margin = 0;
+    body.style.padding = 0;
     this.canvas.addEventListener('wheel', this.handleWheel, { passive: false });
     this.canvas.onmousemove = this.handleMouseMove;
     this.canvas.onmousedown = this.handleMouseDown;
@@ -75,6 +59,7 @@ export default class View {
   clear() {
     this.context.fillStyle = this.backgroundColor;
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
   }
   handleCameraDrag(actorMouseInteraction) {
     if (!actorMouseInteraction) {
@@ -147,25 +132,14 @@ export default class View {
     this.#calcBounds();
   }
   resizeCanvas() {
-    
-    if (this.canvasContainer === window) {
-      this.canvas.width = window.innerWidth;
-      this.canvas.height = window.innerHeight;
-      console.log ('resizing with window');
-    } else {
-      console.log ('before resizing container:'+this.canvasContainer.clientWidth+','+this.canvasContainer.clientHeight);
-      this.canvas.width = this.canvasContainer.clientWidth;
-      this.canvas.height = this.canvasContainer.clientHeight;
-      console.log ('after reszing  container'+this.canvasContainer.clientWidth+','+this.canvasContainer.clientHeight);
-    }
-    console.log (`w,h: ${this.canvas.width}, ${this.canvas.height}`)
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
     if (!this.screenCenter) {
       this.screenCenter = new Point(this.canvas.width / 2, this.canvas.height / 2);
     } else {
       this.screenCenter.x = this.canvas.width / 2;
       this.screenCenter.y = this.canvas.height / 2;
     }
-
     this.#calcBounds();
   }
 }

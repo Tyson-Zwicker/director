@@ -5,7 +5,6 @@ import Boundry from './boundry.js';
 import Transpose from './transpose.js';
 import Appearance from './appearance.js'
 export default class Actor {
-  typeName = undefined;
   name = undefined;
   mass = undefined;
   polygon = undefined;
@@ -27,9 +26,8 @@ export default class Actor {
   sensors = undefined;
   sensorBoundry = undefined;
   maxSensorRange =0;
-  constructor(typeName, polygon, mass, bounceCoefficient=0.5, collides=true, moves=true) {
-    if (!(typeof typeName === 'string') || typeName==="" ) throw new Error (`Actor.constructor: invalid typeName [${typeName}]`);
-    this.typeName = typeName;
+  constructor(name, polygon, mass, bounceCoefficient=0.5, collides=true, moves=true) {
+    this.name = name;
     this.polygon = polygon;
     this.appearance = Appearance.default;
     this.mass = mass;
@@ -39,16 +37,7 @@ export default class Actor {
     this.radius = polygon.radius;
     if (this.mass<=0 || this.radius<=0) throw new Error (`Actor.constructor: Actors must have a phsyical presence.  mass: [${_this.mass}] radius [${this.radius}]!`)
   }
-  createInstance (name, appearance, position, velocity, facing,spin){
-    let actor = new Actor (this.typeName, this.polygon, this.mass, this.bounceCoefficient, this.collides, this.moves);
-    actor.name = name;
-    actor.appearance = appearance;
-    actor.position =position;
-    actor.velocity = velocity;
-    actor.facing = facing;
-    actor.spin = spin;
-    return actor;
-  }
+
   setLabel(text, position, appearance, size) {
     this.#label = new Label (this, position, appearance, size, text);
   }
@@ -58,8 +47,8 @@ export default class Actor {
   }
   attachPart(part) {
     if (this.parts.has (part.name)) throw new Error (`Actor.attachPart: part names [${part.name}] already exists.`);
+    part.owner = this;
     this.parts.set (part.name, part);
-
   }
   getPart (partName){
     if (!this.parts.has (partName)) throw new Error (`Actor.getPart: part names [${partName}] does not exist`);
@@ -85,7 +74,6 @@ export default class Actor {
   }
   draw(view) {
     let origin = Point.from(this.position);
-    
     let appearance = this.#drawChooseAppearance();
     this.polygon.draw (Transpose.worldToScreen (this.position),this.facing, appearance);
     this.#drawParts(view);
@@ -101,9 +89,10 @@ export default class Actor {
     return appearance;
   }
   #drawParts(view) {
-    for (let part of this.parts) {      
+    for (let part of this.parts.values()) {  
       let appearance = (part.appearance) ? part.appearance : this.appearance;
-      part.polygon.draw (Transpose.childToScreen (part, this), part.facing+this.facing, appearance);
+      let partOrigin = Transpose.childToScreen (part, this);
+      part.polygon.draw (partOrigin, part.facing+this.facing, appearance);
     }
   }
   #drawLabel() {

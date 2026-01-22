@@ -19,17 +19,12 @@ export default class EventTracker {
     }
     return null;
   }
-  getEventsBefore(time) {
-    console.log('searching for before ' + time);
+  getEventsBefore(time) {    
     let i = 0;
-    console.log('comparing with ' + this.sortedTimes[i]);
     while (this.sortedTimes[i] < time && i < this.sortedTimes.length) {
-      console.log('this is before! ' + this.sortedTimes[i]);
       i++;
-      console.log('comparing with ' + this.sortedTimes[i]);
     }
     i--; //go back by 1 event..
-    console.log('going with index ' + i + ' with time = ' + this.sortedTimes[i]);
     let result = [];
     for (let eventIndex = i; eventIndex >= 0; eventIndex--) { //work backwards through time..
       result.push(this.map.get(this.sortedTimes[eventIndex]));
@@ -38,11 +33,8 @@ export default class EventTracker {
   }
   getEventsAfter(time) {
     let i = 0;
-    console.log('comparing with ' + this.sortedTimes[i]);
     while ( this.sortedTimes[i]<time && i < this.sortedTimes.length) {
-      console.log('this is before! ' + this.sortedTimes[i]);
-      i++;
-      console.log('comparing with ' + this.sortedTimes[i]);
+      i++;    
     }
     let result = [];
     for (let eventIndex = i; eventIndex < this.sortedTimes.length; eventIndex++) {

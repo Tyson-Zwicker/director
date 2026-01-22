@@ -37,8 +37,8 @@ export default class Polygon {
       }
     }
     path.closePath();
-    Director.view.context.fillStyle = appearance.fill;
-    Director.view.context.strokeStyle = appearance.stroke;
+    Director.view.context.fillStyle = appearance.fillHex;
+    Director.view.context.strokeStyle = appearance.strokeHex;
     Director.view.context.lineWidth = appearance.width;
     Director.view.context.fill(path);
     Director.view.context.stroke(path);
