@@ -106,11 +106,9 @@ function getListFields() {
 }
 function addDropDownCanvasEvents() {
   for (let fieldName of dropDownFields.keys()) {
-    if (fieldName.indexOf('polygon') !== -1) {
-      console.log ('adding polygon field:'+fieldName);
+    if (fieldName.indexOf('polygon') !== -1) {      
       let element = dropDownFields.get(fieldName);
-      element.addEventListener('change', () => {
-        console.log ('polygon field event fired');
+      element.addEventListener('change', () => {        
         let p = getPolygonPoints(element.value);
         drawPolygonFunction(p);
       });
@@ -142,13 +140,9 @@ function populateDropDownLists() {
   //Find the drop down fields, and fill them from their own table
   for (let elementName of dropDownFields.keys()) {
     const dropDownList = fieldElements.get(elementName);
-    console.log(dropDownList);
     let datakey = elementName;
-    console.log(elementName);
-
     if (elementName.indexOf('polygon') !== -1) {
       datakey = 'polygons';
-      console.log('polygon exception');
     };
     let foreignTable = JSON.parse(localStorage.getItem(datakey));
     console.log(foreignTable);
@@ -209,6 +203,7 @@ function loadItems() {
       items.set(item.name, item);  //REMEMBER: Everything has name.
     }
   }
+  console.log (`${items.size} items loaded.`);
 }
 function getChildTables() {
   let tables = new Map();
@@ -285,12 +280,19 @@ function storeFields(replace = false) {
   }
   const newItem = {};
   for (let fieldName of fieldElements.keys()) {
-    if (!listBoxFields.has(fieldName)) {// Drop downs and text fields..
+    if (!listBoxFields.has(fieldName)) {// Drop downs, text fields and checkboxes..
       try {
-        newItem[fieldName] = fieldElements.get(fieldName).value;
+        //Checkboxes are different..
+        let element = fieldElements.get(fieldName);
+        if (element.tagName.toLowerCase() === 'input' && element.type.toLowerCase() === 'checkbox') {
+          newItem[fieldName] = (element.checked)? 'true':'false';
+        } else {
+          newItem[fieldName] = fieldElements.get(fieldName).value;
+        }
       } catch (e) {
-        let errMsg = `Error in  storeFields: ${fieldName}`;
+        let errMsg = `Error in  storeFields: ${fieldName} :${e.message}`;
         alert('store fields:' + errMsg);
+        return;
       }
     } else {                                //Now handle child tables..      
       newItem[fieldName] = currentItem[fieldName]; //We need to move all the children to the new item name.      
@@ -325,9 +327,15 @@ function populateFieldsFromItemList(itemName) {
   const item = items.get(itemName);
   for (let fieldName of fieldNames) {
     const element = fieldElements.get(fieldName);
-    element.value = item[fieldName];
+    if (element.tagName.toLowerCase() === 'input' && element.type.toLowerCase() === 'checkbox') {
+      //handle Checkboxes
+      element.checked = (item[fieldName] === 'true');
+    } else {
+      //Everything else works the same..
+      element.value = item[fieldName];
+    }
   }
-  
+
 }
 function findRecordInTable(tableName, recordName) {
   let raw = localStorage.getItem(tableName);
@@ -381,16 +389,15 @@ function addEventListeners() {
     populateFieldsFromItemList(selectedName);
     populateListBoxes();
     if (polygonPropertyName != null) {//This is for anything that directly draws.. currently that is only the polygon table but who knows?
-    
       currentPolygonData.length = 0;
       currentPolygonData.push(...currentItem[polygonPropertyName]);
       drawPolygonFunction(currentPolygonData);
     }
     //Now check for any "polygon dropdowns" to draw.. (currently actor and part type both have one).
-    for (let fieldName of fieldNames){
-      if (fieldName.indexOf('polygon'!==-1)){
-        console.log ('drawing field'+fieldName);
-        let element = fieldElements.get (fieldName);
+    for (let fieldName of fieldNames) {
+      if (fieldName.indexOf('polygon' !== -1)) {
+        console.log('drawing field' + fieldName);
+        let element = fieldElements.get(fieldName);
         let p = getPolygonPoints(element.value);
         drawPolygonFunction(p);
       }
@@ -398,14 +405,28 @@ function addEventListeners() {
   });
   itemsListBox.addEventListener('click', () => {
     if (itemsListBox.length === 1) {
-      let selectedName = itemsListBox.options[0].value;
+      let selectedName = itemsListBox.value;
+      if (!items.has(selectedName)) {
+        alert('list box is corrupted.');
+        return;
+      }
       currentItem = items.get(selectedName);
+      if (currentItem === null) alert(`${selectedName} not found in items!`);
       populateFieldsFromItemList(selectedName);
       populateListBoxes();
-      if (polygonPropertyName != null) {
+      if (polygonPropertyName != null) {//This is for anything that directly draws.. currently that is only the polygon table but who knows?
         currentPolygonData.length = 0;
         currentPolygonData.push(...currentItem[polygonPropertyName]);
         drawPolygonFunction(currentPolygonData);
+      }
+      //Now check for any "polygon dropdowns" to draw.. (currently actor and part type both have one).
+      for (let fieldName of fieldNames) {
+        if (fieldName.indexOf('polygon' !== -1)) {
+          console.log('drawing field' + fieldName);
+          let element = fieldElements.get(fieldName);
+          let p = getPolygonPoints(element.value);
+          drawPolygonFunction(p);
+        }
       }
     }
   });

@@ -319,3 +319,28 @@ option:checked {
 .is-hidden {
   display: none !important;
 }
+
+.directory-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 20px;
+  align-items: center;
+  padding: 20px;
+}
+
+a {
+  color: white;
+  font-size: 16pt;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+a:visited {
+  color: white;
+}
+
+.directory-grid span {
+  color: white;
+  font-size: 16pt;
+  font-family: monospace;
+}
