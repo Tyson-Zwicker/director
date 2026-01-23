@@ -256,6 +256,12 @@ export default class Director {
   static removeParticalGenerator(generatorName) {
     this.pGenerators.delete(generatorName);
   }
+  static bindKey (key, fn){
+    Director.keyboard.setKeyFunction (key,fn);
+  }
+  static unbindKey (key){
+    Diector.keyboard.delete (key);
+  }
   //------------------------- Workers called by main loop
   static runParticleGenerators(now) {
     for (let pg of this.pGenerators.values()) {
