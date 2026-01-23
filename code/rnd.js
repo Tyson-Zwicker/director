@@ -2,6 +2,9 @@ import Point from './point.js';
 import Boundry from './boundry.js';
 import Color from './color.js';
 export default class Rnd {
+  static bool (){
+    return (Math.random ()<.5);
+  }
   //IF ONLY ONE provided, range is 0->min,
   //otherwise its min->max
   static int(min, max) { // max not inclusive..
