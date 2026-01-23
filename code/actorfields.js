@@ -22,7 +22,7 @@ export default class ActorField {
             // a = F/m, F = strength/d^2
             // This is one sided. The other object may or may not also excert a force on this actor
             // They BOTH get pulled though: Newton's 3rd law of motion.
-            let force = this.strength / distance ** 2;
+            let force = this.strength / distance;
             let otherActorAcceleration = -force / otherActor.mass;
             let actorAcceleration = force / this.actor.mass;
             let direction = Point.from(this.actor.position);
