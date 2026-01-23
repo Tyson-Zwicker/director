@@ -5,7 +5,7 @@ import Point from './point.js';
 import Rnd from './rnd.js';
 
 export default class ParticleGenertor {
-  constructor(name, position, angleMin, angleMax, velMin, velMax, color, size, durMin, durMax, periodMillis, foreground) {
+  constructor(name, position, angleMin, angleMax, velMin, velMax, color, batchSize, size, durMin, durMax, periodMillis, foreground) {
     if (typeof name !== 'string') throw new Error(`ParticleGenerator.constructor ParticleGenerators must be named ${name}`);
     this.name = name;
     if (!Point.isPointy(position)) throw new Error(`ParticleGenerator.constructor origin must be a point ${position}`);
@@ -13,12 +13,14 @@ export default class ParticleGenertor {
     if (typeof angleMin !== 'number' || typeof angleMax !== 'number') throw new Error(`ParticleGenerator.constructor: angles be degreest ${angleMin}, ${angleMax}`);
     this.angleMin = angleMin;
     this.angleMax = angleMax;
-    this.anglePartOffset =0;
+    this.anglePartOffset = 0;
     if (typeof velMin !== 'number' || typeof velMax !== 'number') throw new Error(`ParticleGenerator.constructor: velocities be numbers ${velMin}, ${velMax}`);
     this.velMin = velMin;
     this.velMax = velMin;
     if (!(color instanceof Color)) throw new Error(`ParticleGenerator.constructor: color must be a Color, ${color}`);
     this.color = color;
+    if (typeof batchSize !== 'number' || size <= 0) new Error(`ParticleGenerator.constructor: batch size must be a number and >0 ${batchSize}`);
+    this.batchSize = batchSize;
     if (typeof size !== 'number' || size <= 0) new Error(`ParticleGenerator.constructor: size must be a number and >0 ${size}`);
     this.size = size;
     if (typeof durMin !== 'number' || typeof durMax !== 'number' || durMin <= 0) throw new Error(`ParticleGenerator.constructor: durations be numbers (in seconds)${velMin}, ${velMax}`);
@@ -30,7 +32,7 @@ export default class ParticleGenertor {
     if (typeof periodMillis !== 'number' || size <= 0) new Error(`ParticleGenerator.constructor: period must be a number and >0 (inMilliseconds) ${periodMillis}`);
     this.periodMillis = periodMillis;
     this.particlePool = [];
-    this.poolSize = this.durMax*1000 / this.periodMillis;
+    this.poolSize = this.durMax * 1000 / this.periodMillis;
     this.attachedPart = undefined; // Add this property
     this.#initializePool();
   }
@@ -57,15 +59,15 @@ export default class ParticleGenertor {
     // Create new one if pool exhausted
     return this.#makeNew();
   }
-  recycle (particle) {
+  recycle(particle) {
     this.particlePool.push(particle);
   }
   #refresh(p) {
-    p.position = Point.from (this.position);
+    p.position = Point.from(this.position);
     p.size = this.size;
     p.color = this.color;
-    p.velocity= this.#getRandomVelocityComponents();
-    let life = Rnd.float (this.durMin, this.durMax);
+    p.velocity = this.#getRandomVelocityComponents();
+    let life = Rnd.float(this.durMin, this.durMax);
     p.duration = life;
     p.life = life;
     p.generator = this;
@@ -82,24 +84,25 @@ export default class ParticleGenertor {
   generate(now) {
     if (now - this.lastGeneratedMillis > this.periodMillis) {
       this.lastGeneratedMillis = now;
-      let particleEffect = this.#getParticleFromPool();
-      if (this.foreground) {
-        Director.addForegroundEffect(particleEffect);
-        return;
+      for (let i = 0; i < this.batchSize; i++) {
+        let particleEffect = this.#getParticleFromPool();
+        if (this.foreground) {
+          Director.addForegroundEffect(particleEffect);
+        } else {
+          Director.addBackgroundEffect(particleEffect);
+        }
       }
-
-      Director.addBackgroundEffect(particleEffect);
     }
   }
   #getRandomVelocityComponents() {
-    let a = this.anglePartOffset+Rnd.float(this.angleMin, this.angleMax);
+    let a = this.anglePartOffset + Rnd.float(this.angleMin, this.angleMax);
     let m = Rnd.float(this.velMin, this.velMax);
     return Point.fromPolar(a, m);
   }
   setPosition(newPosition) {
     this.position = Point.from(newPosition);
   }
-  
+
   setFacing(angleInDegrees) {
     // Store rotation if you need it for particle generation
     this.anglePartOffset = angleInDegrees;

@@ -75,8 +75,8 @@ export default class Rnd {
     if (typeof min === undefined) min = 0;
     if (typeof min !== 'number') throw new Error(`Rnd.color: min [${min}] is not a number.`);
     let m = parseInt(min);
-    if (min > 14 || min < 0) throw new Error(`Rnd.color: min [${min} must be between 0 and 1 (inclusive)`);
-    return new Color(Rnd.int(min, 15), Rnd.int(min, 15), Rnd.int(min, 15));
+    if (m > 14 || m < 0) throw new Error(`Rnd.color: min [${min} must be between 0 and 1 (inclusive)`);
+    return new Color(Rnd.int(m, 15), Rnd.int(m, 15), Rnd.int(m, 15));
   }
   static colorAsHex(min) {
     return Rnd.color(min).asHex();

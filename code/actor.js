@@ -84,6 +84,7 @@ export default class Actor {
   draw(view) {
     let origin = Point.from(this.position);
     let appearance = this.#drawChooseAppearance();
+    console.log (appearance.lineWidth);
     this.polygon.draw(Transpose.worldToScreen(this.position), this.facing, appearance);
     this.#drawParts(view);
     this.#drawLabel(view);
@@ -117,11 +118,11 @@ export default class Actor {
     if (this.facing > 360) this.facing -= 360;
     if (this.facing < 0) this.facing += 360;
   }
-  applyForce (forceVector, delta){
-    let scaledForce = Point.from (forceVector);
-    Point.scale (scaledForce, delta);
-    Point.scale (scaledForce, 1/this.mass);
-    Point.add (this.velocity, scaledForce);    
+  applyForce(forceVector, delta) {
+    let scaledForce = Point.from(forceVector);
+    Point.scale(scaledForce, delta);
+    Point.scale(scaledForce, 1 / this.mass);
+    Point.add(this.velocity, scaledForce);
   }
   toString() {
     return `[${this.name}], contains [${this.parts.length}] parts, label [${this.#label?.text}]`;
