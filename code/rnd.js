@@ -2,8 +2,8 @@ import Point from './point.js';
 import Boundry from './boundry.js';
 import Color from './color.js';
 export default class Rnd {
-  static bool (){
-    return (Math.random ()<.5);
+  static bool() {
+    return (Math.random() < .5);
   }
   //IF ONLY ONE provided, range is 0->min,
   //otherwise its min->max
@@ -76,7 +76,18 @@ export default class Rnd {
     if (typeof min !== 'number') throw new Error(`Rnd.color: min [${min}] is not a number.`);
     let m = parseInt(min);
     if (m > 14 || m < 0) throw new Error(`Rnd.color: min [${min} must be between 0 and 1 (inclusive)`);
-    return new Color(Rnd.int(m, 15), Rnd.int(m, 15), Rnd.int(m, 15));
+    let r = Rnd.int(m, 15);
+    let g = Rnd.int(m, 15);
+    let b = Rnd.int(m, 15);
+    if (Rnd.int(0, 3) === 0) r = 0;
+    if (Rnd.int(0, 3) === 0) g = 0;
+    if (Rnd.int(0, 3) === 0) b = 0;
+    if (r + g + b ===0) {
+      let r = Rnd.int(m, 15);
+      let g = Rnd.int(m, 15);
+      let b = Rnd.int(m, 15);
+    }
+    return new Color(r, g, b);
   }
   static colorAsHex(min) {
     return Rnd.color(min).asHex();

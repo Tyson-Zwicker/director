@@ -10,8 +10,9 @@ import Actor from './actor.js';
 import EventTracker from './eventtracker.js';
 import KeyBoard from './keyboard.js';
 import LineEffect from './lineeffect.js';
-import RadialEffect from './radialeffect.js';
+import CircleEffect from './circleeffect.js';
 import ParticleEffect from './particleeffect.js';
+import RadialEffect from './radialeffect.js';
 import Polygon from './polygon.js';
 import Point from './point.js';
 import Keyboard from './keyboard.js';
@@ -265,7 +266,7 @@ export default class Director {
   }
 
   //------------------------- Workers called by main loop
-  
+
   static runParticleGenerators(now) {
     for (let pg of this.pGenerators.values()) {
       pg.generate(now);
@@ -317,7 +318,7 @@ export default class Director {
     Director.view.context.strokeStyle = '#FFFFFF';
     let oldfont = Director.view.context.font;
     Director.view.context.font = "bold 16px Arial"
-    Director.view.context.fillText('Δ' + (String(Math.trunc(delta * 1000)).padStart (4,'0')), 5, 5);
+    Director.view.context.fillText('Δ' + (String(Math.trunc(delta * 1000)).padStart(4, '0')), 5, 5);
     Director.view.context.font = oldfont;
   }
   static #draw_foregroundEffects(delta) {
@@ -325,6 +326,13 @@ export default class Director {
     for (let effect of Director.fgEffects) {
       if (effect instanceof LineEffect) {       //----------lines
         if (Director.view.canSee(effect.p0) || Director.view.canSee(effect.p1)) {
+          if (effect.draw(Director.view.context, delta)) {
+            survivingForegroundEffects.push(effect);
+          }
+        }
+      }
+      if (effect instanceof CircleEffect) {     //----------circle
+        if (Director.view.canSee(effect.position, effect.radius)) {
           if (effect.draw(Director.view.context, delta)) {
             survivingForegroundEffects.push(effect);
           }
@@ -363,7 +371,7 @@ export default class Director {
           }
         }
       }
-      if (effect instanceof RadialEffect) {
+      if (effect instanceof CircleEffect) {
         if (Director.view.canSee(effect.position, effect.radius)) {
           if (effect.draw(Director.view.context, delta)) {
             survivingBackgroundEffects.push(effect);

@@ -4,7 +4,7 @@ import Point from './point.js';
 import Director from './director.js'
 import LineEffect from './lineeffect.js';
 import Color from './color.js';
-import RadialEffect from './radialeffect.js';
+import CircleEffect from './circleeffect.js';
 
 export default class Sensor {
   constructor(range, sweepArc, facing, sweepSpeed, active) {
@@ -15,10 +15,9 @@ export default class Sensor {
     this.sweepDirectionOfRotation = 1; //either 1 or -1 (sweeping between the two angles back and forth..)
     this.sweepAngle = sweepArc / 2; //This is the direction the beam is look now. (always between -halfSweepArc and +halfSweepArc)
     this.lastSweepAngle = this.sweepAngle;
-    this.sweepSpeed = sweepSpeed; //How many degrees per sweep motoin the beam angle changes..    
+    this.sweepSpeed = sweepSpeed; //How many degrees per sweep motion the beam angle changes..    
     this.active = active;
     this.owner = undefined; //Defined when bound by owner..
-
   }
   detect(delta) {
     this.#sweep(delta);
@@ -32,10 +31,10 @@ export default class Sensor {
       let candidates = this.#getSortedObjectsWithinRange(rayEndPoint);
       for (let candidate of candidates) {
         if (candidate != this.owner) { //don't detect yourself
-          Director.addBackgroundEffect(new RadialEffect(candidate.position, candidate.radius,new Color (0,0,0), 0.5));
+          //Director.addBackgroundEffect(new CircleEffect(candidate.position, candidate.radius,new Color (0,0,0), 0.5));
           let seenPosition = this.#canSee(candidate, rayLine);
           if (seenPosition != false) {
-            this.#drawPingReturned(seenPosition);
+            this.#drawPingReturned(seenPosition, candidate);
             return candidate; //leave loop early - don't look past the first one you see, because anything else will be blocked.        
           }
         }
@@ -60,29 +59,16 @@ export default class Sensor {
     */
     return seenPosition; //false if no interception found.
   }
-  #drawPingReturned(seenPosition) {
-    let ray = new LineEffect(this.owner.position, seenPosition, 2, new Color(0, 15, 0, 1), 3);
+  #drawPingReturned(seenPosition,candidate) {
+    let ray = new LineEffect(this.owner.position, seenPosition, 2, new Color(0, 15, 0, 1), 1.5);
     Director.addBackgroundEffect(ray);
+   // Director.addBackgroundEffect(new CircleEffect(candidate.position, candidate.radius * 1.2, new Color(0, 5, 0), 0.5));
   }
   #drawPingToEdge(rayEndPoint) {
     let ray = new LineEffect(this.owner.position, rayEndPoint, 1, new Color(15, 0, 0, 1), 1);
     Director.addBackgroundEffect(ray);
   }
-  /*
-      Keep for know its good for debugging the quadtree..
-      #draw_sensorBoundry(boundry){
-        let top = new LineEffect(new Point (boundry.x1,boundry.y1),new Point(boundry.x2,boundry.y1),1,'#0ff',0.06);
-        let bottom = new LineEffect(new Point (boundry.x1,boundry.y2),new Point(boundry.x2,boundry.y2),1,'#0ff',0.06);
-        let left = new LineEffect(new Point (boundry.x1,boundry.y1),new Point(boundry.x1,boundry.y2),1,'#0ff',0.06);
-        let right = new LineEffect(new Point (boundry.x2,boundry.y1),new Point(boundry.x2,boundry.y2),1,'#0ff',0.06);
-        Director.addBackgroundEffect(top);
-        Director.addBackgroundEffect(bottom);
-        Director.addBackgroundEffect(left);    
-        Director.addBackgroundEffect(right);
-      }
-  */
   #getSortedObjectsWithinRange(rayEndPoint) {
-    //let sensorBoundry = new Boundry(this.owner.position.x, this.owner.position.y, rayEndPoint.x, rayEndPoint.y);  
     let op = this.owner.position;
     let sb = this.owner.sensorBoundry;
     let sensorBoundry = new Boundry(op.x + sb.x1, op.y + sb.y1, op.x + sb.x2, op.y + sb.x2);  //boundry moves with owner
@@ -96,12 +82,25 @@ export default class Sensor {
   #sweep(delta) {
     if (this.sweepAngle >= this.halfArc) {
       this.sweepAngle = this.halfArc;
-      this.sweepDirectionOfRotation = -1;
+      this.sweepDirectionOfRotation = -this.sweepSpeed;
     }
     else if (this.sweepAngle <= -this.halfArc) {
       this.sweepAngle = -this.halfArc;
-      this.sweepDirectionOfRotation = 1;
+      this.sweepDirectionOfRotation = this.sweepSpeed;
     }
     this.sweepAngle += (delta * this.sweepSpeed) * this.sweepDirectionOfRotation;
   }
 }
+/*
+    Keep for now its good for debugging the quadtree..
+    #draw_sensorBoundry(boundry){
+      let top = new LineEffect(new Point (boundry.x1,boundry.y1),new Point(boundry.x2,boundry.y1),1,'#0ff',0.06);
+      let bottom = new LineEffect(new Point (boundry.x1,boundry.y2),new Point(boundry.x2,boundry.y2),1,'#0ff',0.06);
+      let left = new LineEffect(new Point (boundry.x1,boundry.y1),new Point(boundry.x1,boundry.y2),1,'#0ff',0.06);
+      let right = new LineEffect(new Point (boundry.x2,boundry.y1),new Point(boundry.x2,boundry.y2),1,'#0ff',0.06);
+      Director.addBackgroundEffect(top);
+      Director.addBackgroundEffect(bottom);
+      Director.addBackgroundEffect(left);    
+      Director.addBackgroundEffect(right);
+    }
+*/
