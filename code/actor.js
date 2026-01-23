@@ -117,6 +117,12 @@ export default class Actor {
     if (this.facing > 360) this.facing -= 360;
     if (this.facing < 0) this.facing += 360;
   }
+  applyForce (forceVector, delta){
+    let scaledForce = Point.from (forceVector);
+    Point.scaledForce (scaledForce, delta);
+    Point.scaledForce (scaledForce, 1/this.miss);
+    this.velocity.add (scaledForce);
+  }
   toString() {
     return `[${this.name}], contains [${this.parts.length}] parts, label [${this.#label?.text}]`;
   }
