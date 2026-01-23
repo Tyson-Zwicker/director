@@ -261,9 +261,11 @@ export default class Director {
     Director.keyboard.setKeyFunction(key, fn);
   }
   static unbindKey(key) {
-    Diector.keyboard.delete(key);
+    Director.keyboard.delete(key);
   }
+
   //------------------------- Workers called by main loop
+  
   static runParticleGenerators(now) {
     for (let pg of this.pGenerators.values()) {
       pg.generate(now);

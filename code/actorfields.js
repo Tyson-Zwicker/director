@@ -8,8 +8,8 @@ export default class ActorField {
     actor = undefined;
     strength = undefined;    
     constructor(actor, strength) {
-        if (typeof strength !== 'number') throw Error(`Field.constructor: strength is not a number [${strength}]`);
-        if (!(actor instanceof Actor)) throw Error(`Field.constructor:  Actor is not an actor [${actor}]`)
+        if (typeof strength !== 'number') throw new Error(`Field.constructor: strength is not a number [${strength}]`);
+        if (!(actor instanceof Actor)) throw new Error(`Field.constructor:  Actor is not an actor [${actor}]`)
         this.strength = strength;
         this.actor = actor;
     }
@@ -17,7 +17,7 @@ export default class ActorField {
         if (this.actor !== otherActor) { //do not interact with yourself...
             let distance = Point.distance(this.actor.position, otherActor.position);
             if (distance === 0) {
-                throw Error(`Director.applyActorField: Actor ${actor} and other actor ${otherActor} BOTH exist at (${actor.position.x},${actor.position.y}).`);
+                throw new Error(`Director.applyActorField: Actor ${actor} and other actor ${otherActor} BOTH exist at (${actor.position.x},${actor.position.y}).`);
             }
           
             let force = this.strength / distance;

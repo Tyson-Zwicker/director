@@ -7,7 +7,7 @@ import Color from './color.js';
 import RadialEffect from './radialeffect.js';
 
 export default class Sensor {
-  constructor(owner, range, sweepArc, facing, sweepSpeed, active) {
+  constructor(range, sweepArc, facing, sweepSpeed, active) {
     this.sweepArc = sweepArc;
     this.facing = facing;
     this.halfArc = sweepArc / 2; //to avoid dividing by 2 a lot..
@@ -15,9 +15,9 @@ export default class Sensor {
     this.sweepDirectionOfRotation = 1; //either 1 or -1 (sweeping between the two angles back and forth..)
     this.sweepAngle = sweepArc / 2; //This is the direction the beam is look now. (always between -halfSweepArc and +halfSweepArc)
     this.lastSweepAngle = this.sweepAngle;
-    this.sweepSpeed = sweepSpeed; //How many degrees per sweep motoin the beam angle changes..
-    this.owner = owner;
+    this.sweepSpeed = sweepSpeed; //How many degrees per sweep motoin the beam angle changes..    
     this.active = active;
+    this.owner = undefined; //Defined when bound by owner..
 
   }
   detect(delta) {
@@ -32,7 +32,7 @@ export default class Sensor {
       let candidates = this.#getSortedObjectsWithinRange(rayEndPoint);
       for (let candidate of candidates) {
         if (candidate != this.owner) { //don't detect yourself
-          Director.addBackgroundEffect(new RadialEffect(candidate.position, candidate.radius , '#000', 0.5));
+          Director.addBackgroundEffect(new RadialEffect(candidate.position, candidate.radius,new Color (0,0,0), 0.5));
           let seenPosition = this.#canSee(candidate, rayLine);
           if (seenPosition != false) {
             this.#drawPingReturned(seenPosition);

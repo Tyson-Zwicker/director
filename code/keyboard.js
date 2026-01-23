@@ -59,18 +59,13 @@ export default class Keyboard {
   static getReleaseHoldEvent(e, duration) {
     return { "key": e.key, "when": Date.now(), "duration": duration, "action": 'release' };
   }
-  callKeyFunctions(delta) {
-    if (Keyboard.events.size>0){
-      console.log (Keyboard.events);
-    }
-    for (let key of Keyboard.events.keys()) {
-      console.log(`process event for ${key}`);
+  callKeyFunctions(delta) {    
+    for (let key of Keyboard.events.keys()) {      
       if (Keyboard.functions.has(key)) {
         Keyboard.functions.get(key)(Keyboard.events.get(key), delta);
       }
       //remove from events after release so it does keep getting processed.
       if (Keyboard.events.get(key).action === 'release') {
-        console.log('removing release event for ' + key);
         Keyboard.events.delete(key);
       }
     }

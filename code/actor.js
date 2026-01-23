@@ -69,7 +69,7 @@ export default class Actor {
   }
   attachSensor(sensor) {
     if (!this.sensors) this['sensors'] = [];
-    sensor['actor'] = this;
+    sensor.owner = this;
     if (sensor.range > this.maxSensorRange) {
       this.maxSensorRange = sensor.range;
       this.sensorBoundry = new Boundry(-sensor.range, -sensor.range, sensor.range, sensor.range);
@@ -83,8 +83,7 @@ export default class Actor {
   }
   draw(view) {
     let origin = Point.from(this.position);
-    let appearance = this.#drawChooseAppearance();
-    console.log (appearance.lineWidth);
+    let appearance = this.#drawChooseAppearance();    
     this.polygon.draw(Transpose.worldToScreen(this.position), this.facing, appearance);
     this.#drawParts(view);
     this.#drawLabel(view);

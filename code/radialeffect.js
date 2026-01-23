@@ -7,7 +7,7 @@ export default class RadialEffect {
     this.position = position;
     this.radius = radius;
     if (!(color instanceof Color)) {
-      throw error('RadialEffect.constructor: color is not a color.');
+      throw new Error('RadialEffect.constructor: color is not a color.');
     }
     this.color = color;
     this.duration = durationInSeconds;
