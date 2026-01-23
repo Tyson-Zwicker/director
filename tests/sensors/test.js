@@ -6,11 +6,12 @@ import Point from '../../code/point.js';
 import Polygon from '../../code/polygon.js';
 import Rnd from '../../code/rnd.js';
 import Boundry from '../../code/boundry.js';
+import Sensor from '../../code/sensor.js';
+
 document.addEventListener('DOMContentLoaded', function () {
   Director.initialize();
   makeData();
   Director.run();
-
 });
 
 let player1 = undefined;;
@@ -37,51 +38,53 @@ function makeData() {
     Director.addActorType(actorType);
   }
   //Make some actors.
-  let boundry = new Boundry(-5000, -5000, 5000, 5000);
-  for (let i = 0; i < 3000; i++) {
+  let boundry = new Boundry(-1000, -1000, 1000, 1000);
+  for (let i = 0; i < 100; i++) {
     let actorType = Director.getActorType(`acttype${Rnd.int(0, 9)}`);
     let appearance = Director.getAppearance(`app${Rnd.int(0, 10)}`);
-    let actor = actorType.createActorInstance(`actor${i}`, appearance, Rnd.point(boundry), Rnd.vect(0, 360, 5, 60), Rnd.int(360), Rnd.int(-10, 10));
+    let actor = actorType.createActorInstance(`actor${i}`, appearance, Rnd.point(boundry), Rnd.vect(0, 360, 0, 5), Rnd.int(360), Rnd.int(-10, 10));
     Director.addActor(actor);
   }
   //Make the player
   player1 = new Actor('player1', Director.getPolygon('triangle'), Director.getAppearance('player'), 100, 0.8, true, true);
-  Director.addActor (player1);
+  Director.addActor(player1);
   //Add keyboard bindings:
   Director.bindKey('w', w_key);
   Director.bindKey('s', s_key);
   Director.bindKey('a', a_key);
   Director.bindKey('d', d_key);
   Director.bindKey('x', x_key);
-  
+  player1.attachSensor(new Sensor(2000, 33, 0, 10, true));
+  player1.attachSensor(new Sensor(600, 45, 270, 10, true));
+  player1.attachSensor(new Sensor(600, 45, 90, 10, true));
 }
-function x_key(e,delta){
-  if (player1.spin===0) return;
-  player1.spin = .95*player1.spin;
+function x_key(e, delta) {
+  if (player1.spin === 0) return;
+  player1.spin = .95 * player1.spin;
 }
-function w_key(e,delta){
+function w_key(e, delta) {
   if (e.action === 'press' || e.action === 'hold') {
     let thrustMagnitude = 1000; // Adjust this for more/less thrust
     let thrustVector = Point.fromPolar(player1.facing, thrustMagnitude);
-    player1.applyForce(thrustVector, delta);    
+    player1.applyForce(thrustVector, delta);
   }
 }
-function s_key(e,delta) {
+function s_key(e, delta) {
   if (e.action === 'press' || e.action === 'hold') {
     let thrustMagnitude = 2000; // Adjust this for more/less thrust
     let thrustVector = Point.fromPolar(player1.facing, thrustMagnitude);
-    player1.applyForce(thrustVector, delta);    
+    player1.applyForce(thrustVector, delta);
   }
 }
-function a_key(e,delta) {
+function a_key(e, delta) {
   if (e.action === 'press' || e.action === 'hold') {
-    player1.spin += 0.01/ delta;
-    if (player1.spin > 180) player1.spin = 180;  
+    player1.spin += 0.01 / delta;
+    if (player1.spin > 180) player1.spin = 180;
   }
 }
 function d_key(e, delta) {
-    if (e.action === 'press' || e.action === 'hold') {
+  if (e.action === 'press' || e.action === 'hold') {
     player1.spin -= .01 / delta;
-    if (player1.spin < -180) player1.spin = -180;  
+    if (player1.spin < -180) player1.spin = -180;
   }
 }

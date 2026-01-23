@@ -38,14 +38,14 @@ function makeSomeEffects() {
   let foreground = (Rnd.bool());
   let bounds = new Boundry(-500, -500, 500, 500);
   if (whichEffect == 0) {
-    let lineEffect = new LineEffect(Rnd.point(bounds), Rnd.point(bounds), Rnd.int(1, 5), Rnd.color(10), Rnd.float(0.5, 3));
+    let lineEffect = new LineEffect(Rnd.point(bounds), Rnd.point(bounds), Rnd.int(1, 5), Rnd.color(10), Rnd.float(0.5, 1));
     if (foreground) {
       Director.addForegroundEffect(lineEffect);
     } else {
       Director.addBackgroundEffect(lineEffect);
     }
   } else if (whichEffect == 1) {
-    let radialEffect = new RadialEffect(Rnd.point(bounds), Rnd.int(10, 50), Rnd.color(10), Rnd.float(0.5, 2));
+    let radialEffect = new RadialEffect(Rnd.point(bounds), Rnd.int(10, 50), Rnd.color(10), Rnd.float(0.2, 1.5));
     if (foreground) {
       Director.addForegroundEffect(radialEffect);
     } else {
