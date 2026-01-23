@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" hrefs="./code/style.css">
+  <script type="module" src="./code/dbManager.js"></script>
+</head>
+
+<body>
+  <div id="outerColumnContainer" class="outerColumnContainer">
+    <div id="column1" style="display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 10px;">
+      <h2 style="grid-column: 1 / -1; margin: 0 0 10px 0;">Database Manager</h2>
+      
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <label for="tablesList" style="white-space: nowrap;">Tables</label>
+        <select id="tablesList" size="0" style="flex: 1;"></select>
+      </div>
+      <button id="removeTableBtn" style="background-color:#883300; border:2px solid #cc0000; color:#ffffff">Remove Table</button>
+      
+      <label for="recordsList" style="grid-column: 1 / -1; margin-top: 10px;">Records</label>
+      <select id="recordsList" size="10" class="full-height-listbox" style="grid-column: 1 / -1;"></select>
+      
+      <button id="removeRecordBtn" style="background-color:#883300; border:2px solid #cc0000; color:#ffffff; grid-column: 1 / -1;">Remove Record</button>
+      <!--todo implement importing from JSON-->
+      <button id="importJSONBtn" style="background-color:#883300; border:2px solid #cc0000; color:#ffffff; grid-column: 1 / -1;">Import From Jason:</button> 
+      <textarea id="jsonText" 
+      style="background-color:#ffffff; border:2px solid #000000; color:#000000; grid-column: 1 / -1;"></textarea>
+    </div>
+  </div>
+</body>
+
+</html>
