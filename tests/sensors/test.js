@@ -26,7 +26,7 @@ function makeData() {
   Director.addPolygon(Polygon.triangle('triangle', 30, 50));
   //Make some colors too.
   for (let i = 0; i < 10; i++) {
-    let app = new Appearance(`app${i}`, Rnd.colorAsHex(4), Rnd.colorAsHex(8), '#ffffff');
+    let app = new Appearance(`app${i}`, Rnd.colorAsHex(8), Rnd.colorAsHex(12), '#ffffff');
     Director.addAppearance(app);
   }
   //And one for the player
@@ -54,9 +54,9 @@ function makeData() {
   Director.bindKey('a', a_key);
   Director.bindKey('d', d_key);
   Director.bindKey('x', x_key);
-  player1.attachSensor(new Sensor(2000, 33, 0, 10, true));
-  player1.attachSensor(new Sensor(600, 45, 270, 10, true));
-  player1.attachSensor(new Sensor(600, 45, 90, 10, true));
+  player1.attachSensor(new Sensor(400, 33, 0, 7.2, true));
+  player1.attachSensor(new Sensor(1000, 45, 270, 3.6, true));
+  player1.attachSensor(new Sensor(1000, 45, 90, 3.6, true));
 }
 function x_key(e, delta) {
   if (player1.spin === 0) return;
@@ -71,20 +71,20 @@ function w_key(e, delta) {
 }
 function s_key(e, delta) {
   if (e.action === 'press' || e.action === 'hold') {
-    let thrustMagnitude = 2000; // Adjust this for more/less thrust
+    let thrustMagnitude = -2000; // Adjust this for more/less thrust
     let thrustVector = Point.fromPolar(player1.facing, thrustMagnitude);
     player1.applyForce(thrustVector, delta);
   }
 }
 function a_key(e, delta) {
   if (e.action === 'press' || e.action === 'hold') {
-    player1.spin += 0.01 / delta;
+    player1.spin -= 0.01 / delta;
     if (player1.spin > 180) player1.spin = 180;
   }
 }
 function d_key(e, delta) {
   if (e.action === 'press' || e.action === 'hold') {
-    player1.spin -= .01 / delta;
+    player1.spin += .01 / delta;
     if (player1.spin < -180) player1.spin = -180;
   }
 }

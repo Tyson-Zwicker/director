@@ -7,8 +7,9 @@ import Rnd from '../../code/rnd.js';
 import Boundry from '../../code/boundry.js';
 import Color from '../../code/color.js';
 import ParticleGenerator from '../../code/particlegenerator.js';
-import RadialEffect from '../../code/radialeffect.js';
+import CircleEffect from '../../code/circleeffect.js';
 import LineEffect from '../../code/lineeffect.js';
+import RadialEffect from '../../code/radialeffect.js';
 document.addEventListener('DOMContentLoaded', function () {
   Director.initialize();
   makeData();
@@ -27,16 +28,9 @@ function placeParticleGenerator() {
   Director.addParticleGenerator(generator2);
 }
 function makeSomeEffects() {
-  /*class LineEffect {
- constructor(p0, p1, w, color, durationInSeconds)
- ParticleGenertor {
- constructor(name, position, angleMin, angleMax, velMin, velMax, color, size, durMin, durMax, periodMillis, foreground) {
-  class RadialEffect {
- constructor(position, radius, color, durationInSeconds) {
- */
-  let whichEffect = Rnd.int(2);
+  let whichEffect = Rnd.int(3);
   let foreground = (Rnd.bool());
-  let bounds = new Boundry(-500, -500, 500, 500);
+  let bounds = new Boundry(-1500, -1500, 1500, 1500);
   if (whichEffect == 0) {
     let lineEffect = new LineEffect(Rnd.point(bounds), Rnd.point(bounds), Rnd.int(1, 5), Rnd.color(10), Rnd.float(0.5, 1));
     if (foreground) {
@@ -45,7 +39,14 @@ function makeSomeEffects() {
       Director.addBackgroundEffect(lineEffect);
     }
   } else if (whichEffect == 1) {
-    let radialEffect = new RadialEffect(Rnd.point(bounds), Rnd.int(10, 50), Rnd.color(10), Rnd.float(0.2, 1.5));
+    let circleEffect = new CircleEffect(Rnd.point(bounds), Rnd.int(10, 50), Rnd.color(10), Rnd.float(0.2, 1.5));
+    if (foreground) {
+      Director.addForegroundEffect(circleEffect);
+    } else {
+      Director.addBackgroundEffect(circleEffect);
+    }
+  } else if (whichEffect == 2) {
+    let radialEffect = new RadialEffect(Rnd.point(bounds), Rnd.int(10, 50), Rnd.int (50,300), Rnd.color(10), Rnd.int (5,30),Rnd.float(0.5, 2));
     if (foreground) {
       Director.addForegroundEffect(radialEffect);
     } else {
@@ -76,7 +77,7 @@ function makeData() {
   }
   //Make some actors.
   let boundry = new Boundry(-1000, -1000, 1000, 1000);
-  for (let i = 0; i < 500; i++) {
+  for (let i = 0; i < 50; i++) {
     let actorType = Director.getActorType(`acttype${Rnd.int(0, 9)}`);
     let appearance = Director.getAppearance(`app${Rnd.int(0, 10)}`);
     let actor = actorType.createActorInstance(`actor${i}`, appearance, Rnd.point(boundry), Rnd.vect(0, 360, 5, 60), Rnd.int(360), Rnd.int(-10, 10));
