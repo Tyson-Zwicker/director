@@ -1,66 +1,78 @@
 export default class Keyboard {
-  functions = new Map();
-  events = new Map();
+  static functions = new Map();
+  static events = new Map();
 
-  bindEvents() {
-    window.onkeydown = this.keyDown.bind(this);
-    window.onkeyup = this.keyUp.bind(this);
+  constructor() {
+    //bind events
+    window.addEventListener('keydown', this.keyDown);
+    window.addEventListener('keyup', this.keyUp);
   }
-
+  //When keyDown and keyUp are called "this" is "window" because that's what is calling it.
+  //SO events and functions are static, so "this" is irrelevent.  
   keyDown(e) {
     let eventInfo;
-    if (this.events.has(e.key)) {
-      let lastEvent = this.events.get(e.key);
+    let lastEvent = Keyboard.events.get(e.key);
+    if (Keyboard.events.has(e.key)) {
       if (lastEvent.action === 'press') {
-        eventInfo = getHoldEvent(e, lastEvent.when);
+        eventInfo = Keyboard.getHoldEvent(e, lastEvent.when);
+      } else if (lastEvent.action === 'hold') {
+        eventInfo = Keyboard.getUpdateHoldEvent(e, lastEvent.holdStartTime);
       } else if (lastEvent.action === 'release') {
-        eventInfo = getPressEvent(e);
-      } else {
-        eventInfo = getUpdateHoldEvent(e, lastEvent.holdstart);
+        eventInfo = Keyboard.getPressEvent(e);
       }
-      events.set(e.key, eventInfo);      
+    } else {
+      eventInfo = Keyboard.getPressEvent(e);
     }
+    Keyboard.events.set(e.key, eventInfo);    
   }
   keyUp(e) {
     let eventInfo;
-    if (this.events.has(e.key)) {
-      let lastEvent = this.events.get(e.key);
+    if (Keyboard.events.has(e.key)) {
+      let lastEvent = Keyboard.events.get(e.key);
       if (lastEvent.action === 'press') {
-        eventInfo = getReleaseEvent(e, 0);
+        eventInfo = Keyboard.getReleaseEvent(e, 0);
       } else if (lastEvent.action === 'hold') {
-        eventInfo = getReleaseHoldEvent(e, lastEvent.duration);
+        eventInfo = Keyboard.getReleaseHoldEvent(e, lastEvent.duration);
       }
-      events.set(e.key, eventInfo);     
+      Keyboard.events.set(e.key, eventInfo);
     }
   }
   setKeyFunction(key, fn) {
-    this.functions.set(key, fn);
+    Keyboard.functions.set(key, fn);
   }
-  getPressEvent(e) {
-    return { "key": e.key, "when": DateTime.now, "duration": 0, "action": 'press' };
+  static getPressEvent(e) {
+    return { "key": e.key, "when": Date.now(), "duration": 0, "action": 'press' };
   }
-  getHoldEvent(e, pressStartTime) {
+  static getHoldEvent(e, pressStartTime) {
     let now = Date.now();
     let dur = now - pressStartTime;
-    return { "key": e.key, "when": now, "holdstart": pressStartTime, "duration": dur, "action": 'hold' };
+    return { "key": e.key, "when": now, "holdStartTime": pressStartTime, "duration": dur, "action": 'hold' };
   }
-  getUpdateHoldEvent(e, holdStartTime) {
+  static getUpdateHoldEvent(e, holdStartTime) {
     let now = Date.now();
     let dur = now - holdStartTime;
-    return { "key": e.key, "when": now, "holdstart": pressStartTime, "duration": dur, "action": 'hold' };
+    return { "key": e.key, "when": Date.now(), "holdStartTime": holdStartTime, "duration": dur, "action": 'hold' };
   }
-  getReleaseEvent(e, duration) {
-    return { "key": e.key, "when": now, "duration": duration, "action": 'release' };
+  static getReleaseEvent(e, duration) {
+    return { "key": e.key, "when": Date.now(), "duration": duration, "action": 'release' };
   }
-  getReleaseHoldEvent(e, duration) {
-    return { "key": e.key, "when": now, "duration": duration, "action": 'release' };
+  static getReleaseHoldEvent(e, duration) {
+    return { "key": e.key, "when": Date.now(), "duration": duration, "action": 'release' };
   }
-  callKeyFunctions(){
-    for (let key  in this.events.keys()){
-      if (this.functions.has(key)){
-        this.functions.get(key)(this.events.keys);
+  callKeyFunctions(delta) {
+    if (Keyboard.events.size>0){
+      console.log (Keyboard.events);
+    }
+    for (let key of Keyboard.events.keys()) {
+      console.log(`process event for ${key}`);
+      if (Keyboard.functions.has(key)) {
+        Keyboard.functions.get(key)(Keyboard.events.get(key), delta);
+      }
+      //remove from events after release so it does keep getting processed.
+      if (Keyboard.events.get(key).action === 'release') {
+        console.log('removing release event for ' + key);
+        Keyboard.events.delete(key);
       }
     }
-    this.events.clear();
   }
 }

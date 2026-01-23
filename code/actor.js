@@ -119,9 +119,9 @@ export default class Actor {
   }
   applyForce (forceVector, delta){
     let scaledForce = Point.from (forceVector);
-    Point.scaledForce (scaledForce, delta);
-    Point.scaledForce (scaledForce, 1/this.miss);
-    this.velocity.add (scaledForce);
+    Point.scale (scaledForce, delta);
+    Point.scale (scaledForce, 1/this.mass);
+    Point.add (this.velocity, scaledForce);    
   }
   toString() {
     return `[${this.name}], contains [${this.parts.length}] parts, label [${this.#label?.text}]`;

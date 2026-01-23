@@ -14,8 +14,9 @@ import RadialEffect from './radialeffect.js';
 import ParticleEffect from './particleeffect.js';
 import Polygon from './polygon.js';
 import Point from './point.js';
+import Keyboard from './keyboard.js';
+
 export default class Director {
-  static keyboard = new KeyBoard();
   static initialize() {
     Director.MILLISECONDS = 1000;
     Director.continueAnimationLoop = false;
@@ -32,9 +33,9 @@ export default class Director {
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
     Director.view = undefined;  //Defined by a call to run() the director. If none is specified, the window is assumed empty and one is created to fill that window.
-    Director.keyboard.bindEvents();
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
+    Director.keyboard = new Keyboard();
   }
 
   static importPolygonBank(json) {
@@ -256,11 +257,11 @@ export default class Director {
   static removeParticalGenerator(generatorName) {
     this.pGenerators.delete(generatorName);
   }
-  static bindKey (key, fn){
-    Director.keyboard.setKeyFunction (key,fn);
+  static bindKey(key, fn) {
+    Director.keyboard.setKeyFunction(key, fn);
   }
-  static unbindKey (key){
-    Diector.keyboard.delete (key);
+  static unbindKey(key) {
+    Diector.keyboard.delete(key);
   }
   //------------------------- Workers called by main loop
   static runParticleGenerators(now) {
@@ -301,13 +302,21 @@ export default class Director {
     Director.#draw_backgroundEffects(delta);
     for (let actor of Director.actors.values()) {
       if (Director.view.canSee(actor.position, actor.radius)) {
-        Director.view.context.textBaseline = 'top';
-        Director.view.context.setFillStyle = '#FFFF00';
-        Director.view.context.fillText(delta, 5, 5);
+
         actor.draw(Director.view);
       }
     }
     Director.#draw_foregroundEffects(delta);
+    this.#drawMillisInTheCorner(delta);
+  }
+  static #drawMillisInTheCorner(delta) {
+    Director.view.context.textBaseline = 'top';
+    Director.view.context.fillStyle = '#FFFFFF';
+    Director.view.context.strokeStyle = '#FFFFFF';
+    let oldfont = Director.view.context.font;
+    Director.view.context.font = "bold 16px Arial"
+    Director.view.context.fillText('Δ' + (String(Math.trunc(delta * 1000)).padStart (4,'0')), 5, 5);
+    Director.view.context.font = oldfont;
   }
   static #draw_foregroundEffects(delta) {
     let survivingForegroundEffects = [];
@@ -414,6 +423,8 @@ export default class Director {
       Director.creatorFn(delta);
     }
     Director.checkUserActorInteraction();
+    //console.log (Director.keyboard);
+    Director.keyboard.callKeyFunctions(delta);
     Director.quadtree.clear();      //QuadTree is cleared (will be recreated begining next loop)
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }
