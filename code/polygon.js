@@ -2,10 +2,12 @@ import Point from './point.js';
 import Director from './director.js';
 import Rnd from './rnd.js';
 export default class Polygon {
+  
   points = [];
   drawnPoints = [];
   radius = 0;
-  constructor(points) {
+  constructor(name,points) {
+    this.name = name;
     if (!Array.isArray(points)) throw new Error(`${points} is not an array`);
     if (points.length < 3) throw new Error(`Polygon constructor: points length is less than 3`);
     for (let p of points) {
@@ -17,7 +19,7 @@ export default class Polygon {
       if (d > this.radius) {
         this.radius = d;
       }
-    }
+    }    
   }
   draw(origin, rotation, appearance) {
     this.drawnPoints = [];
@@ -72,7 +74,7 @@ export default class Polygon {
     }
     return isInside;
   }
-  static makeIrregular(side, minRadius, maxRadius) {
+  static makeIrregular(name,side, minRadius, maxRadius) {
     let parray = []
     let a = 0;
     for (let i = 0; i < side; i++) {
@@ -80,37 +82,37 @@ export default class Polygon {
       parray.push(new Point(Math.cos(a) * r, Math.sin(a) * r));
       a = a + Math.PI * 2 / side;
     }
-    return new Polygon(parray);
+    return new Polygon(name,parray);
   }
-  static makeRegular(side, radius) {
+  static makeRegular(name,side, radius) {
     let parray = [];
     let a = 0;
     for (let i = 0; i < side; i++) {
       parray.push(new Point(Math.cos(a) * radius, Math.sin(a) * radius));
       a += Math.PI * 2 / side;
     }
-    return new Polygon(parray);
+    return new Polygon(name,parray);
   }
-  static rectangle(w, h) {
+  static rectangle(name,w, h) {
     let parray = [];
     parray.push(
       new Point(-w / 2, -h / 2),
       new Point(w / 2, -h / 2),
       new Point(w / 2, h / 2),
       new Point(-w / 2, h / 2));
-    return new Polygon(parray);
+    return new Polygon(name,parray);
   }
-  static triangle(b, h) {
+  static triangle(name,b, h) {
     let parray = [];
     parray.push(
       new Point(-h / 2, -b / 2),
       new Point(-h / 2, b / 2),
       new Point(h / 2, 0));
-    return new Polygon(parray);
+    return new Polygon(name,parray);
   }
   toString() {
-    let s = '';
-    let so = '';
+    let s = `polygon [${this.name}`;
+    let so = ']: ';
     for (let p of this.drawnPoints) {
       s += p.toString() + ' ';
     }

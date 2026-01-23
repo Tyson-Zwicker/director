@@ -12,9 +12,8 @@ export default class ActorType{
   }
   createActorInstance (name, appearance, position, velocity, facing,spin){
     //name, polygon, mass, bounceCoefficient=0.5, collides=true, moves=true
-    let actor = new Actor (name, this.polygon, this.mass, this.bounceCoefficient, this.collides, this.moves);
-    actor.actorType = this;
-    actor.appearance = appearance; 
+    let actor = new Actor (name, this.polygon, appearance, this.mass, this.bounceCoefficient, this.collides, this.moves);
+    actor.actorType = this;    
     actor.position =position;
     actor.velocity = velocity;
     actor.facing = facing;

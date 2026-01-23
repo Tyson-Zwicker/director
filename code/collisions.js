@@ -46,8 +46,8 @@ export default class Collisions {
     return collisions;
   }
   static handleCollisionPhysics(collision) {
-    let m1 = collision.actor.mass();
-    let m2 = collision.otherActor.mass();
+    let m1 = collision.actor.mass;
+    let m2 = collision.otherActor.mass;
     let totalMass = m1 + m2;
     if (totalMass <= 0) return;
     //calculate the normal vector

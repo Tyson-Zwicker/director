@@ -4,6 +4,8 @@ import Label from './label.js';
 import Boundry from './boundry.js';
 import Transpose from './transpose.js';
 import Appearance from './appearance.js'
+import Polygon from './polygon.js';
+
 export default class Actor {
   name = undefined;
   mass = undefined;
@@ -15,7 +17,7 @@ export default class Actor {
   collisionFn = undefined;
   moves = true;
   parts = new Map();
-  
+
   position = new Point(0, 0); // world coordinates, defined in pixels.
   facing = 0; // Defined in degrees
   spin = 0; // Defined in degrees per second.
@@ -25,45 +27,52 @@ export default class Actor {
   sensorData = new EventTracker();
   sensors = undefined;
   sensorBoundry = undefined;
-  maxSensorRange =0;
-  constructor(name, polygon, mass, bounceCoefficient=0.5, collides=true, moves=true) {
+  maxSensorRange = 0;
+  constructor(name, polygon, appearance, mass, bounceCoefficient = 0.5, collides = true, moves = true) {
+    if (typeof name !== 'string') throw new Error(`Actor.constructor: Name must be defined as string.  [${name}]`);
+    if (!(polygon instanceof Polygon)) throw new Error(`Actor.constructor: Polygon must be defined [${polygon}]`);
+    if (!(appearance instanceof Appearance)) throw new Error(`Actor.constructor: Polygon must be defined [${polygon}]`);
+    if (typeof mass !== 'number') throw new Error(`Actor.constructor: mass is not a number ${mass}`);
+    if (typeof bounceCoefficient !== 'number') throw new Error(`Actor.constructor: mass is not a number ${bounceCoefficient}`);
+    if (typeof collides !== 'boolean') throw new Error(`Actor.constructor: collides must be boolean  ${collides}`);
+    if (typeof moves != 'boolean') throw new Error(`Actor.construcor: Moves must be boolean [${moves}]`);
     this.name = name;
     this.polygon = polygon;
-    this.appearance = Appearance.default;
+    this.appearance = appearance;
     this.mass = mass;
     this.bounceCoefficient = bounceCoefficient;
     this.collides = collides;
     this.moves = moves;
     this.radius = polygon.radius;
-    if (this.mass<=0 || this.radius<=0) throw new Error (`Actor.constructor: Actors must have a phsyical presence.  mass: [${_this.mass}] radius [${this.radius}]!`)
+    if (this.mass <= 0 || this.radius <= 0) throw new Error(`Actor.constructor: Actors must have a phsyical presence.  mass: [${_this.mass}] radius [${this.radius}]!`)
   }
 
   setLabel(text, position, appearance, size) {
-    this.#label = new Label (this, position, appearance, size, text);
+    this.#label = new Label(this, position, appearance, size, text);
   }
   attachButton(b) {
     this.button = b;
     b.actor = this;
   }
   attachPart(part) {
-    if (this.parts.has (part.name)) throw new Error (`Actor.attachPart: part names [${part.name}] already exists.`);
+    if (this.parts.has(part.name)) throw new Error(`Actor.attachPart: part names [${part.name}] already exists.`);
     part.owner = this;
-    this.parts.set (part.name, part);
+    this.parts.set(part.name, part);
   }
-  getPart (partName){
-    if (!this.parts.has (partName)) throw new Error (`Actor.getPart: part names [${partName}] does not exist`);
-    return this.parts.get (partName)
+  getPart(partName) {
+    if (!this.parts.has(partName)) throw new Error(`Actor.getPart: part names [${partName}] does not exist`);
+    return this.parts.get(partName)
   }
-  removePart (partName){
-    if (!this.parts.has (partName)) throw new Error (`Actor.removePart: part names [${partName}] does not exist`);
-    this.parts.delete (partName);
+  removePart(partName) {
+    if (!this.parts.has(partName)) throw new Error(`Actor.removePart: part names [${partName}] does not exist`);
+    this.parts.delete(partName);
   }
   attachSensor(sensor) {
     if (!this.sensors) this['sensors'] = [];
     sensor['actor'] = this;
-    if (sensor.range > this.maxSensorRange){
+    if (sensor.range > this.maxSensorRange) {
       this.maxSensorRange = sensor.range;
-      this.sensorBoundry = new Boundry (-sensor.range, -sensor.range, sensor.range, sensor.range);
+      this.sensorBoundry = new Boundry(-sensor.range, -sensor.range, sensor.range, sensor.range);
     }
     this.sensors.push(sensor);
     return this.sensors.length;
@@ -75,7 +84,7 @@ export default class Actor {
   draw(view) {
     let origin = Point.from(this.position);
     let appearance = this.#drawChooseAppearance();
-    this.polygon.draw (Transpose.worldToScreen (this.position),this.facing, appearance);
+    this.polygon.draw(Transpose.worldToScreen(this.position), this.facing, appearance);
     this.#drawParts(view);
     this.#drawLabel(view);
   }
@@ -89,27 +98,16 @@ export default class Actor {
     return appearance;
   }
   #drawParts(view) {
-    for (let part of this.parts.values()) {  
+    for (let part of this.parts.values()) {
       let appearance = (part.appearance) ? part.appearance : this.appearance;
-      let partOrigin = Transpose.childToScreen (part, this);
-      part.polygon.draw (partOrigin, part.facing+this.facing, appearance);
+      let partOrigin = Transpose.childToScreen(part, this);
+      part.polygon.draw(partOrigin, part.facing + this.facing, appearance);
     }
   }
   #drawLabel() {
     if (this.#label) {
       this.#label.draw();
     }
-  }
-  mass() {
-    //If mass was not defined, use the polygon's area instead.
-    if (this._mass == undefined || isNaN(this._mass)) {
-      if (this.polygon?.radius === undefined || this.polygon.radius === null || isNaN(this.polygon.radius)) {
-        throw new Error(`Actor ${this.name} has no radius/mass defined.`);
-      } else {
-        return Math.PI * Math.pow(this.polygon.radius, 2);
-      }
-    }
-    return this._mass;
   }
   move(delta) {
     let scaledVelocity = Point.from(this.velocity);

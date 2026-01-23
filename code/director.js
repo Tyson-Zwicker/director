@@ -14,7 +14,6 @@ import RadialEffect from './radialeffect.js';
 import ParticleEffect from './particleeffect.js';
 import Polygon from './polygon.js';
 import Point from './point.js';
-
 export default class Director {
   static keyboard = new KeyBoard();
   static initialize() {
@@ -22,7 +21,7 @@ export default class Director {
     Director.continueAnimationLoop = false;
     Director.appearanceBank = new Map();
     Director.polygonBank = new Map();
-    Director.actorTypes = new Map();
+    Director.actorTypeBank = new Map();
     Director.actors = new Map();
     Director.actorFields = new Map();
     Director.partTypes = new Map();
@@ -53,7 +52,7 @@ export default class Director {
         let point = { "x": parseFloat(strPoint.x), "y": parseFloat(strPoint.y) };
         points.push(point);
       }
-      Director.polygonBank.set(poly.name, new Polygon(points));
+      Director.polygonBank.set(poly.name, new Polygon(poly.name, points));
     }
   }
   static importAppearanceBank(json) {
@@ -64,7 +63,7 @@ export default class Director {
       throw new Error("Director.importAppearanceBank. Bad JSON.");
     }
     for (let appr of jsonObj.appearances) {
-      Director.appearanceBank.set(appr.name, new Appearance(appr.fill, appr.stroke, appr.text, parseInt(appr.width)));
+      Director.appearanceBank.set(appr.name, new Appearance(appr.name, appr.fill, appr.stroke, appr.text, parseInt(appr.width)));
     }
   }
   static importPartTypes(json) {
@@ -119,7 +118,7 @@ export default class Director {
         );
         actorType.attachPart(part);
       }
-      Director.actorTypes.set(actorType.name, actorType);
+      Director.actorTypeBank.set(actorType.name, actorType);
     }
   }
   static importActors(json) {
@@ -133,11 +132,11 @@ export default class Director {
       if (!Director.appearanceBank.has(actorElement.appearances)) {
         throw new Error(`Director.importActors: unknown appearance name [${actorElement.appearance}] for actor [${actorElement.name}]`);
       }
-      if (!Director.actorTypes.has(actorElement.actorTypes)) {
+      if (!Director.actorTypeBank.has(actorElement.actorTypes)) {
         throw new Error(`Director.importActors: unknown actor typeName [${actorElement.actorType}] for actor [${actorElement.name}]`);
       }
       let appearance = Director.appearanceBank.get(actorElement.appearances);
-      let actorType = Director.actorTypes.get(actorElement.actorTypes);
+      let actorType = Director.actorTypeBank.get(actorElement.actorTypes);
       // createActorInstance (name, appearance, position, velocity, facing, spin){
       let actor = actorType.createActorInstance(
         actorElement.name, appearance,
@@ -171,29 +170,44 @@ export default class Director {
     }
 
   }
+  static addPolygon(polygon) {
+    if (Director.polygonBank.has(polygon.name)) throw new Error(`Director.addPolygon: Polygon [${polygon.name} already exists.`);
+    Director.polygonBank.set(polygon.name, polygon);
+  }
+  static getPolygon(polygonName) {
+    if (!Director.polygonBank.has(polygonName)) throw new Error(`Director.addPolygon: Polygon [${polygonMame} does not exist.`);
+    return Director.polygonBank.get(polygonName);
+  }
+  static addActorType(actorType) {
+    if (Director.actorTypeBank.has(actorType.name)) throw new Error(`Director.addActorType: actorType [${actorType.name}] already exists.`);
+    Director.actorTypeBank.set(actorType.name, actorType);
+  }
+  static getActorType(actorTypeName) {
+    if (!Director.actorTypeBank.has(actorTypeName)) throw new Error(`Director.getActorType: actorType [${actorTypeName}] does not exist.`);
+    return Director.actorTypeBank.get(actorTypeName);
+  }
   static addCreatorsFunction(fn) {
     Director.creatorFn = fn
   }
   static addActor(actor) {
-    if (Director.actors.has(actor.name)) throw Error(`Director:addActor: actor named [${actor.name}] already exists.`)
+    if (Director.actors.has(actor.name)) throw new Error(`Director:addActor: actor named [${actor.name}] already exists.`);
     Director.actors.set(actor.name, actor);
     Director.quadtree.insert(actor);
   }
   static getActor(actorName) {
-    if (!Director.actors.has(actorName)) throw new Error(`Director.removeActor: unknown actor [${actorName}]`)
+    if (!Director.actors.has(actorName)) throw new Error(`Director.removeActor: unknown actor [${actorName}]`);
     return Director.actors.get(actorName);
   }
   static removeActor(actorName) {
-    if (!Director.actors.has(actorName)) throw new Error(`Director.removeActor: unknown actor [${actorName}]`)
+    if (!Director.actors.has(actorName)) throw new Error(`Director.removeActor: unknown actor [${actorName}]`);
     Director.actors.delete(actorName);
   }
-  static addAppearance(name, fillHexColor, strokeHexColor, textHexColor, lineWidth) {
-    if (Director.appearanceBank.has(name)) throw new Error(`Appearance [${name}] already exists.`);
-    let appearance = new Appearance(fillHexColor, strokeHexColor, textHexColor, lineWidth);
-    Director.appearanceBank.set(name, appearance);
+  static addAppearance(appearance) {
+    if (Director.appearanceBank.has(appearance.name)) throw new Error(`Director.addAppearance: Appearance [${appearance.name}] already exists.`);
+    Director.appearanceBank.set(appearance.name, appearance);
   }
   static getAppearance(appearanceName) {
-    if (!Director.appearanceBank.has(appearanceName)) throw new Error(`Director.getAppearance: appearance [${appearanceName}] already exists.`);
+    if (!Director.appearanceBank.has(appearanceName)) throw new Error(`Director.getAppearance: unknown appearance [${appearanceName}].`);
     return Director.appearanceBank.get(appearanceName);
   }
   static addPartType(part) {
@@ -223,7 +237,7 @@ export default class Director {
     part.attachParticleGenerator(generator);
   }
   static addFieldToActor(actor, strength) {
-    if (!(actor instanceof Actor)) throw Error(`Director.addFieldToActor: actor is not an actor. [${actor}]`);
+    if (!(actor instanceof Actor)) throw new Error(`Director.addFieldToActor: actor is not an actor. [${actor}]`);
     Director.actorFields.set(actor.name, new ActorField(actor, strength));
   }
   static removeFieldFromActor(actor) {
@@ -393,18 +407,18 @@ export default class Director {
     if (Director.creatorFn) {
       Director.creatorFn(delta);
     }
-    Director.checkUserActorInteraction();    
+    Director.checkUserActorInteraction();
     Director.quadtree.clear();      //QuadTree is cleared (will be recreated begining next loop)
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }
   //------------------------- runners
-  static run() {    
-    Director.view = new View('#505');
+  static run() {
+    Director.view = new View('#024');
     Director.continueAnimationLoop = true;
     requestAnimationFrame(Director.loop.bind(Director));
   }
   static runOnce(canvas, canvasContainer) {
-    Director.view = new View('#055');
+    Director.view = new View('#505');
     Director.continueAnimationLoop = false;
     requestAnimationFrame(Director.loop.bind(Director));
   }

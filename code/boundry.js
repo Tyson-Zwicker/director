@@ -2,7 +2,12 @@ import Point from './point.js';
 export default class Boundry {
   constructor(x1, y1, x2, y2) {
     //Ensure (this.x1,this.y1) is upper right and (this.x2, this.y2) is lower left
-
+    if (!(typeof x1 ==='number' &&
+      typeof y1 ==='number' &&
+      typeof x2 ==='number' &&
+      typeof y2 ==='number')){
+        throw new Error (`One of the parameters is not a number x1 ${x1}, y1 ${y1}, x2 ${x2}, y2 ${y2}`);
+      }
     if (x2 - x1 > 0 && y2 - y1 > 0) { //x1,y1 = upper left, and x2,y2 = bottom right..
       this.x1 = x1;
       this.x2 = x2;

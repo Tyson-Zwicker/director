@@ -23,8 +23,8 @@ export default class ActorField {
             // This is one sided. The other object may or may not also excert a force on this actor
             // They BOTH get pulled though: Newton's 3rd law of motion.
             let force = this.strength / distance ** 2;
-            let otherActorAcceleration = -force / otherActor.mass();
-            let actorAcceleration = force / this.actor.mass();
+            let otherActorAcceleration = -force / otherActor.mass;
+            let actorAcceleration = force / this.actor.mass;
             let direction = Point.from(this.actor.position);
             Point.sub(direction, otherActor.position);
             Point.normalize(direction); //This vector now points FROM actor to other vector.

@@ -38,7 +38,7 @@ export default class Color {
     return this.#intToHex(Math.round(base10));
   }
   static fromHex(hex) {
-    if (hex[0] !== '#') throw new Error(`Color.fromHex: must start with # ${hex}`);
+    if (hex[0] !== '#') throw new Error(`Color.fromHex: must start with "#". Parameter was [${hex}]`);
     let r = parseInt(hex[1], 16);
     let g = parseInt(hex[2], 16);
     let b = parseInt(hex[3], 16);
@@ -72,10 +72,6 @@ export default class Color {
   #intToHex(value) {
     if (value < 0 || value > 15) throw new Error(`color.#intToHex: value out of bounds ${value}. Must be (0,15) inclusive`);
     return value.toString(16).toUpperCase();
-  }
-  static random(min) {
-    if (!min || min < 0 || min > 15) min = 6;
-    return new Color(Rnd.int (0,15), Rnd.int (0,15), Rnd.int (0,15));
   }
   toString() {
     let r = `r:${this.r} g:${this.g} b:${this.b} a:${this.opacity} hex:${this.asHex()}`;
