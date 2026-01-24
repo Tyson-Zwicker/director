@@ -1,12 +1,15 @@
 import Point from './point.js';
 export default class Button {
-  actor = null;
+  actor = undefined;
+  guiControl = undefined;
   clicked = false;
-  clickFn = null;
+  clickFn = undefined;
   hovered = false;
   pressed = false;
   toggle = false;
 
+  //Must be bound by an actor or GUIcontrol to do anything..
+  //They must bind the actor OR guiControl property.
   constructor(hoveredAppearance, pressedAppearance, clickFn = null, toggle = false) {
     this.hoveredAppearance = hoveredAppearance;
     this.pressedAppearance = pressedAppearance;
@@ -14,8 +17,14 @@ export default class Button {
     this.toggle = toggle;
   }
   checkForMouse(mouse) {
+    let insideBounds = false;
+    if (typeof this.guiControl === 'object' && this.guiControl instanceof GUIControl) {
+      insideBounds = this.actor.guiControl.isMouseIn(Point.from(mouse.x, mouse.y));
+    } else if (typeof this.actor === 'object' && this.actor instanceof Actor) {
+      insideBounds = this.actor.polygon.isPointIn(Point.from(mouse.x, mouse.y))
+    }
     let interaction = false;
-    if (this.actor.polygon.isPointIn(new Point(mouse.x, mouse.y))) {
+    if (insideBounds) {
       if (mouse.buttonDown && !this.hovered) {
         //*Must* be checked first.. mouse went down somewhere else, but not here.. doesn't affect this actor..
         return false;
@@ -44,6 +53,7 @@ export default class Button {
       this.hovered = false;
     }
     return interaction;
+
   }
   #click() {
     if (!this.toggle) {
