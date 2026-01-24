@@ -1,31 +1,53 @@
 import Boundry from './boundry.js';
 import Appearance from './appearance.js';
-import Button from '.button.js';
-
-class GUI {
+import Button from './button.js';
+import Director from './director.js';
+export default class GUI {
   static paneNames = ['top', 'bottom', 'left', 'right', 'float'];
   constructor(colWidth, rowHeight) {
     if (typeof colWidth !== 'number' || typeof rowHeight !== 'number') throw new Error(`GUI.constructor colWidth and rowHeight should be numbers [${colWidth},${rowHeight}].`);
-    let w = Director.view.canvas.width;
-    let h = Director.view.canvas.height;
     this.panes = new Map();
-    this.panes.set('top', { "boundry": this.#topBoundry(), "items": [], 'activeList': undefined });
-    this.panes.set('bottom', { "boundry": this.#bottomBoundry(), "items": [], 'activeList': undefined });
-    this.panes.set('left', { "boundry": this.#leftBoundry(), "items": [], 'activeList': undefined });
-    this.panes.set('right', { "boundry": this.#rightBoundry(), "items": [], 'activeList': undefined });
+    //Boundries are calculated when the View calls resize, 
+    //which it will call long before draw every looks for them.
+    this.panes.set('top', { "boundry": undefined, "items": [], 'activeList': undefined });
+    this.panes.set('bottom', { "boundry": undefined, "items": [], 'activeList': undefined });
+    this.panes.set('left', { "boundry": undefined, "items": [], 'activeList': undefined });
+    this.panes.set('right', { "boundry": undefined, "items": [], 'activeList': undefined });
     this.lists = new Map();
   }
   #topBoundry() {
-    return new Boundry(0, 0, w, rowHeight);
+    //The first time these are called, view is still constructing itself.. it will be called from draw() when needed
+    //and view will be available then.
+    if (typeof Director.view !== 'undefined') {
+      let w = Director.view.canvas.width;
+      let h = Director.view.canvas.height;
+      return new Boundry(0, 0, w, rowHeight);
+    }
+    return undefined;
   }
   #bottomBoundry() {
-    return new Boundry(0, h - rowHeight, w, h);
+    if (typeof Director.view !== 'undefined') {
+      let w = Director.view.canvas.width;
+      let h = Director.view.canvas.height;
+      return new Boundry(0, h - rowHeight, w, h);
+    }
+    return undefined;
   }
   #leftBoundry() {
-    return new Boundry(0, rowHeight, colWidth, h - rowHeight);
+    if (typeof Director.view !== 'undefined') {
+      let w = Director.view.canvas.width;
+      let h = Director.view.canvas.height;
+      return new Boundry(0, rowHeight, colWidth, h - rowHeight);
+    }
+    return undefined;
   }
   #rightBoundry() {
-    return new Boundry(w - colWidth, rowHeight, w, h - rowHeight);
+    if (typeof Director.view !== 'undefined') {
+      let w = Director.view.canvas.width;
+      let h = Director.view.canvas.height;
+      return new Boundry(w - colWidth, rowHeight, w, h - rowHeight);
+    }
+    return undefined;
   }
   //This gets called from View.resizeCanvas().  That's the only place its called from. 2026-01-24
   resize() {
@@ -137,6 +159,9 @@ class GUI {
     //calculate the width of all the parts put together..
     //use that to set an offset from the left side = (totalwidth-neededwidth) /2
     //the size something needs is basically just the width of the text + margin*2
-    
+    //draw.textBox(x1, y2, x2, y2, text, fontSize, fontName, appearance)
+    //class Draw {
+    //  constructor(context2d)
+
   }
 }

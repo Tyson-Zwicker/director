@@ -1,5 +1,5 @@
 import Point from './point.js';
-
+import Director from './director.js';
 export default class View {
   backgroundPressed = false;
   backgroundPressedCoordinate = null;

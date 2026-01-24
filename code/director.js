@@ -16,6 +16,7 @@ import RadialEffect from './radialeffect.js';
 import Polygon from './polygon.js';
 import Point from './point.js';
 import Keyboard from './keyboard.js';
+import GUI from './gui.js';
 
 export default class Director {
   static initialize() {
@@ -37,7 +38,7 @@ export default class Director {
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
     Director.keyboard = new Keyboard();
-    Director.gui = new GUI();
+    Director.gui = new GUI(80,40);//TODO: figure out good values (or better a function) to set these to..
   }
 
   static importPolygonBank(json) {
