@@ -38,7 +38,8 @@ export default class Color {
     return this.#intToHex(Math.round(base10));
   }
   static fromHex(hex) {
-    if (hex[0] !== '#') throw new Error(`Color.fromHex: must start with "#". Parameter was [${hex}]`);
+    if (hex[0] !== '#') throw new Error(`Color.fromHex: hex value must start with "#". Parameter was [${hex}]`);
+    if (hex.length!==4) throw new Error(`Color.fromHex: hex value should be #RGB (not #RRGGBB). Parameter was [${hex}]`);
     let r = parseInt(hex[1], 16);
     let g = parseInt(hex[2], 16);
     let b = parseInt(hex[3], 16);
