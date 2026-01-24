@@ -37,6 +37,7 @@ export default class Director {
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
     Director.keyboard = new Keyboard();
+    Director.gui = new GUI();
   }
 
   static importPolygonBank(json) {
@@ -282,10 +283,9 @@ export default class Director {
   static checkUserActorInteraction() {
     let actorMouseInteraction = false;
     for (let actor of Director.actors.values()) {
-      // Check if actor is in view before interacting
       if (
-        Director.view.canSee(actor.position) &&
-        actor.button &&
+        typeof actor.button ==='object' &&
+        Director.view.canSee(actor.position) &&        
         actor.button.checkForMouse(Director.view.mouse)
       ) {
         actorMouseInteraction = true;
@@ -433,9 +433,8 @@ export default class Director {
       Director.creatorFn(delta);
     }
     Director.checkUserActorInteraction();
-    //console.log (Director.keyboard);
     Director.keyboard.callKeyFunctions(delta);
-    Director.quadtree.clear();      //QuadTree is cleared (will be recreated begining next loop)
+    Director.quadtree.clear();     
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }
   //------------------------- runners
