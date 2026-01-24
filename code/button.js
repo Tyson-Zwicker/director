@@ -49,22 +49,27 @@ export default class Button {
         interaction = true;
       }
     } else {
-      this.pressed = false; // So it can't be clicked if its not on it..
+      this.pressed = false; // So.. it can't be clicked if its not on it..
       this.hovered = false;
     }
     return interaction;
 
   }
   #click() {
+    let buttonOwner = undefined;
+    if (typeof this.actor !== 'undefined' && this.actor instanceof Actor) buttonOwner = this.actor;
+    else if (typeof this.guiControl !== 'undefined') buttonOwner = this.guiControl;
+    else throw new Error('Button.#click:  This button has been clicked but it has no owner.');
+
     if (!this.toggle) {
-      if (this.clickFn) {
-        this.clickFn();
+      if (typeof this.clickFn === 'function') {
+        this.clickFn(buttonOwner);
       }
     } else {
       this.clicked = !this.clicked;
       if (this.clicked) {
-        if (this.clickFn) {
-          this.clickFn();
+        if (typeof this.clickFn === 'function') {
+          this.clickFn(buttonOwner);
         }
       }
     }
