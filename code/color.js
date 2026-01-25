@@ -15,11 +15,11 @@ export default class Color {
     this.opacity = opacity;
   }
   asHex() {
-    let r = `#${this.#intToHex(this.r)}${this.#intToHex(this.g)}${this.#intToHex(this.b)}${this.#floatToHex(this.opacity)}`;
-    return r;
+    let rc = `#${this.#intToHex(this.r)}${this.#intToHex(this.g)}${this.#intToHex(this.b)}${this.#floatToHex(this.opacity)}`;
+    return rc;
   }
   withOpacity(opacity) {
-    return new Color (this.r,this.g,this.b,this.opacity * opacity );
+    return new Color(this.r, this.g, this.b, this.opacity * opacity);
   }
   //negative number makes it brighter or dimmer. Range is 0 to 1. 0 makes it black,1 changes nothing.
   changeBrightness(c) {
@@ -39,15 +39,22 @@ export default class Color {
   }
   static fromHex(hex) {
     if (hex[0] !== '#') throw new Error(`Color.fromHex: hex value must start with "#". Parameter was [${hex}]`);
-    if (hex.length!==4) throw new Error(`Color.fromHex: hex value should be #RGB (not #RRGGBB). Parameter was [${hex}]`);
-    let r = parseInt(hex[1], 16);
-    let g = parseInt(hex[2], 16);
-    let b = parseInt(hex[3], 16);
-    let op = 1;
-    if (hex.length === 5) {
-      let op = parseInt(hex[4], 16) / 15;//This turns #F into 1 and #0 into 0..
+    let r,g,b,op;
+    if (hex.length === 4) {
+      r = parseInt(hex[1], 16);
+      g = parseInt(hex[2], 16);
+      b = parseInt(hex[3], 16);
+      op = 15;
     }
-    return new Color(r, g, b, op);
+    else if (hex.length === 5) {
+      r = parseInt(hex[1], 16);
+      g = parseInt(hex[2], 16);
+      b = parseInt(hex[3], 16);
+      op = parseInt(hex[4], 16);
+    }else{
+      throw new Error(`Color.fromHex: hex value must be 16-bit format (#RGB or #RGBo) not (#RRGGBB). Parameter was [${hex}]`);
+    }
+    return new Color(r, g, b, op/15);
   }
   getLinearGradient(context, x1, y1, x2, y2, stopPoint1, color1, stopPoint2, color2, stopPoint3, color3, stopPoint4, color4) {
     if (isNaN(x1) || isNaN(x2)) throw new Error(`line.draw bad coordinates (${x1},${y1}) (${x2},${y2})`)

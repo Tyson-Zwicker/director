@@ -88,10 +88,6 @@ export default class Draw {
     let textSize = this.getTextSize(text, fontSize, fontName);
     let tx = x1 + ((x2 - x1) - textSize.width) / 2;
     let ty = y1 + ((y2 - y1) - textSize.height) / 2;
-    console.log (`box is ${y1-y1} tall.`);
-    console.log (`text is ${textSize.height} tall.`);
-    
-    
     this.g.fillText(text, tx, ty);
   }
 }

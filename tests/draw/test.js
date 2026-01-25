@@ -87,7 +87,6 @@ export default function init() {
     }
   }
   let appearance = new Appearance ('test','#040','#0a0','#fff',2);
-  console.log (appearance);
   draw.textBox (400,5,500,45, 'Text Box!', 16, 'monospace', appearance);
 }
 

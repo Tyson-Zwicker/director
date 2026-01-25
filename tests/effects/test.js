@@ -64,11 +64,13 @@ function makeData() {
   Director.addPolygon(Polygon.triangle('triangle', 30, 50));
   //Make some colors too.
   for (let i = 0; i < 10; i++) {
-    let app = new Appearance(`app${i}`, Rnd.colorAsHex(4), Rnd.colorAsHex(8), '#ffffff');
+    let fill = Rnd.colorAsHex (4);
+    let stroke = Rnd.colorAsHex (10);
+    let app = new Appearance(`app${i}`, fill,stroke, '#fff');
     Director.addAppearance(app);
   }
   //And one for the player
-  Director.addAppearance(new Appearance('player', '#aa0000', '#ff8800', '#ffffff'));
+  Director.addAppearance(new Appearance('player', '#a00', '#f80', '#fff'));
   //Make some actorTypes
   for (let i = 0; i < 10; i++) {
     let polygon = Director.getPolygon(`poly${Rnd.int(0, 10)}`);
