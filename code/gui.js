@@ -72,21 +72,21 @@ export default class GUI {
   }
   addButton(pane, label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn) {
     if (!GUI.paneNames.includes(pane)) throw new Error(`GUI.addButton: Pane must be top,bottom,left, right or float [${pane}].`);
-    this.panes.get(pane).push(this.getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn));
+    this.panes.get(pane).items.push(this.getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn));
   }
   getText(label, appearance) {
-    this.panes.get(pane).push({
+    let newText = {
       "type": 'text',
       "text": label,
       "appearance": appearance,
       "button": undefined,
       "bounds": undefined,
       "visible": true
-    });
+    };
   }
   addText(pane, label, appearance) {
     if (!GUI.paneNames.includes(pane)) throw new Error(`GUI.addText: Pane must be top,bottom,left, right or float [${pane}].`);
-    this.panes.get(pane).push(getText(label, appearance));
+    this.panes.get(pane).items.push(this.getText(label, appearance));
   }
   getList(label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems) {
     if (!Array.isArray(items)) throw new Error(`GUI.addList: Pane must be top,bottom,left, right or float [${pane}].`);
@@ -114,10 +114,10 @@ export default class GUI {
   }
   addList(pane, label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems) {
     if (!GUI.paneNames.includes(pane)) throw new Error(`GUI.addList: Pane must be top,bottom,left, right or float [${pane}].`);
-    let newList = getList(label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems);
+    let newList = this.addTextgetList(label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems);
     newList.paneName = pane;
     this.lists.set(listName, newList);
-    this.panes.get(pane).push(newList);
+    this.panes.get(pane).items.push(newList);
   }
   showList(listName) {
     // Pane def: { "boundry": this.#topBoundry(), "items": [], 'activeList': undefined }
@@ -154,8 +154,55 @@ export default class GUI {
     //3.. Set the active list for this pane.. to nothing..
     pane.activeList = undefined;
   }
+  
   draw() {
+    //TODO.. I have to measure all these things and set 
+    //the boundried before I can draw them...
+    
+    // if the boundries are undefined, call measure(), also
+     //measure after resizing..
+
+     //keep the sizes in the items because that won't change, 
+     //when the window is resized, only the offset (based on where the
+     //pane moved) will be different.
+
+
     //top and bottom go horizontally.
+    let pane = this.panes['top'];
+    
+    if (typeof topItems.activeList === 'undefined') {
+      let topItems = pane.items;
+      for (item of topItems) {
+        if (item.isVisible) {
+          //draw the item..
+        }
+      }
+    }else{
+      for (item of topItems) {
+        if (typeof item.listName !=='undefined') {
+          if (item.listName === topItems.activeList){
+            for (let listItem of item.listItems){
+              //draw the listItem..
+            }
+          }
+        }
+      }
+    }
+    pane = this.panes['bottom'];
+    let bottomItems = this.panes['bottom'].items;
+    for (item in bottomItems) {
+
+    }
+    pane = this.panes['left'];
+    let leftItems = this.panes['left'].items;
+    for (item in leftItems) {
+
+    }
+    pane = this.panes['right'];
+    let rightItems = this.panes['right'].items;
+    for (item in rightItems) {
+
+    }
     //calculate the width of all the parts put together..
     //use that to set an offset from the left side = (totalwidth-neededwidth) /2
     //the size something needs is basically just the width of the text + margin*2
