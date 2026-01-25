@@ -7,7 +7,7 @@ import Rnd from '../../code/rnd.js';
 import Boundry from '../../code/boundry.js';
 document.addEventListener('DOMContentLoaded', function () {
   Director.initialize();
-  //makeData();
+  makeData();
   makeGUI();
   Director.view.backgroundColor = '#505';
   Director.run();
@@ -24,8 +24,8 @@ function makeGUI(){
   Director.gui.addText('left', 'Left Text 2', nrm);
   Director.gui.addButton ('left','Click Me', nrm,hov,prs,false,(owner)=>{console.log(owner); alert (`${owner}`)});
 
-  Director.gui.addText('right', 'Right Text 1', nrm);
-  Director.gui.addText('right', 'Right Text 2', nrm);
+ // Director.gui.addText('right', 'Right Text 1', nrm);
+ // Director.gui.addText('right', 'Right Text 2', nrm);
   Director.gui.addText('bottom', 'Bottom Text 1', nrm);
   Director.gui.addText('bottom', 'Bottom Text 2', nrm);
 }

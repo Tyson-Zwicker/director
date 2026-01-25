@@ -165,48 +165,39 @@ export default class GUI {
   }
 
   draw() {
-    //TODO: clear the pane background.
-    //IF the panes are drawing where they should... offset the runningX and Y 
-    //values so that the corners don't overlap.
     let pane;
-
-    pane = this.panes.get('top');
-    this.renderer.fillBox(pane.boundry.x1, pane.boundry.y1, pane.boundry.x2, pane.boundry.y2, '#300');
-    pane = this.panes.get('bottom');
-    this.renderer.fillBox(pane.boundry.x1, pane.boundry.y1, pane.boundry.x2, pane.boundry.y2, '#003');
-    pane = this.panes.get('right');
-    this.renderer.fillBox(pane.boundry.x1, pane.boundry.y1, pane.boundry.x2, pane.boundry.y2, '#202');
-    pane = this.panes.get('left');
-    this.renderer.fillBox(pane.boundry.x1, pane.boundry.y1, pane.boundry.x2, pane.boundry.y2, '#022');
-
     let runningX, runningY, incX, incY;
     for (let paneName of GUI.paneNames) {
       let pane = this.panes.get(paneName);
-      runningX = 0;
-      runningY = 0;
-      if (paneName === 'top' || paneName === 'bottom') {
-        runningX = pane.boundry.x1;
-        incX = true; incY = false;
-      }
-      if (paneName === 'left' || paneName === 'right') {
-        runningY = pane.boundry.y1;
-        incX = false; incY = true;
-      }
-      if (typeof pane.activeList === 'undefined') {
-        for (let item of pane.items) {
-          if (item.visible) {
-            this.#drawItem(item, runningX, runningY);
-            if (incX) runningX += item.bounds.width;
-            if (incY) runningY += item.bounds.height;
-          }
+      if (pane.items.length > 0) {
+        this.renderer.fillBox(pane.boundry.x1, pane.boundry.y1, pane.boundry.x2, pane.boundry.y2, this.view.backgroundColor);
+
+        runningX = 0;
+        runningY = 0;
+        if (paneName === 'top' || paneName === 'bottom') {
+          runningX = pane.boundry.x1;
+          incX = true; incY = false;
         }
-      } else {
-        let listItems = this.lists.get(pane.activeList);
-        for (let listItem of listItems) {
-          if (listItem.visible) {
-            this.#drawItem(listItem, runningX, runningY);
-            if (incX) runningX += listItem.bounds.width;
-            if (incY) runningY += listItem.bounds.height;
+        if (paneName === 'left' || paneName === 'right') {
+          runningY = pane.boundry.y1;
+          incX = false; incY = true;
+        }
+        if (typeof pane.activeList === 'undefined') {
+          for (let item of pane.items) {
+            if (item.visible) {
+              this.#drawItem(item, runningX, runningY);
+              if (incX) runningX += item.bounds.width;
+              if (incY) runningY += item.bounds.height;
+            }
+          }
+        } else {
+          let listItems = this.lists.get(pane.activeList);
+          for (let listItem of listItems) {
+            if (listItem.visible) {
+              this.#drawItem(listItem, runningX, runningY);
+              if (incX) runningX += listItem.bounds.width;
+              if (incY) runningY += listItem.bounds.height;
+            }
           }
         }
       }
@@ -219,6 +210,11 @@ export default class GUI {
       item.bounds.x2 + runningX,
       item.bounds.y2 + runningY
     );
+    let appearance = item.appearance;
+    if (item.type==='list' || item.type==='button'){
+      if (item.button.hovered) appearance = item.button.hoveredAppearance;
+      else if (item.button.pressed) appearance = item.button.pressedAppearance;
+    }
     this.renderer.textBox(
       drawnBounds.x1,
       drawnBounds.y1,
@@ -227,7 +223,7 @@ export default class GUI {
       item.text,
       this.fontSize,
       this.fontName,
-      item.appearance);
+      appearance);
     item.drawnBounds = drawnBounds;
   }
 }
