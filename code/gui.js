@@ -8,6 +8,7 @@ export default class GUI {
   constructor(colWidth, rowHeight, margin, view) {
     if (typeof colWidth !== 'number' || typeof rowHeight !== 'number') throw new Error(`GUI.constructor colWidth and rowHeight should be numbers [${colWidth},${rowHeight}].`);
     if (typeof margin !== 'number') throw new Error(`GUI.constructor(): margin is not a number: ${margin}`);
+    this.margin = margin;
     this.renderer = new Draw(view.context);
     this.fontSize = 16;
     this.fontName = 'monospace';
@@ -15,8 +16,6 @@ export default class GUI {
     this.colWidth = colWidth;
     this.rowHeight = rowHeight;
     this.panes = new Map();
-    //Boundries are calculated when the View calls resize, 
-    //which it will call long before draw every looks for them.
     this.panes.set('top', { "boundry": this.#topBoundry(), "items": [], 'activeList': undefined });
     this.panes.set('bottom', { "boundry": this.#bottomBoundry(), "items": [], 'activeList': undefined });
     this.panes.set('left', { "boundry": this.#leftBoundry(), "items": [], 'activeList': undefined });
@@ -24,10 +23,10 @@ export default class GUI {
     this.lists = new Map();
   }
   #topBoundry() {
-    return new Boundry(0, 0, this.view.canvas.width, this.rowHeight);
+    return new Boundry(this.colWidth, 0, this.view.canvas.width - this.colWidth, this.rowHeight);
   }
   #bottomBoundry() {
-    return new Boundry(0, this.view.canvas.height - this.rowHeight, this.view.canvas.width, this.view.canvas.height);
+    return new Boundry(this.colWidth, this.view.canvas.height - this.rowHeight, this.view.canvas.width - this.colWidth, this.view.canvas.height);
   }
   #leftBoundry() {
     return new Boundry(0, this.rowHeight, this.colWidth, this.view.canvas.height - this.rowHeight);
@@ -44,41 +43,10 @@ export default class GUI {
   }
   measureItem(pane, text) {
     let textSize = this.renderer.getTextSize(text, this.fontSize, this.fontName);
-    if (pane === 'top') {
-      let b = new Boundry(
-        0,
-        0,
-        textSize.width,
-        this.rowHeight);
-      return b;
-    }
-    if (pane === 'bottom') {
-      let b = new Boundry(
-        0,
-        this.view.canvas.height - this.rowHeight,
-        textSize.width,
-        this.view.canvas.height);
-      return b;
-    }
-
-    if (pane === 'left') {
-      let b = new Boundry(
-        0,
-        0,
-        this.colWidth,
-        textSize.height
-      );
-      return b;
-    }
-    if (pane === 'right') {
-      let b = new Boundry(
-        this.view.canvas.width - this.colWidth,
-        0,
-        this.view.canvas.width,
-        textSize.height
-      );
-      return b;
-    }
+    if (pane === 'top') return new Boundry(0, 0, textSize.width + this.margin * 2, this.rowHeight);
+    if (pane === 'bottom') return new Boundry(0, this.view.canvas.height - this.rowHeight, textSize.width + this.margin * 2, this.view.canvas.height); 
+    if (pane === 'left') return new Boundry(0, 0, this.colWidth, textSize.height + this.margin * 2);
+    if (pane === 'right') return new Boundry(this.view.canvas.width - this.colWidth, 0, this.view.canvas.width, textSize.height + this.margin * 2);
   }
 
   getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn) {
@@ -185,20 +153,36 @@ export default class GUI {
   }
 
   draw() {
+    //TODO: clear the pane background.
+    //IF the panes are drawing where they should... offset the runningX and Y 
+    //values so that the corners don't overlap.
+    let pane;
+
+    pane = this.panes.get('top');
+    this.renderer.fillBox(pane.boundry.x1, pane.boundry.y1, pane.boundry.x2, pane.boundry.y2, '#300');
+    pane = this.panes.get('bottom');
+    this.renderer.fillBox(pane.boundry.x1, pane.boundry.y1, pane.boundry.x2, pane.boundry.y2, '#003');
+    pane = this.panes.get('right');
+    this.renderer.fillBox(pane.boundry.x1, pane.boundry.y1, pane.boundry.x2, pane.boundry.y2, '#202');
+    pane = this.panes.get('left');
+    this.renderer.fillBox(pane.boundry.x1, pane.boundry.y1, pane.boundry.x2, pane.boundry.y2, '#022');
+
     let runningX, runningY, incX, incY;
     for (let paneName of GUI.paneNames) {
+      let pane = this.panes.get(paneName);
       runningX = 0;
       runningY = 0;
-      if (paneName === 'top' || paneName === 'bottom') {  
+      if (paneName === 'top' || paneName === 'bottom') {
+        runningX = pane.boundry.x1;
         incX = true; incY = false;
       }
-      if (paneName === 'left' || paneName === 'right') { 
+      if (paneName === 'left' || paneName === 'right') {
+        runningY = pane.boundry.y1;
         incX = false; incY = true;
       }
-      let pane = this.panes.get(paneName);  
       if (typeof pane.activeList === 'undefined') {
-        for (let item of pane.items) { 
-          if (item.visible) {  
+        for (let item of pane.items) {
+          if (item.visible) {
             this.#drawItem(item, runningX, runningY);
             if (incX) runningX += item.bounds.width;
             if (incY) runningY += item.bounds.height;
@@ -207,9 +191,9 @@ export default class GUI {
       } else {
         let listItems = this.lists.get(pane.activeList);
         for (let listItem of listItems) {
-          if (listItem.visible) {  
-            this.#drawItem(listItem, runningX, runningY); 
-            if (incX) runningX += listItem.bounds.width; 
+          if (listItem.visible) {
+            this.#drawItem(listItem, runningX, runningY);
+            if (incX) runningX += listItem.bounds.width;
             if (incY) runningY += listItem.bounds.height;
           }
         }

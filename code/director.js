@@ -39,7 +39,7 @@ export default class Director {
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
     Director.keyboard = new Keyboard();
-    Director.gui = new GUI(80,40, 5, view);//TODO: figure out good values (or better a function) to set these to..
+    Director.gui = new GUI(160,40, 5, view);//TODO: figure out good values (or better a function) to set these to..
   }
 
   static importPolygonBank(json) {
@@ -442,8 +442,7 @@ export default class Director {
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }
   //------------------------- runners
-  static run() {
-    
+  static run() {    
     Director.continueAnimationLoop = true;
     requestAnimationFrame(Director.loop.bind(Director));
   }
