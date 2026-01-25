@@ -73,7 +73,7 @@ export default class Draw {
   getTextSize(text, fontSize, fontName) {
     this.g.textBaseline = 'top';
     this.g.textAlign = 'left';
-    this.font = `${this.fontSize}px ${fontName}}`;
+    this.g.font = `${fontSize}px ${fontName}`;
     let metrics = this.g.measureText(text);
     return { "width": metrics.width, "height": (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) ?? fontSize };
   }

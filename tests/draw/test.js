@@ -86,7 +86,11 @@ export default function init() {
         200 + (y + 1) * spacing, color);
     }
   }
-  let appearance = new Appearance ('test','#040','#0a0','#fff',2);
-  draw.textBox (400,5,500,45, 'Text Box!', 16, 'monospace', appearance);
+  let appearance = new Appearance('test', '#040', '#0a0', '#fff', 2);
+  let text = '`_ABC_123` _'
+  let ts = 16;
+  let size = draw.getTextSize(text, ts, 'monospace');
+  console.log(size);
+  draw.textBox(400, 5, 400 + size.width, 45, text, ts, 'monospace', appearance);
 }
 
