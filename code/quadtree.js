@@ -1,4 +1,5 @@
 import Boundry from './boundry.js';
+import Draw from './draw.js';
 
 export default class Quadtree {
   constructor(bounds, capacity, minimumSize = 1) {
@@ -104,7 +105,7 @@ export default class Quadtree {
 
     this.divided = true;
   }
-  /* only used in debugging.. quadtree not involved in any of the changes in this branch.
+
   draw(context, offsetX, offsetY, currentColorIndex) {
     let draw = new Draw(context);
     let colors = ['#d00', '#090', '#00f'];
@@ -114,15 +115,14 @@ export default class Quadtree {
     let x2 = this.bounds.x2 + offsetX;
     let y2 = this.bounds.y2 + offsetY;
 
-    draw.box2(x1, y1, x2, y2, colors[currentColorIndex % colors.length]);
+    draw.box(x1, y1, x2, y2, colors[currentColorIndex % colors.length]);
     currentColorIndex = (currentColorIndex + 1) % colors.length;
     if (this.northeast) this.northeast.draw(context, offsetX, offsetY, currentColorIndex);
     if (this.southeast) this.southeast.draw(context, offsetX, offsetY, currentColorIndex);
     if (this.northwest) this.northwest.draw(context, offsetX, offsetY, currentColorIndex);
     if (this.southwest) this.southwest.draw(context, offsetX, offsetY, currentColorIndex);
     for (let actor of this.actors) {
-      draw.circle2(actor.position.x + offsetX, actor.position.y + offsetY, actor.radius, '#fff');
+      draw.circleHex(actor.position.x + offsetX, actor.position.y + offsetY, actor.radius, '#fff');
     }
   }
-    */
 }
