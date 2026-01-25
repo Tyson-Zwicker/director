@@ -54,7 +54,6 @@ export default class Button {
       this.hovered = false;
     }
     return interaction;
-
   }
   #click() {
     let buttonOwner = undefined;

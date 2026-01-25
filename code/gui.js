@@ -97,7 +97,7 @@ export default class GUI {
     this.controls.push(newText);
   }
   getList(label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems) {
-    if (!Array.isArray(items)) throw new Error(`GUI.addList: Pane must be top,bottom,left, right or float [${pane}].`);
+    if (!Array.isArray(listItems)) throw new Error(`GUI.addList: Pane must be top,bottom,left, right or float [${pane}].`);
     if (this.lists.has(listName)) throw new Error(`GUI.addList: Pane ${pane} already contains list with name ${listName}`);
     let b = new Button(hoveredAppearance, pressedAppearance, (owner) => { Director.gui.showList(owner.listName); }, false);
     let newList = {
@@ -111,10 +111,11 @@ export default class GUI {
       "listItems": undefined,
       "visible": true
     };
-    b.guiControl = this; //Binding the button to the new control.. so the function points at this.. so it can pass this list's name to showList()..
-    //make sure items is itemsList are actually buttons and bind those buttons to this list..
+    b.guiControl = newList; //Binding the button to the new control.. so the function points at this.. so it can pass this list's name to showList()..
+    //make sure items is itemsList are actually buttons and bind those buttons to this list..    
+    console.log (newList);
     if (!Array.isArray(listItems)) throw new Error(`GUI.addList: Pane ${pane} already contains list with name ${listName}`);
-    for (item of listItems) {
+    for (let item of listItems) {
       if (typeof item.type === 'string' && item.type === 'button') {
         item.listName = listName;
       } else throw new Error(`GUI.addList: List item is not a button ${item}`);
@@ -211,7 +212,7 @@ export default class GUI {
       item.bounds.y2 + runningY
     );
     let appearance = item.appearance;
-    if (item.type==='list' || item.type==='button'){
+    if (item.type==='list' || item.type==='button'){      
       if (item.button.hovered) appearance = item.button.hoveredAppearance;
       else if (item.button.pressed) appearance = item.button.pressedAppearance;
     }
@@ -227,11 +228,13 @@ export default class GUI {
     item.drawnBounds = drawnBounds;
   }
 }
-//TODO:
-// 0.. BACKUP
-// 1. button needs to inform owner of its status
-//so owner can choose an appropriate appearance when drawn.
-// 2. Don't draw a panel is its empty.
-// 3. BACKUP
-// 4. ADD A LIST
-// 5. TEST..
+/*TODO:
+ 4. ADD A LIST
+ 5. TEST.. 
+    1. When leaving the list's button it SOMETIMES does not return to normal appearance from hovered
+    2. It throws a big ass error if it is clicked.
+    
+    BUT
+
+    Buttons work, layout works, text metrics work, just need those lists.
+*/
