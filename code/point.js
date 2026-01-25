@@ -76,7 +76,7 @@ export default class Point {
     if (this.isPointy(obj)) {
       return new Point(obj.x, obj.y);
     }
-    throw new Error(`Point.from: object is not a point.`);
+    throw new Error(`Point.from: object is not a point: [${obj}]`);
   }
   //Angle should be in Degrees.
   static fromPolar(angle, magnitude) {

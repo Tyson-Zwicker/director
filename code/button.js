@@ -1,4 +1,5 @@
 import Point from './point.js';
+import GUI from './gui.js';
 export default class Button {
   actor = undefined;
   guiControl = undefined;
@@ -18,10 +19,10 @@ export default class Button {
   }
   checkForMouse(mouse) {
     let insideBounds = false;
-    if (typeof this.guiControl === 'object' && this.guiControl instanceof GUIControl) {
-      insideBounds = this.actor.guiControl.isMouseIn(Point.from(mouse.x, mouse.y));
+    if (typeof this.guiControl === 'object' && GUI.isControl (this.guiControl)) {
+      insideBounds = GUI.isMouseIn(this.guiControl, Point.from(mouse));
     } else if (typeof this.actor === 'object' && this.actor instanceof Actor) {
-      insideBounds = this.actor.polygon.isPointIn(Point.from(mouse.x, mouse.y))
+      insideBounds = this.actor.polygon.isPointIn(Point.from(mouse))
     }
     let interaction = false;
     if (insideBounds) {

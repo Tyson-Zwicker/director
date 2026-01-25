@@ -61,8 +61,8 @@ export default class View {
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
   }
-  handleCameraDrag(actorMouseInteraction) {
-    if (!actorMouseInteraction) {
+  handleCameraDrag(mouseInteractedWithSomething) {
+    if (!mouseInteractedWithSomething) {
       if (this.backgroundPressed && this.mouse.buttonDown) {
         //drag occuring..         
         let drag = Point.from(this.backgroundPressedCoordinate);

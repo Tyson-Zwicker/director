@@ -35,11 +35,11 @@ export default class Director {
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
     let view = new View('#024');
-    Director.view =view;
+    Director.view = view;
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
     Director.keyboard = new Keyboard();
-    Director.gui = new GUI(160,40, 5, view);//TODO: figure out good values (or better a function) to set these to..
+    Director.gui = new GUI(160, 40, 5, view);//TODO: figure out good values (or better a function) to set these to..
   }
 
   static importPolygonBank(json) {
@@ -282,19 +282,35 @@ export default class Director {
       }
     }
   }
-  static checkUserActorInteraction() {
+  static checkMouseActorInteraction() {
     let actorMouseInteraction = false;
     for (let actor of Director.actors.values()) {
       if (
-        typeof actor.button ==='object' &&
-        Director.view.canSee(actor.position) &&        
+        typeof actor.button === 'object' &&
+        Director.view.canSee(actor.position) &&
         actor.button.checkForMouse(Director.view.mouse)
       ) {
         actorMouseInteraction = true;
         break;
       }
     }
-    Director.view.handleCameraDrag(actorMouseInteraction);
+    return actorMouseInteraction;
+  }
+  static checkMouseGuiInteraction() {
+    let guiInteraction = false;
+    for (let guiControl of Director.gui.controls) {
+      if ((guiControl.type === 'button' || guiControl.type === 'list')) {
+        if (guiControl.button.checkForMouse(Director.view.mouse)){
+          guiInteraction = true;
+          break;
+        }
+      }
+    }
+    return guiInteraction;
+  }
+  static checkMouseInteractions() {
+    let mouseInteractedWithSomething = this.checkMouseActorInteraction() || this.checkMouseGuiInteraction();
+    Director.view.handleCameraDrag(mouseInteractedWithSomething);
   }
   static collisions(delta) {
     let collisions = Collisions.getCollisions(Director.quadtree);
@@ -312,7 +328,7 @@ export default class Director {
       }
     }
     Director.#draw_foregroundEffects(delta);
-    
+
     Director.gui.draw();
     this.#drawMillisInTheCorner(delta);
   }
@@ -433,20 +449,18 @@ export default class Director {
     Director.runParticleGenerators(currentTime);
     Director.draw(delta);
     Director.collisions(delta);
-    if (Director.creatorFn) {
-      Director.creatorFn(delta);
-    }
-    Director.checkUserActorInteraction();
+    if (Director.creatorFn) Director.creatorFn(delta);
+    Director.checkMouseInteractions();
     Director.keyboard.callKeyFunctions(delta);
-    Director.quadtree.clear();     
+    Director.quadtree.clear();
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }
   //------------------------- runners
-  static run() {    
+  static run() {
     Director.continueAnimationLoop = true;
     requestAnimationFrame(Director.loop.bind(Director));
   }
-  static runOnce(canvas, canvasContainer) {  
+  static runOnce(canvas, canvasContainer) {
     Director.continueAnimationLoop = false;
     requestAnimationFrame(Director.loop.bind(Director));
   }

@@ -11,7 +11,7 @@ export default class Draw {
     this.g.rect(x1, y1, x2 - x1, y2 - y1);
     this.g.stroke();
   }
-  fillboxHex(x1, y1, x2, y2, hexColor) {
+  fillBoxHex(x1, y1, x2, y2, hexColor) {
     if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
 
     this.g.fillStyle = hexColor;
@@ -78,9 +78,10 @@ export default class Draw {
     return { "width": metrics.width, "height": (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) ?? fontSize };
   }
   textBox(x1, y1, x2, y2, text, fontSize, fontName, appearance) {
+    //console.log (appearance);
     this.fillBox(x1, y1, x2, y2, appearance.fillHex);
-    this.box(x1, y1, x2, y2, appearance.stokeHex, appearance.lineWidth);
-    
+    this.box(x1, y1, x2, y2, appearance.strokeHex, appearance.lineWidth);
+
     this.g.fillStyle = appearance.textHex;
     this.g.textBaseline = 'top';
     this.g.textAlign = 'left';

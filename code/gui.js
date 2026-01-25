@@ -21,6 +21,7 @@ export default class GUI {
     this.panes.set('left', { "boundry": this.#leftBoundry(), "items": [], 'activeList': undefined });
     this.panes.set('right', { "boundry": this.#rightBoundry(), "items": [], 'activeList': undefined });
     this.lists = new Map();
+    this.controls = [];
   }
   #topBoundry() {
     return new Boundry(this.colWidth, 0, this.view.canvas.width - this.colWidth, this.rowHeight);
@@ -44,11 +45,16 @@ export default class GUI {
   measureItem(pane, text) {
     let textSize = this.renderer.getTextSize(text, this.fontSize, this.fontName);
     if (pane === 'top') return new Boundry(0, 0, textSize.width + this.margin * 2, this.rowHeight);
-    if (pane === 'bottom') return new Boundry(0, this.view.canvas.height - this.rowHeight, textSize.width + this.margin * 2, this.view.canvas.height); 
+    if (pane === 'bottom') return new Boundry(0, this.view.canvas.height - this.rowHeight, textSize.width + this.margin * 2, this.view.canvas.height);
     if (pane === 'left') return new Boundry(0, 0, this.colWidth, textSize.height + this.margin * 2);
     if (pane === 'right') return new Boundry(this.view.canvas.width - this.colWidth, 0, this.view.canvas.width, textSize.height + this.margin * 2);
   }
-
+  static isMouseIn(guiControl, point) {
+    return guiControl.drawnBounds.isPointInside(point.x, point.y);
+  }
+  static isControl(guiControl) {
+    return (typeof guiControl !== undefined && typeof guiControl.type !== undefined && (guiControl.type === 'text' || guiControl.type === 'button' || guiControl.type === 'list'));
+  }
   getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn) {
     if (typeof toggle !== 'boolean') throw new Error(`GUI.addButton: toggle must be boolean [${toggle}].`);
     let b = new Button(hoveredAppearance, pressedAppearance, fn, toggle);
@@ -58,6 +64,7 @@ export default class GUI {
       "appearance": normalAppearance,
       "button": b,
       "bounds": undefined,
+      "drawnBounds": undefined,
       "visible": true,
     }
     b.guiControl = newButton;
@@ -68,6 +75,7 @@ export default class GUI {
     let newButton = this.getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn);
     newButton.bounds = this.measureItem(pane, label);
     this.panes.get(pane).items.push(newButton);
+    this.controls.push(newButton);
   }
   getText(label, appearance) {
     let newText = {
@@ -76,6 +84,7 @@ export default class GUI {
       "appearance": appearance,
       "button": undefined,
       "bounds": undefined,
+      "drawnBounds": undefined,
       "visible": true
     };
     return newText;
@@ -85,6 +94,7 @@ export default class GUI {
     let newText = this.getText(label, appearance);
     newText.bounds = this.measureItem(pane, label);
     this.panes.get(pane).items.push(newText);
+    this.controls.push(newText);
   }
   getList(label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems) {
     if (!Array.isArray(items)) throw new Error(`GUI.addList: Pane must be top,bottom,left, right or float [${pane}].`);
@@ -97,34 +107,36 @@ export default class GUI {
       "appearance": normalAppearance,
       "button": b,
       "bounds": undefined,
-      "listItems": listItems,
+      "drawnBounds": undefined,
+      "listItems": undefined,
       "visible": true
     };
     b.guiControl = this; //Binding the button to the new control.. so the function points at this.. so it can pass this list's name to showList()..
     //make sure items is itemsList are actually buttons and bind those buttons to this list..
     if (!Array.isArray(listItems)) throw new Error(`GUI.addList: Pane ${pane} already contains list with name ${listName}`);
-    for (item of items) {
+    for (item of listItems) {
       if (typeof item.type === 'string' && item.type === 'button') {
         item.listName = listName;
       } else throw new Error(`GUI.addList: List item is not a button ${item}`);
     }
-    newList.items = items;
+    newList.listItems = listItems;
     return newList;
   }
   addList(pane, label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems) {
     if (!GUI.paneNames.includes(pane)) throw new Error(`GUI.addList: Pane must be top,bottom,left, right or float [${pane}].`);
-    let newList = this.addTextgetList(label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems);
+    let newList = this.getList(label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems);
     newList.paneName = pane;
     newList.bounds = this.measureItem(pane, label);
     this.lists.set(listName, newList);
     this.panes.get(pane).items.push(newList);
+    this.controls.push(newList);
   }
   showList(listName) {
     //1. Hide the controls in this list's pane..
     let list = this.lists.get(listName);
     let pane = this.panes.get(list.paneName);
     let paneItems = pane.items;
-    for (item of paneItems) {
+    for (let item of paneItems) {
       item.visible = false;
     }
     //2.. Make its items visible;
@@ -201,14 +213,29 @@ export default class GUI {
     }
   }
   #drawItem(item, runningX, runningY) {
-    this.renderer.textBox(
+    let drawnBounds = new Boundry(
       item.bounds.x1 + runningX,
       item.bounds.y1 + runningY,
       item.bounds.x2 + runningX,
-      item.bounds.y2 + runningY,
+      item.bounds.y2 + runningY
+    );
+    this.renderer.textBox(
+      drawnBounds.x1,
+      drawnBounds.y1,
+      drawnBounds.x2,
+      drawnBounds.y2,
       item.text,
       this.fontSize,
       this.fontName,
       item.appearance);
+    item.drawnBounds = drawnBounds;
   }
 }
+//TODO:
+// 0.. BACKUP
+// 1. button needs to inform owner of its status
+//so owner can choose an appropriate appearance when drawn.
+// 2. Don't draw a panel is its empty.
+// 3. BACKUP
+// 4. ADD A LIST
+// 5. TEST..
