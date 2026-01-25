@@ -8,10 +8,11 @@ import Boundry from '../../code/boundry.js';
 document.addEventListener('DOMContentLoaded', function () {
   Director.initialize();
   makeGUI();
+  Director.view.backgroundColor = '#505';
   Director.run();
 
 });
-function makeGUI() {
+function makeGUI(){
   let app1 = new Appearance('app1', '#050', '#0a0', '#fff');
   Director.gui.addText('top', 'Top Text 1', app1);
   Director.gui.addText('top', 'Top Text 2', app1);

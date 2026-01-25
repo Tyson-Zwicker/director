@@ -34,11 +34,12 @@ export default class Director {
     Director.signals = new EventTracker();
     Director.lastFrameTime = 0;
     Director.font = 'bold 12px monospace';
-    Director.view = undefined;  //Defined by a call to run() the director. If none is specified, the window is assumed empty and one is created to fill that window.
+    let view = new View('#024');
+    Director.view =view;
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
     Director.keyboard = new Keyboard();
-    Director.gui = new GUI(80,40);//TODO: figure out good values (or better a function) to set these to..
+    Director.gui = new GUI(80,40, 5, view);//TODO: figure out good values (or better a function) to set these to..
   }
 
   static importPolygonBank(json) {
@@ -311,6 +312,8 @@ export default class Director {
       }
     }
     Director.#draw_foregroundEffects(delta);
+    
+    Director.gui.draw();
     this.#drawMillisInTheCorner(delta);
   }
   static #drawMillisInTheCorner(delta) {
@@ -440,12 +443,11 @@ export default class Director {
   }
   //------------------------- runners
   static run() {
-    Director.view = new View('#024');
+    
     Director.continueAnimationLoop = true;
     requestAnimationFrame(Director.loop.bind(Director));
   }
-  static runOnce(canvas, canvasContainer) {
-    Director.view = new View('#505');
+  static runOnce(canvas, canvasContainer) {  
     Director.continueAnimationLoop = false;
     requestAnimationFrame(Director.loop.bind(Director));
   }

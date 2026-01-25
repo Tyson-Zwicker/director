@@ -31,7 +31,7 @@ export default class View {
     this.canvas.onmouseup = this.handleMouseUp;
     this.canvas.oncontextmenu = this.handleContextMenu;
     window.addEventListener('resize', this.resizeCanvas.bind(this));
-    this.resizeCanvas();  // This will set screenCenter and the bounds.
+    this.initCanvas();  // This will set screenCenter and the bounds.
   }
   canSee(point, radius) {
     let { x0, y0, x1, y1 } = this.bounds;
@@ -130,6 +130,17 @@ export default class View {
     this.camera.y += ychange;
     this.camera.zoom = Math.max(this.minimumZoom, this.camera.zoom);
     this.#calcBounds();
+  }
+  initCanvas(){
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+    if (!this.screenCenter) {
+      this.screenCenter = new Point(this.canvas.width / 2, this.canvas.height / 2);
+    } else {
+      this.screenCenter.x = this.canvas.width / 2;
+      this.screenCenter.y = this.canvas.height / 2;
+    }
+    this.#calcBounds();    
   }
   resizeCanvas() {
     this.canvas.width = window.innerWidth;

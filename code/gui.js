@@ -2,60 +2,85 @@ import Boundry from './boundry.js';
 import Appearance from './appearance.js';
 import Button from './button.js';
 import Director from './director.js';
+import Draw from './draw.js'; //measures text..
 export default class GUI {
-  static paneNames = ['top', 'bottom', 'left', 'right', 'float'];
-  constructor(colWidth, rowHeight) {
+  static paneNames = ['top', 'bottom', 'left', 'right'];
+  constructor(colWidth, rowHeight, margin, view) {
     if (typeof colWidth !== 'number' || typeof rowHeight !== 'number') throw new Error(`GUI.constructor colWidth and rowHeight should be numbers [${colWidth},${rowHeight}].`);
+    if (typeof margin !== 'number') throw new Error(`GUI.constructor(): margin is not a number: ${margin}`);
+    this.renderer = new Draw(view.context);
+    this.fontSize = 16;
+    this.fontName = 'monospace';
+    this.view = view;
+    this.colWidth = colWidth;
+    this.rowHeight = rowHeight;
     this.panes = new Map();
     //Boundries are calculated when the View calls resize, 
     //which it will call long before draw every looks for them.
-    this.panes.set('top', { "boundry": undefined, "items": [], 'activeList': undefined });
-    this.panes.set('bottom', { "boundry": undefined, "items": [], 'activeList': undefined });
-    this.panes.set('left', { "boundry": undefined, "items": [], 'activeList': undefined });
-    this.panes.set('right', { "boundry": undefined, "items": [], 'activeList': undefined });
+    this.panes.set('top', { "boundry": this.#topBoundry(), "items": [], 'activeList': undefined });
+    this.panes.set('bottom', { "boundry": this.#bottomBoundry(), "items": [], 'activeList': undefined });
+    this.panes.set('left', { "boundry": this.#leftBoundry(), "items": [], 'activeList': undefined });
+    this.panes.set('right', { "boundry": this.#rightBoundry(), "items": [], 'activeList': undefined });
     this.lists = new Map();
   }
   #topBoundry() {
-    //The first time these are called, view is still constructing itself.. it will be called from draw() when needed
-    //and view will be available then.
-    if (typeof Director.view !== 'undefined') {
-      let w = Director.view.canvas.width;
-      let h = Director.view.canvas.height;
-      return new Boundry(0, 0, w, rowHeight);
-    }
-    return undefined;
+    return new Boundry(0, 0, this.view.canvas.width, this.rowHeight);
   }
   #bottomBoundry() {
-    if (typeof Director.view !== 'undefined') {
-      let w = Director.view.canvas.width;
-      let h = Director.view.canvas.height;
-      return new Boundry(0, h - rowHeight, w, h);
-    }
-    return undefined;
+    return new Boundry(0, this.view.canvas.height - this.rowHeight, this.view.canvas.width, this.view.canvas.height);
   }
   #leftBoundry() {
-    if (typeof Director.view !== 'undefined') {
-      let w = Director.view.canvas.width;
-      let h = Director.view.canvas.height;
-      return new Boundry(0, rowHeight, colWidth, h - rowHeight);
-    }
-    return undefined;
+    return new Boundry(0, this.rowHeight, this.colWidth, this.view.canvas.height - this.rowHeight);
   }
   #rightBoundry() {
-    if (typeof Director.view !== 'undefined') {
-      let w = Director.view.canvas.width;
-      let h = Director.view.canvas.height;
-      return new Boundry(w - colWidth, rowHeight, w, h - rowHeight);
-    }
-    return undefined;
+    return new Boundry(this.view.canvas.width - this.colWidth, this.rowHeight, this.view.canvas.width, this.view.canvas.height - this.rowHeight);
   }
-  //This gets called from View.resizeCanvas().  That's the only place its called from. 2026-01-24
+
   resize() {
     this.panes.get('top').boundry = this.#topBoundry();
     this.panes.get('bottom').boundry = this.#bottomBoundry();
     this.panes.get('left').boundry = this.#leftBoundry();
     this.panes.get('right').boundry = this.#rightBoundry();
   }
+  measureItem(pane, text) {
+    let textSize = this.renderer.getTextSize(text, this.fontSize, this.fontName);
+    if (pane === 'top') {
+      let b = new Boundry(
+        0,
+        0,
+        textSize.width,
+        this.rowHeight);
+      return b;
+    }
+    if (pane === 'bottom') {
+      let b = new Boundry(
+        0,
+        this.view.canvas.height - this.rowHeight,
+        textSize.width,
+        this.view.canvas.height);
+      return b;
+    }
+
+    if (pane === 'left') {
+      let b = new Boundry(
+        0,
+        0,
+        this.colWidth,
+        textSize.height
+      );
+      return b;
+    }
+    if (pane === 'right') {
+      let b = new Boundry(
+        this.view.canvas.width - this.colWidth,
+        0,
+        this.view.canvas.width,
+        textSize.height
+      );
+      return b;
+    }
+  }
+
   getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn) {
     if (typeof toggle !== 'boolean') throw new Error(`GUI.addButton: toggle must be boolean [${toggle}].`);
     let b = new Button(hoveredAppearance, pressedAppearance, fn, toggle);
@@ -72,7 +97,9 @@ export default class GUI {
   }
   addButton(pane, label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn) {
     if (!GUI.paneNames.includes(pane)) throw new Error(`GUI.addButton: Pane must be top,bottom,left, right or float [${pane}].`);
-    this.panes.get(pane).items.push(this.getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn));
+    let newButton = this.getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn);
+    newButton.bounds = this.measureItem(pane, label);
+    this.panes.get(pane).items.push(newButton);
   }
   getText(label, appearance) {
     let newText = {
@@ -83,10 +110,13 @@ export default class GUI {
       "bounds": undefined,
       "visible": true
     };
+    return newText;
   }
   addText(pane, label, appearance) {
     if (!GUI.paneNames.includes(pane)) throw new Error(`GUI.addText: Pane must be top,bottom,left, right or float [${pane}].`);
-    this.panes.get(pane).items.push(this.getText(label, appearance));
+    let newText = this.getText(label, appearance);
+    newText.bounds = this.measureItem(pane, label);
+    this.panes.get(pane).items.push(newText);
   }
   getList(label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems) {
     if (!Array.isArray(items)) throw new Error(`GUI.addList: Pane must be top,bottom,left, right or float [${pane}].`);
@@ -99,6 +129,7 @@ export default class GUI {
       "appearance": normalAppearance,
       "button": b,
       "bounds": undefined,
+      "listItems": listItems,
       "visible": true
     };
     b.guiControl = this; //Binding the button to the new control.. so the function points at this.. so it can pass this list's name to showList()..
@@ -116,11 +147,11 @@ export default class GUI {
     if (!GUI.paneNames.includes(pane)) throw new Error(`GUI.addList: Pane must be top,bottom,left, right or float [${pane}].`);
     let newList = this.addTextgetList(label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems);
     newList.paneName = pane;
+    newList.bounds = this.measureItem(pane, label);
     this.lists.set(listName, newList);
     this.panes.get(pane).items.push(newList);
   }
   showList(listName) {
-    // Pane def: { "boundry": this.#topBoundry(), "items": [], 'activeList': undefined }
     //1. Hide the controls in this list's pane..
     let list = this.lists.get(listName);
     let pane = this.panes.get(list.paneName);
@@ -135,15 +166,13 @@ export default class GUI {
     }
     //3.. Set the active list for this pane..
     pane.activeList = listName;
-    // Now next draw the list will be shown.  Its should probably be drawn with an offset so the list matches
-    //where the button used to be...
   }
   hideList(listname) {
     //1. Show the controls in this list's pane..
     let list = this.lists.get(listName);
     let pane = this.panes.get(list.paneName);
     let paneItems = pane.items;
-    for (item of paneItems) {
+    for (let item of paneItems) {
       item.visible = true;
     }
     //2.. Make its items INvisible;
@@ -154,61 +183,48 @@ export default class GUI {
     //3.. Set the active list for this pane.. to nothing..
     pane.activeList = undefined;
   }
-  
+
   draw() {
-    //TODO.. I have to measure all these things and set 
-    //the boundried before I can draw them...
-    
-    // if the boundries are undefined, call measure(), also
-     //measure after resizing..
-
-     //keep the sizes in the items because that won't change, 
-     //when the window is resized, only the offset (based on where the
-     //pane moved) will be different.
-
-
-    //top and bottom go horizontally.
-    let pane = this.panes['top'];
-    
-    if (typeof topItems.activeList === 'undefined') {
-      let topItems = pane.items;
-      for (item of topItems) {
-        if (item.isVisible) {
-          //draw the item..
-        }
+    let runningX, runningY, incX, incY;
+    for (let paneName of GUI.paneNames) {
+      runningX = 0;
+      runningY = 0;
+      if (paneName === 'top' || paneName === 'bottom') {  
+        incX = true; incY = false;
       }
-    }else{
-      for (item of topItems) {
-        if (typeof item.listName !=='undefined') {
-          if (item.listName === topItems.activeList){
-            for (let listItem of item.listItems){
-              //draw the listItem..
-            }
+      if (paneName === 'left' || paneName === 'right') { 
+        incX = false; incY = true;
+      }
+      let pane = this.panes.get(paneName);  
+      if (typeof pane.activeList === 'undefined') {
+        for (let item of pane.items) { 
+          if (item.visible) {  
+            this.#drawItem(item, runningX, runningY);
+            if (incX) runningX += item.bounds.width;
+            if (incY) runningY += item.bounds.height;
+          }
+        }
+      } else {
+        let listItems = this.lists.get(pane.activeList);
+        for (let listItem of listItems) {
+          if (listItem.visible) {  
+            this.#drawItem(listItem, runningX, runningY); 
+            if (incX) runningX += listItem.bounds.width; 
+            if (incY) runningY += listItem.bounds.height;
           }
         }
       }
     }
-    pane = this.panes['bottom'];
-    let bottomItems = this.panes['bottom'].items;
-    for (item in bottomItems) {
-
-    }
-    pane = this.panes['left'];
-    let leftItems = this.panes['left'].items;
-    for (item in leftItems) {
-
-    }
-    pane = this.panes['right'];
-    let rightItems = this.panes['right'].items;
-    for (item in rightItems) {
-
-    }
-    //calculate the width of all the parts put together..
-    //use that to set an offset from the left side = (totalwidth-neededwidth) /2
-    //the size something needs is basically just the width of the text + margin*2
-    //draw.textBox(x1, y2, x2, y2, text, fontSize, fontName, appearance)
-    //class Draw {
-    //  constructor(context2d)
-
+  }
+  #drawItem(item, runningX, runningY) {
+    this.renderer.textBox(
+      item.bounds.x1 + runningX,
+      item.bounds.y1 + runningY,
+      item.bounds.x2 + runningX,
+      item.bounds.y2 + runningY,
+      item.text,
+      this.fontSize,
+      this.fontName,
+      item.appearance);
   }
 }
