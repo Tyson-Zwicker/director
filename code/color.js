@@ -51,9 +51,21 @@ export default class Color {
       g = parseInt(hex[2], 16);
       b = parseInt(hex[3], 16);
       op = parseInt(hex[4], 16);
+    }else if (hex.length ===7){ //Ignore 2nd digit of each color - we're using 16bit color
+      r = parseInt(hex[1], 16);
+      g = parseInt(hex[3], 16);
+      b = parseInt(hex[5], 16);
+      op = 15;
+        
+    }else if (hex.length ===9){ //Ignore 2nd digit of each color- we're using 16bit color
+      r = parseInt(hex[1], 16);
+      g = parseInt(hex[3], 16);
+      b = parseInt(hex[5], 16);
+      op = parseInt(hex[9], 16);
+    
     }else{
-      throw new Error(`Color.fromHex: hex value must be 16-bit format (#RGB or #RGBo) not (#RRGGBB). Parameter was [${hex}]`);
-    }
+      throw new Error(`Color.fromHex: Bad hex value [${hex}].`);
+    } 
     return new Color(r, g, b, op/15);
   }
   getLinearGradient(context, x1, y1, x2, y2, stopPoint1, color1, stopPoint2, color2, stopPoint3, color3, stopPoint4, color4) {

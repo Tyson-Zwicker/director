@@ -34,7 +34,7 @@ function makeData() {
     for (let y = -2000; y < 2000; y += 200) {
       let actorType = Director.getActorType(`acttype${Rnd.int(0, 9)}`);
       let appearance = Director.getAppearance(`app${Rnd.int(0, 10)}`);
-      let actor = actorType.createActorInstance(`actor${x + '|' + y}`, appearance, new Point(x, y), Rnd.vect (0,360,-30,30), Rnd.int(360), 0);
+      let actor = actorType.createActorInstance(`actor${x + '|' + y}`, appearance, new Point(x, y), Rnd.vect (0,360,0,100), Rnd.int(360), 0);
       let forceStrength = -1;
       Director.addFieldToActor (actor, forceStrength);
       Director.addActor(actor);

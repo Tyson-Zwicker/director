@@ -19,7 +19,7 @@ function makeData() {
   }
   //Make some colors too.
   for (let i = 0; i < 10; i++) {
-    let app = new Appearance(`app${i}`, Rnd.colorAsHex(4), Rnd.colorAsHex(8), '#ffffff');
+    let app = new Appearance(`app${i}`, Rnd.colorAsHex(4), Rnd.colorAsHex(8), '#fff');
     Director.addAppearance(app);
   }
   //Make some actorTypes
