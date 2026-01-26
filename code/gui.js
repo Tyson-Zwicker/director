@@ -118,6 +118,7 @@ export default class GUI {
       "bounds": undefined,
       "drawnBounds": undefined,
       "listItems": undefined,
+      "selectedItem": undefined,
       "visible": true
     };
     b.guiControl = newList; //Binding the button to the new control.. so the function points at this.. so it can pass this list's name to showList()..
@@ -127,6 +128,12 @@ export default class GUI {
     for (let item of listItems) {
       if (typeof item.type === 'string' && item.type === 'button') {
         item.listName = listName;
+        item.button.clickFn = (owner) => {
+          //todoo: this not getting called (list items unresponsive)
+          //also: the hidden button IS still responding, that shouldn't happen...
+          Director.gui.hideList(owner.listName);
+          Director.gui.lists.get(owner).selectedItem = owner.label;
+        }
       } else throw new Error(`GUI.addList: List item is not a button ${item}`);
     }
     newList.listItems = listItems;
