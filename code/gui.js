@@ -128,8 +128,7 @@ export default class GUI {
     for (let item of listItems) {
       if (typeof item.type === 'string' && item.type === 'button') {
         item.listName = listName;
-        item.visible = false;
-       //TODO: this not getting called (list items unresponsive)
+        item.visible = false;       
         item.button.clickFn = (owner) => {
           console.log(`list item click.. trying to hide list.${owner}`);
           Director.gui.hideList(owner.listName);
