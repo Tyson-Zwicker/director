@@ -299,11 +299,10 @@ export default class Director {
   static checkMouseGuiInteraction() {
     let guiInteraction = false;
     for (let guiControl of Director.gui.controls) {
-      if ((guiControl.type === 'button' || guiControl.type === 'list')) {
-        //Don't check hiden items.
+      if ((guiControl.type === 'button' || guiControl.type === 'list')) {        
         if (guiControl.visible && guiControl.button.checkForMouse(Director.view.mouse)){
           guiInteraction = true;
-          break;
+          //Note: Do not break out of the loop here. Testing the other controls is necessary to let them de-hover themselves.
         }
       }
     }

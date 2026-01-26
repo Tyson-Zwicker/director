@@ -123,20 +123,22 @@ export default class GUI {
     };
     b.guiControl = newList; //Binding the button to the new control.. so the function points at this.. so it can pass this list's name to showList()..
     //make sure items is itemsList are actually buttons and bind those buttons to this list..    
-    console.log(newList);
+
     if (!Array.isArray(listItems)) throw new Error(`GUI.addList: Pane ${pane} already contains list with name ${listName}`);
     for (let item of listItems) {
       if (typeof item.type === 'string' && item.type === 'button') {
         item.listName = listName;
+        item.visible = false;
+       //TODO: this not getting called (list items unresponsive)
         item.button.clickFn = (owner) => {
-          //todoo: this not getting called (list items unresponsive)
-         console.log ('list item click.. trying to hide list.');s
+          console.log(`list item click.. trying to hide list.${owner}`);
           Director.gui.hideList(owner.listName);
-          Director.gui.lists.get(owner).selectedItem = owner.label;
+          Director.gui.lists.get(owner.listName).selectedItem = owner.text;
         }
       } else throw new Error(`GUI.addList: List item is not a button ${item}`);
     }
     newList.listItems = listItems;
+    console.log(newList);
     return newList;
   }
   addList(pane, label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems) {
@@ -145,7 +147,8 @@ export default class GUI {
     newList.paneName = pane;
     newList.bounds = this.measureItem(pane, label);
     for (let listItem of newList.listItems) {
-      listItem.bounds = this.measureItem(pane, listItem.label, newList.bounds);
+      listItem.bounds = this.measureItem(pane, listItem.text, newList.bounds);
+      this.controls.push(listItem);  // Add list items to controls so they can be checked for mouse interaction
     }
     this.lists.set(listName, newList);
     this.panes.get(pane).items.push(newList);
@@ -167,8 +170,8 @@ export default class GUI {
     //3.. Set the active list for this pane..
     pane.activeList = listName;
   }
-  hideList(listname) {
-    console.log ('a list item called back to closd its list!')
+  hideList(listName) {
+    console.log(`a list item called back to close its list: ${listName}`)
     //1. Show the controls in this list's pane..
     let list = this.lists.get(listName);
     let pane = this.panes.get(list.paneName);
@@ -249,10 +252,3 @@ export default class GUI {
     item.drawnBounds = drawnBounds;
   }
 }
-/*TODO:
- 4. ADD A LIST
- 5. TEST.. 
-
-    1.. The list items need to be given bounds before they get drawn.
-    ..this is a good spot 
-*/
