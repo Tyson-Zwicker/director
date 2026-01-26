@@ -64,9 +64,9 @@ export default class GUI {
   static isControl(guiControl) {
     return (typeof guiControl !== undefined && typeof guiControl.type !== undefined && (guiControl.type === 'text' || guiControl.type === 'button' || guiControl.type === 'list'));
   }
-  getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn) {
+  getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value) {
     if (typeof toggle !== 'boolean') throw new Error(`GUI.addButton: toggle must be boolean [${toggle}].`);
-    let b = new Button(hoveredAppearance, pressedAppearance, fn, toggle);
+    let b = new Button(hoveredAppearance, pressedAppearance, fn, toggle, value);
     let newButton = {
       "type": 'button',
       "text": label,
@@ -75,13 +75,14 @@ export default class GUI {
       "bounds": undefined,
       "drawnBounds": undefined,
       "visible": true,
+      "value": value
     }
     b.guiControl = newButton;
     return newButton;
   }
-  addButton(pane, label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn) {
+  addButton(pane, label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value) {
     if (!GUI.paneNames.includes(pane)) throw new Error(`GUI.addButton: Pane must be top,bottom,left, right or float [${pane}].`);
-    let newButton = this.getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn);
+    let newButton = this.getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value);
     newButton.bounds = this.measureItem(pane, label);
     this.panes.get(pane).items.push(newButton);
     this.controls.push(newButton);
@@ -105,56 +106,64 @@ export default class GUI {
     this.panes.get(pane).items.push(newText);
     this.controls.push(newText);
   }
-  getList(label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems) {
-    if (!Array.isArray(listItems)) throw new Error(`GUI.addList: Pane must be top,bottom,left, right or float [${pane}].`);
-    if (this.lists.has(listName)) throw new Error(`GUI.addList: Pane ${pane} already contains list with name ${listName}`);
-    let b = new Button(hoveredAppearance, pressedAppearance, (owner) => { Director.gui.showList(owner.listName); }, false);
+  getList(paneName, label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems, defaultValue) {
+    if (!GUI.paneNames.includes(paneName))throw new Error(`GUI.getList: invalid paneName: [${paneName}].`);
+    if (!Array.isArray(listItems)) throw new Error(`GUI.getList: listItems should be an array: [${listItems}].`);
+    if (this.lists.has(listName)) throw new Error(`GUI.getList: Unknown list  ${listName}.`);
+    let listCallback = (e) => { 
+      Director.gui.showList(e.owner.listName);
+    }
+    let b = new Button(hoveredAppearance, pressedAppearance, listCallback, false, '');
+      
     let newList = {
       "type": 'list',
       "listName": listName,
+      "paneName": paneName,
       "text": label,
       "appearance": normalAppearance,
       "button": b,
       "bounds": undefined,
       "drawnBounds": undefined,
       "listItems": undefined,
-      "selectedItem": undefined,
+      "selectedValue": defaultValue,
       "visible": true
     };
     b.guiControl = newList; //Binding the button to the new control.. so the function points at this.. so it can pass this list's name to showList()..
-    //make sure items is itemsList are actually buttons and bind those buttons to this list..    
-
-    if (!Array.isArray(listItems)) throw new Error(`GUI.addList: Pane ${pane} already contains list with name ${listName}`);
-    for (let item of listItems) {
-      if (typeof item.type === 'string' && item.type === 'button') {
-        item.listName = listName;
-        item.visible = false;       
-        item.button.clickFn = (owner) => {
-          console.log(`list item click.. trying to hide list.${owner}`);
-          Director.gui.hideList(owner.listName);
-          Director.gui.lists.get(owner.listName).selectedItem = owner.text;
+    //make sure items is itemsList are actually buttons and bind those buttons to this list..        
+    let foundDefaultItem = false;
+    for (let listItem of listItems) {
+      if (typeof listItem.type !== undefined && listItem.type === 'button') {
+        if (listItem.button.value === defaultValue) foundDefaultItem = true;
+        listItem.listName = listName;
+        listItem.visible = false;
+        listItem.button.clickFn = (event) => {
+          console.log(`list item click.. trying to hide list.${event.owner} value:${event.value}`);
+          Director.gui.hideList(event.owner.listName);//event.owner is the GUIControl (type=button or list)           
+          Director.gui.lists.get(event.owner.listName).selectedValue = event.value;//event.value is the Button's value (the actual button of class Button) - declared at Button's construction.
         }
-      } else throw new Error(`GUI.addList: List item is not a button ${item}`);
+      } else throw new Error(`GUI.addList: List item is not a button ${listItem}`);
     }
+    if (!foundDefaultItem) throw new Error(`GUI.getList: Not list items match default value [${defaultValue}].`);
     newList.listItems = listItems;
-    console.log(newList);
     return newList;
   }
-  addList(pane, label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems) {
-    if (!GUI.paneNames.includes(pane)) throw new Error(`GUI.addList: Pane must be top,bottom,left, right or float [${pane}].`);
-    let newList = this.getList(label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems);
-    newList.paneName = pane;
-    newList.bounds = this.measureItem(pane, label);
+  addList(paneName, label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems, defaultValue) {
+    if (typeof defaultValue === 'undefined') throw new Error('GUI.addList: defaultValue is undefined.');
+    if (!GUI.paneNames.includes(paneName)) throw new Error(`GUI.getList: Pane must be top,bottom,left, right or float [${paneName}].`);
+    let newList = this.getList(paneName, label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems, defaultValue);
+    newList.paneName = paneName;
+    newList.bounds = this.measureItem(paneName, label);
     for (let listItem of newList.listItems) {
-      listItem.bounds = this.measureItem(pane, listItem.text, newList.bounds);
+      listItem.bounds = this.measureItem(paneName, listItem.text, newList.bounds);
       this.controls.push(listItem);  // Add list items to controls so they can be checked for mouse interaction
     }
     this.lists.set(listName, newList);
-    this.panes.get(pane).items.push(newList);
+    this.panes.get(paneName).items.push(newList);
     this.controls.push(newList);
   }
   showList(listName) {
     //1. Hide the controls in this list's pane..
+    if (!this.lists.has (listName)) throw new Error (`GUI.showList: listName [${listName}] not found.`); 
     let list = this.lists.get(listName);
     let pane = this.panes.get(list.paneName);
     let paneItems = pane.items;
@@ -170,7 +179,7 @@ export default class GUI {
     pane.activeList = listName;
   }
   hideList(listName) {
-    console.log(`a list item called back to close its list: ${listName}`)
+    console.log(`a list item called back to close its list: ${listName}`);
     //1. Show the controls in this list's pane..
     let list = this.lists.get(listName);
     let pane = this.panes.get(list.paneName);
@@ -239,12 +248,14 @@ export default class GUI {
       if (item.button.hovered) appearance = item.button.hoveredAppearance;
       else if (item.button.pressed) appearance = item.button.pressedAppearance;
     }
+    let text = item.text;
+    if (item.type === 'list') text = `${item.text} : ${item.selectedValue}`;
     this.renderer.textBox(
       drawnBounds.x1,
       drawnBounds.y1,
       drawnBounds.x2,
       drawnBounds.y2,
-      item.text,
+      text,
       this.fontSize,
       this.fontName,
       appearance);
