@@ -43,11 +43,20 @@ export default class GUI {
     this.panes.get('right').boundry = this.#rightBoundry();
   }
   measureItem(pane, text) {
+    //list items use the "offset" - its the bounds of the button that shows the list..
     let textSize = this.renderer.getTextSize(text, this.fontSize, this.fontName);
-    if (pane === 'top') return new Boundry(0, 0, textSize.width + this.margin * 2, this.rowHeight);
-    if (pane === 'bottom') return new Boundry(0, this.view.canvas.height - this.rowHeight, textSize.width + this.margin * 2, this.view.canvas.height);
-    if (pane === 'left') return new Boundry(0, 0, this.colWidth, textSize.height + this.margin * 2);
-    if (pane === 'right') return new Boundry(this.view.canvas.width - this.colWidth, 0, this.view.canvas.width, textSize.height + this.margin * 2);
+    if (pane === 'top') {
+      return new Boundry(0, 0, textSize.width + this.margin * 2, this.rowHeight);
+    }
+    if (pane === 'bottom') {
+      return new Boundry(0, this.view.canvas.height - this.rowHeight, textSize.width + this.margin * 2, this.view.canvas.height);
+    }
+    if (pane === 'left') {
+      return new Boundry(0, 0, this.colWidth, textSize.height + this.margin * 2);
+    }
+    if (pane === 'right') {
+      return new Boundry(this.view.canvas.width - this.colWidth, 0, this.view.canvas.width, textSize.height + this.margin * 2);
+    }
   }
   static isMouseIn(guiControl, point) {
     return guiControl.drawnBounds.isPointInside(point.x, point.y);
@@ -113,7 +122,7 @@ export default class GUI {
     };
     b.guiControl = newList; //Binding the button to the new control.. so the function points at this.. so it can pass this list's name to showList()..
     //make sure items is itemsList are actually buttons and bind those buttons to this list..    
-    console.log (newList);
+    console.log(newList);
     if (!Array.isArray(listItems)) throw new Error(`GUI.addList: Pane ${pane} already contains list with name ${listName}`);
     for (let item of listItems) {
       if (typeof item.type === 'string' && item.type === 'button') {
@@ -128,6 +137,9 @@ export default class GUI {
     let newList = this.getList(label, normalAppearance, hoveredAppearance, pressedAppearance, listName, listItems);
     newList.paneName = pane;
     newList.bounds = this.measureItem(pane, label);
+    for (let listItem of newList.listItems) {
+      listItem.bounds = this.measureItem(pane, listItem.label, newList.bounds);
+    }
     this.lists.set(listName, newList);
     this.panes.get(pane).items.push(newList);
     this.controls.push(newList);
@@ -192,7 +204,8 @@ export default class GUI {
             }
           }
         } else {
-          let listItems = this.lists.get(pane.activeList);
+          let list = this.lists.get(pane.activeList);
+          let listItems = list.listItems;
           for (let listItem of listItems) {
             if (listItem.visible) {
               this.#drawItem(listItem, runningX, runningY);
@@ -212,7 +225,7 @@ export default class GUI {
       item.bounds.y2 + runningY
     );
     let appearance = item.appearance;
-    if (item.type==='list' || item.type==='button'){      
+    if (item.type === 'list' || item.type === 'button') {
       if (item.button.hovered) appearance = item.button.hoveredAppearance;
       else if (item.button.pressed) appearance = item.button.pressedAppearance;
     }
@@ -231,10 +244,7 @@ export default class GUI {
 /*TODO:
  4. ADD A LIST
  5. TEST.. 
-    1. When leaving the list's button it SOMETIMES does not return to normal appearance from hovered
-    2. It throws a big ass error if it is clicked.
-    
-    BUT
 
-    Buttons work, layout works, text metrics work, just need those lists.
+    1.. The list items need to be given bounds before they get drawn.
+    ..this is a good spot 
 */

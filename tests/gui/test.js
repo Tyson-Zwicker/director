@@ -23,6 +23,7 @@ function makeGUI() {
   Director.gui.addText('left', 'Left Text 1', nrm);
   Director.gui.addText('left', 'Left Text 2', nrm);
   Director.gui.addButton('left', 'Click Me', nrm, hov, prs, false, (owner) => { console.log(owner); alert(`${owner}`) });
+  Director.gui.addText('left', 'Left Text 3', nrm);
 
   //make buttons for list items..
   // gui.getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn) 
