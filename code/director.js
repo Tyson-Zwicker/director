@@ -300,7 +300,8 @@ export default class Director {
     let guiInteraction = false;
     for (let guiControl of Director.gui.controls) {
       if ((guiControl.type === 'button' || guiControl.type === 'list')) {
-        if (guiControl.button.checkForMouse(Director.view.mouse)){
+        //Don't check hiden items.
+        if (guiControl.visible && guiControl.button.checkForMouse(Director.view.mouse)){
           guiInteraction = true;
           break;
         }

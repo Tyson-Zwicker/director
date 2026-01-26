@@ -130,7 +130,7 @@ export default class GUI {
         item.listName = listName;
         item.button.clickFn = (owner) => {
           //todoo: this not getting called (list items unresponsive)
-          //also: the hidden button IS still responding, that shouldn't happen...
+         console.log ('list item click.. trying to hide list.');s
           Director.gui.hideList(owner.listName);
           Director.gui.lists.get(owner).selectedItem = owner.label;
         }
@@ -168,6 +168,7 @@ export default class GUI {
     pane.activeList = listName;
   }
   hideList(listname) {
+    console.log ('a list item called back to closd its list!')
     //1. Show the controls in this list's pane..
     let list = this.lists.get(listName);
     let pane = this.panes.get(list.paneName);
