@@ -1,6 +1,4 @@
-import Appearance from './appearance.js';
-import ActorType from './actortype.js';
-import Part from './part.js';
+
 import View from './view.js';
 import Quadtree from './quadtree.js';
 import Collisions from './collisions.js';
@@ -13,8 +11,7 @@ import LineEffect from './lineeffect.js';
 import CircleEffect from './circleeffect.js';
 import ParticleEffect from './particleeffect.js';
 import RadialEffect from './radialeffect.js';
-import Polygon from './polygon.js';
-import Point from './point.js';
+
 import Keyboard from './keyboard.js';
 import GUI from './gui.js';
 
@@ -39,142 +36,9 @@ export default class Director {
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
     Director.keyboard = new Keyboard();
-    Director.gui = new GUI(160, 40, 5, view);//TODO: figure out good values (or better a function) to set these to..
+    Director.gui = new GUI(160, 40, 5, 5, view);//TODO: figure out good values (or better a function) to set these to..    
   }
 
-  static importPolygonBank(json) {
-    let jsonObj = undefined;
-    try {
-      jsonObj = JSON.parse(json);
-    } catch (e) {
-      throw new Error("Director.importPolyBank. Bad JSON.");
-    }
-    //You must convert EVERYTHING to a number manually or else it might do "Javascript" math with a string..
-
-    for (let poly of jsonObj.polygons) {
-      let points = [];
-      for (let strPoint of poly.points) {
-        let point = { "x": parseFloat(strPoint.x), "y": parseFloat(strPoint.y) };
-        points.push(point);
-      }
-      Director.polygonBank.set(poly.name, new Polygon(poly.name, points));
-    }
-  }
-  static importAppearanceBank(json) {
-    let jsonObj = undefined;
-    try {
-      jsonObj = JSON.parse(json);
-    } catch (e) {
-      throw new Error("Director.importAppearanceBank. Bad JSON.");
-    }
-    for (let appr of jsonObj.appearances) {
-      Director.appearanceBank.set(appr.name, new Appearance(appr.name, appr.fill, appr.stroke, appr.text, parseInt(appr.width)));
-    }
-  }
-  static importPartTypes(json) {
-    let jsonObj = undefined;
-    try {
-      jsonObj = JSON.parse(json);
-    } catch (e) {
-      throw new Error("Director.importPartTypes. Bad JSON.");
-    }
-    for (let partType of jsonObj.partTypes) {
-      Director.partTypes.set(partType.name, new Part(partType.name, Director.polygonBank.get(partType.polygon)));
-    }
-  }
-  static importActorTypes(json) {
-    let jsonObj = undefined;
-    try {
-      jsonObj = JSON.parse(json);
-    } catch (e) {
-      throw new Error("Director.importActorTypes. Bad JSON.");
-    }
-    for (let actorTypeElement of jsonObj.actorTypes) {
-      if (!Director.polygonBank.has(actorTypeElement.polygon)) {
-        throw new Error(`Director.importActorTypes: unknown polygon name [${actorTypeElement.polygon}]`);
-      }
-      let poly = Director.polygonBank.get(actorTypeElement.polygon);
-      if (actorTypeElement.bounceCoefficient > 1 || actorTypeElement.bounceCoefficient < 0) {
-        throw error(`Director.importActorTypes: bounce Coefficient ${actorTypeElement.bounceCoefficient} out of bounds for ${actorTypeElement.name}`);
-      }
-      let actorType = new ActorType(
-        actorTypeElement.name,
-        poly,
-        parseInt(actorTypeElement.mass),
-        parseFloat(actorTypeElement.bounceCoefficient),
-        (actorTypeElement.collides === 'true'),
-        (actorTypeElement.moves === 'true')
-      );
-      for (let partElement of actorTypeElement.parts) {
-        if (!Director.partTypes.has(partElement.partTypes)) {
-          throw new Error(`Director.importActorTypes: unknown part Type [${partElement.partTypes}] for part [${partElement.name}]`);
-        }
-        if (!Director.appearanceBank.has(partElement.appearances)) {
-          throw new Error(`Director.importActorTypes: unknown appearance [${partElement.appearances} for part ${partElement.name}]`);
-        }
-        let partType = Director.partTypes.get(partElement.partTypes);
-        //createInstance ( name, appearance, offsetFromActorOrigin, facing, spin){
-        let part = partType.createInstance(
-          partElement.name,
-          Director.appearanceBank.get(partElement.appearances),
-          new Point(parseFloat(partElement.xOffset), parseFloat(partElement.yOffset)),
-          parseFloat(partElement.facing),
-          parseFloat(partElement.spin)
-        );
-        actorType.attachPart(part);
-      }
-      Director.actorTypeBank.set(actorType.name, actorType);
-    }
-  }
-  static importActors(json) {
-    let jsonObj = undefined;
-    try {
-      jsonObj = JSON.parse(json);
-    } catch (e) {
-      throw new Error("Director.importActors. Bad JSON.");
-    }
-    for (let actorElement of jsonObj.actors) {
-      if (!Director.appearanceBank.has(actorElement.appearances)) {
-        throw new Error(`Director.importActors: unknown appearance name [${actorElement.appearance}] for actor [${actorElement.name}]`);
-      }
-      if (!Director.actorTypeBank.has(actorElement.actorTypes)) {
-        throw new Error(`Director.importActors: unknown actor typeName [${actorElement.actorType}] for actor [${actorElement.name}]`);
-      }
-      let appearance = Director.appearanceBank.get(actorElement.appearances);
-      let actorType = Director.actorTypeBank.get(actorElement.actorTypes);
-      // createActorInstance (name, appearance, position, velocity, facing, spin){
-      let actor = actorType.createActorInstance(
-        actorElement.name, appearance,
-        new Point(parseFloat(actorElement.positionX), parseFloat(actorElement.positionY)),
-        new Point(parseFloat(actorElement.velocityX), parseFloat(actorElement.velocityY)),
-        parseFloat(actorElement.facing), parseFloat(actorElement.spin));
-      Director.actors.set(actor.name, actor);
-    }
-  }
-  static importScene(json) {
-    let jsonObj = undefined;
-    try {
-      jsonObj = JSON.parse(json);
-    } catch (e) {
-      throw new Error("Director.importScene. Bad JSON.");
-    }
-    Director["scene"] = {
-      name: jsonObj.name,
-      description: jsonObj.description,
-      text: jsonObj.text,
-    };
-    for (let appearance of jsonObj.appearances) {
-      if (!Director.appearanceBank.has(appearance.name)) throw new Error(`Director.importScene: appearance ${appearance.name} does not exist`);
-    }
-    for (let polygon of jsonObj.polygons) {
-      if (!Director.polygonBank.has(polygon.name)) throw new Error(`Director.importScene: polygon ${polygon.name} does not exist`);
-
-    }
-    for (let actor of jsonObj.actors) {
-      if (!Director.actors.has(actor.name)) throw new Error(`Director.importScene: actor ${actor.name} does not exist`);
-    }
-
-  }
   static addPolygon(polygon) {
     if (Director.polygonBank.has(polygon.name)) throw new Error(`Director.addPolygon: Polygon [${polygon.name} already exists.`);
     Director.polygonBank.set(polygon.name, polygon);
@@ -299,8 +163,8 @@ export default class Director {
   static checkMouseGuiInteraction() {
     let guiInteraction = false;
     for (let guiControl of Director.gui.controls) {
-      if ((guiControl.type === 'button' || guiControl.type === 'list')) {        
-        if (guiControl.visible && guiControl.button.checkForMouse(Director.view.mouse)){
+      if ((guiControl.type === 'button' || guiControl.type === 'list')) {
+        if (guiControl.visible && guiControl.button.checkForMouse(Director.view.mouse)) {
           guiInteraction = true;
           //Note: Do not break out of the loop here. Testing the other controls is necessary to let them de-hover themselves.
         }
