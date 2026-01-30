@@ -152,6 +152,6 @@ export default class View {
       this.screenCenter.y = this.canvas.height / 2;
     }
     this.#calcBounds();
-    Director.gui.resize();
+    Director.GUI.resize();
   }
 }
