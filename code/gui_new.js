@@ -31,29 +31,34 @@ export default class GUI {
   }
   static isControl(element) {
     return Check.obj(element, GUIElement);
-  }
-  static draw() { }
+  }  
   static resize() {
-    if (typeof GUI.renderer === 'undefined') GUI.renderer = new Draw(view.context); //called from view.resize (so a good 
     //Don't resize 'float' -floating panes are dismissed 
     //if a window is resized so they don't care..
-    GUI.panels['top'].recaclulate();
-    GUI.panels['bottom'].recalculate();
-    GUI.panels['left'].recalculate();
-    GUI.panels['right'].recalculate();
-    GUI.panels['top'].draw();
-    GUI.panes['bottom'].draw();
-    GUI.panels['left'].draw();
-    GUI.panels['right'].draw();
+    console.log ('resizing gui..');
+    GUI.panels.get('top').recalculate();
+    console.log ('top.offset = '+GUI.panels.get('top').offset);
+    GUI.panels.get('bottom').recalculate();
+    GUI.panels.get('left').recalculate();
+    GUI.panels.get('right').recalculate();
+    GUI.panels.get('top').draw();
+    GUI.panels.get('bottom').draw();
+    GUI.panels.get('left').draw();
+    GUI.panels.get('right').draw();
   }
-
+  static draw( ) {
+    GUI.panels.get('top').draw(); 
+    GUI.panels.get('bottom').draw();
+    GUI.panels.get('left').draw();
+    GUI.panels.get('right').draw();
+  }
   static addText(location, text, appearance, shadowAppearance) {
-    let panel = this.panels.get(location);
-    this.elements.push(panel.addText(text, appearance, shadowAppearance));
+    let panel = GUI.panels.get(location);
+    GUI.elements.push(panel.addText(text, appearance, shadowAppearance));
   }
-  addButton(locationtext, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value) {
-    let panel = this.panels.get(location);
-    this.elements.push(panel.addButton(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value));
+  static addButton(location, text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value) {
+    let panel = GUI.panels.get(location);
+    GUI.elements.push(panel.addButton(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value));
   }
   addList() { }
 }

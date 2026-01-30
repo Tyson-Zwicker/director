@@ -3,6 +3,7 @@ import Button from './button.js';
 import Point from './point.js';
 import Check from './check.js';
 import GUI from './gui_new.js';
+import GUIElement from './guielement.js';
 import Director from './director.js';
 
 export default class GUIPanel {
@@ -112,14 +113,15 @@ export default class GUIPanel {
         break;
       case 'left':
         this.direction = new Point(0, 1);
-        this.boundry = new Point(
+        this.boundry = new Boundry(
           0, GUI.rowHeight,
           GUI.columnWidth, height - GUI.rowHeight
         );
+        console.log (this.boundry);
         this.offset = new Point(this.boundry.x1, this.boundry.y1);
       case 'right':
         this.direction = new Point(0, 1);
-        this.boundry(
+        this.boundry = new Boundry(
           width - GUI.columnWidth, GUI.rowHeight,
           width, height - GUI.rowHeight
         );
@@ -133,7 +135,6 @@ export default class GUIPanel {
     if (direction === 'up' || direction === 'down') {
       //They're going up and down so width is based on width of spawner..
       return listElement.bounds.width;
-      height+=listElements.bounds.hieght;
     }else{
       //They're going go to be based on column Width x items.;
         return GUI.columnWidth * listElement.items.length;
