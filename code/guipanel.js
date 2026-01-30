@@ -1,20 +1,21 @@
 import Boundry from './boundry.js';
+import Button from './button.js';
 import Point from './point.js';
 import Check from './check.js';
-import GUI from './gui.js';
+import GUI from './gui_new.js';
 import Director from './director.js';
 
-class GUIPanel {
+export default class GUIPanel {
   elements = [];
   listElements = new Map();
   listPanel = undefined; //showList sets this..
   constructor(location, parentElement) {
-    if (!Check.str(location) || !GUI.locations.contains(location)) throw new Error(`GUIPanel.constructor: location is invalid [${location}]`);
+    if (!Check.str(location) || !GUI.locations.includes(location)) throw new Error(`GUIPanel.constructor: location is invalid [${location}]`);
     this.location = location;
     this.activeList = undefined;
-    if (location !== 'float') this.recalculate(); //Sets direction, boundry and offset.
-    else if (location !== 'float') this.calculateFloat(parentElement);
+    if (location === 'float') this.calculateFloat(parentElement);//DO NOT calc normal panes yet..the view isn't ready..
   }
+
 
   draw() {
     let cursor = Point.from(this.offset);
@@ -29,21 +30,27 @@ class GUIPanel {
       cursor.y += direction.y * (gap + element.bounds.height);
     }
   }
-  
+
   showList(listElement) {
     let floatingPanel = new Panel('float', listElement);
     this.listPanel = floatingPanel;
     this.activeList = listElement;
+    for (let element of this.elements) element.active = true; //reactive the panels items..
+    this.calculateFloat();
+    this.recalculate();
+
   }
-  
+
   hideList() {
     this.activeList = undefined;
+    for (let element of this.elements) element.active = false; //deactive everything- floating list panel is active now..
     this.floatingPanel = undefined;
+    this.recalculate;
   }
-  
+
   calculateFloat(items, direction, listElement) {
-    let itemsWidth = this.#getFloatElementsCollectiveWidth(direction);
-    let itemsHeight = this.#getFloatElementsCollectiveHeight(direction);
+    let itemsWidth = this.#getFloatElementsCollectiveWidth(direction,listElements);
+    let itemsHeight = this.#getFloatElementsCollectiveHeight(direction.listElements);
     let elementBounds = listElement.bounds;
     if (direction === 'up') {
       direction = new Point(0, 1);
@@ -80,13 +87,13 @@ class GUIPanel {
       this.offset = new Point(elementBounds.x2, elementBounds.y1);
     }
   }
-  
+
   recalculate() {
     this.activeList = undefined; //If a list was opened, close it when they start fiddling with the window..
     let width = Director.view.canvas.width;
     let height = Director.view.canvas.height;
     let itemsWidth = this.#getElementsCollectiveWidth();
-    let itemsHeight = this.#getElementsCollectiveHeight();    
+    let itemsHeight = this.#getElementsCollectiveHeight();
     switch (this.location) {
       case 'top':
         this.direction = new Point(1, 0);
@@ -120,33 +127,65 @@ class GUIPanel {
         this.offset = new Point(this.boundry.x1, this.boundry.y1);
     }//end switch
   }
-  
-  #getFloatElementsCollectiveWidth(direction) {
-    if (direction ==='up' || direction ==='down'){
-//TODO: finish.
+
+
+  #getFloatElementsCollectiveWidth(direction,listElement) {    
+    let width =0; 
+    if (direction === 'up' || direction === 'down') {
+      //They're going up and down so width is based on width of spawner..
+      return listElement.bounds.width;
+      height+=listElements.bounds.hieght;
+    }else{
+      //They're going go to be based on column Width x items.;
+        return GUI.columnWidth * listElement.items.length;
     }
   }
-  
-  #getFloatElementsCollectiveHeight(direction) {
-//TODO: finish..
+
+  #getFloatElementsCollectiveHeight(direction,listElement) {
+    let hieght=0;
+   if (direction === 'up' || direction === 'down') {
+      //They're going up and down so height is row Height x number of items..
+      return GUI.rowHeight * listElement.items.length;      
+    }else{
+      //Its going left to right so height if based on a single spawners height
+      return listElement.bounds.height;
+    }
   }
-  
+
   #getElementsCollectiveWidth() {
     if (this.location === 'top' || this.location === 'bottom') {
       let w = 0;
-      for (let element in elements) w += element.bounds.width;
+      for (let element of this.elements) w += element.bounds.width;
       return w;
     } else if (this.location === 'left' || this.location === 'right') {
       return GUI.columnWidth;
     }
   }
-  
+
   #getElementsCollectiveHeight() {
     if (this.location === 'top' || this.location === 'bottom') {
       return GUI.columnWidth;
     } else if (this.location === 'left' || this.location === 'right') {
       let h = 0;
-      for (let element in elements) h += element.bounds.height;
+      for (let element of this.elements) h += element.bounds.height;
     }
   }
+
+  //constructor (direction, text, appearance, shadowAppearance, hoverAppearance, pressedAppearance){
+  addText(direction, text, appearance, shadowAppearance) {
+    let textElement = new GUIElement(direction, text, appearance, shadowAppearance);
+    this.elements.push(textElement);
+  }
+  addButton(direction, text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value) {
+    let buttonElement = new GUIElement(direction, text, appearance, shadowAppearance);
+    let button = new Button(hoveredAppearance, pressedAppearance, fn, toggle, value);
+    button.owner = buttonElement;
+    buttonElement.button = button;
+  }
+  //TODO: add lists..
+  addList(direction, text, appearance, shadowAppearance) {
+
+  }
+  getListItem() { }
+
 }
