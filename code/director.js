@@ -162,7 +162,7 @@ export default class Director {
   static checkMouseGuiInteraction() {
 
     let guiInteraction = false;
-    for (let guiControl of GUI.controls) {
+    for (let guiControl of GUI.elements) {
       if ((guiControl.type === 'button' || guiControl.type === 'list')) {
         if (guiControl.active && guiControl.button.checkForMouse(Director.view.mouse)) {
           guiInteraction = true;

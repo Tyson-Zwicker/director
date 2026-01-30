@@ -11,11 +11,10 @@ export default class GUIPanel {
   listPanel = undefined; //showList sets this..
   constructor(location, parentElement) {
     if (!Check.str(location) || !GUI.locations.includes(location)) throw new Error(`GUIPanel.constructor: location is invalid [${location}]`);
-    this.location = location;
+    this.location = location;   
     this.activeList = undefined;
     if (location === 'float') this.calculateFloat(parentElement);//DO NOT calc normal panes yet..the view isn't ready..
   }
-
 
   draw() {
     let cursor = Point.from(this.offset);
@@ -172,18 +171,26 @@ export default class GUIPanel {
   }
 
   //constructor (direction, text, appearance, shadowAppearance, hoverAppearance, pressedAppearance){
-  addText(direction, text, appearance, shadowAppearance) {
+  addText(text, appearance, shadowAppearance) {
+    let direction ='left'; //Not the same as the point vector "this.direction"
+    if (location==='right' ||this.location === 'left') direction ='down';
     let textElement = new GUIElement(direction, text, appearance, shadowAppearance);
+    textElement.type='text';
     this.elements.push(textElement);
+    return textElement;
   }
-  addButton(direction, text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value) {
+  addButton(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value) {
+    let direction ='left'; //Not the same as the point vector "this.direction"
+    if (location==='right' ||this.location === 'left') direction ='down';    
     let buttonElement = new GUIElement(direction, text, appearance, shadowAppearance);
+    buttonElement.type='button';
     let button = new Button(hoveredAppearance, pressedAppearance, fn, toggle, value);
     button.owner = buttonElement;
     buttonElement.button = button;
+    return buttonElement;
   }
   //TODO: add lists..
-  addList(direction, text, appearance, shadowAppearance) {
+  addList(text, appearance, shadowAppearance) {
 
   }
   getListItem() { }
