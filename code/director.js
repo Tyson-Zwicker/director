@@ -36,7 +36,7 @@ export default class Director {
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
     Director.keyboard = new Keyboard();
-    GUI.initialize(160, 40, 5, 5,15,'monospace');
+    GUI.initialize(160, 40, 2, 20 ,15,'monospace');
     GUI.resize();
   }
   static addPolygon(polygon) {

@@ -24,9 +24,9 @@ export default class GUIElement {
     let drawer = new Draw (Director.view.context);
     let textSize = drawer.getTextSize(text, GUI.fontSize, GUI.fontName);
     if (direction ==='up' || direction ==='down'){
-      return new Boundry (0,0,GUI.columnWidth, textSize.height);
+      return new Boundry (0,0,GUI.columnWidth, textSize.height+GUI.padding);
     }else{
-      return new Boundry (0,0,textSize.width, GUI.rowHeight);
+      return new Boundry (0,0,textSize.width+GUI.padding, GUI.rowHeight);
     }
   }
 }

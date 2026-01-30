@@ -35,22 +35,17 @@ export default class GUI {
   static resize() {
     //Don't resize 'float' -floating panes are dismissed 
     //if a window is resized so they don't care..
-    console.log ('resizing gui..');
     GUI.panels.get('top').recalculate();
-    console.log ('top.offset = '+GUI.panels.get('top').offset);
     GUI.panels.get('bottom').recalculate();
     GUI.panels.get('left').recalculate();
     GUI.panels.get('right').recalculate();
-    GUI.panels.get('top').draw();
-    GUI.panels.get('bottom').draw();
-    GUI.panels.get('left').draw();
-    GUI.panels.get('right').draw();
+    GUI.draw();
   }
   static draw( ) {
-    GUI.panels.get('top').draw(); 
-    GUI.panels.get('bottom').draw();
-    GUI.panels.get('left').draw();
-    GUI.panels.get('right').draw();
+    GUI.panels.get('top').drawPanel(); 
+    GUI.panels.get('bottom').drawPanel();
+    GUI.panels.get('left').drawPanel();
+    GUI.panels.get('right').drawPanel();
   }
   static addText(location, text, appearance, shadowAppearance) {
     let panel = GUI.panels.get(location);
