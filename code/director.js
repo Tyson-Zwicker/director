@@ -152,7 +152,7 @@ export default class Director {
       if (
         typeof actor.button === 'object' &&
         Director.view.canSee(actor.position) &&
-        actor.button.checkForMouse(Director.view.mouse)
+        actor.button.checkForMouseonActor(Director.view.mouse)
       ) {
         actorMouseInteraction = true;
         break;
@@ -163,9 +163,9 @@ export default class Director {
   static checkMouseGuiInteraction() {
 
     let guiInteraction = false;
-    for (let guiControl of GUI.elements) {
-      if ((guiControl.type === 'button' || guiControl.type === 'list')) {
-        if (guiControl.active && guiControl.button.checkForMouse(Director.view.mouse)) {
+    for (let element of GUI.elements) {
+      if ((element.type === 'button' || element.type === 'list')) {      
+        if (element.active && element.button.checkForMouseOnGUI(Director.view.mouse)) {
           guiInteraction = true;
           //Note: Do not break out of the loop here. Testing the other controls is necessary to let them de-hover themselves.
         }

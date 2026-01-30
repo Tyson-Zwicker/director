@@ -21,7 +21,7 @@ export default class GUIPanel {
   drawPanel() {
     if (this.elements.length > 0) {
       let drawer = new Draw(Director.view.context);
-      drawer.fillBox(this.boundry.x1, this.boundry.y1, this.boundry.x2, this.boundry.y2, '#096');
+      drawer.fillBox(this.boundry.x1, this.boundry.y1, this.boundry.x2, this.boundry.y2, '#022');
       let cursor = Point.from(this.offset);
       for (let element of this.elements) {
         if (element.type === 'list' && element.listName === this.activeList) {
@@ -51,6 +51,9 @@ export default class GUIPanel {
       element.bounds.x2 + cursor.x, element.bounds.y2 + cursor.y,
       element.text,
       GUI.fontSize, GUI.fontName, appearance);
+      element.drawnBounds = new Boundry (
+        element.bounds.x1 + cursor.x, element.bounds.y1 + cursor.y,
+        element.bounds.x2 + cursor.x, element.bounds.y2 + cursor.y);
   }
   showList(listElement) {
     let floatingPanel = new Panel('float', listElement);
@@ -209,8 +212,10 @@ export default class GUIPanel {
     if (location === 'right' || this.location === 'left') direction = 'down';
     let buttonElement = new GUIElement(direction, text, appearance, shadowAppearance);
     buttonElement.type = 'button';
+    this.elements.push (buttonElement);
+    //extra button stuff..
     let button = new Button(hoveredAppearance, pressedAppearance, fn, toggle, value);
-    button.owner = buttonElement;
+    button.guiElement = buttonElement;
     buttonElement.button = button;
     return buttonElement;
   }

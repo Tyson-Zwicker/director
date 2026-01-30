@@ -90,16 +90,12 @@ export default function init() {
   let text = '`_ABC_123` _'
   let ts = 16;
   let size = draw.getTextSize(text, ts, 'monospace');
-  console.log(size);
   draw.textBox(400, 5, 400 + size.width, 45, text, ts, 'monospace', appearance);
-
   draw.fillBox (400,200,450,250,'#ff0');
-  
   let appearance2 = new Appearance('test2', '#000', '#fff', '#f0f', 2);
    text = 'asdkl_';
   ts = 20;
   size = draw.getTextSize(text, ts, 'Arial');
-  console.log(size);
   draw.textBox(600, 5, 600 + size.width, 45, text, ts, 'monospace', appearance2);
 }
 

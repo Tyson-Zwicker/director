@@ -1,41 +1,43 @@
 import Director from '../../code/director.js';
 import ActorType from '../../code/actortype.js';
 import Appearance from '../../code/appearance.js';
-import Color from '../../code/color.js';
 import Polygon from '../../code/polygon.js';
 import Rnd from '../../code/rnd.js';
 import Boundry from '../../code/boundry.js';
+import GUI from '../../code/gui_new.js';
+
 document.addEventListener('DOMContentLoaded', function () {
   Director.initialize();
   makeData();
   makeGUI();
   Director.view.backgroundColor = '#505';
   Director.run();
-
 });
 
 function makeGUI() {
   let nrm = new Appearance('app', '#050', '#0a0', '#fff');
+  let shd = new Appearance('shd', '#343', '#565', '#999');
   let hov = new Appearance('hov', '#070', '#0f0', '#ffa');
   let prs = new Appearance('prs', '#770', '#5f0', '#000');
-  Director.gui.addText('top', 'Top Text 1', nrm);
-  Director.gui.addText('top', 'Top Text 2', nrm);
-  Director.gui.addText('left', 'Left Text 1', nrm);
-  Director.gui.addText('left', 'Left Text 2', nrm);
-  Director.gui.addButton('left', 'Click Me', nrm, hov, prs, false, (owner) => { console.log(owner); alert(`${owner}`) }, 'Hello');
-  Director.gui.addButton('left', 'Click Me2', nrm, hov, prs, false, (owner) => { console.log(owner); alert(`${owner}`)},'World');
-
-  Director.gui.addText('left', 'Left Text 3', nrm);
-
-  //make buttons for list items..
-  // gui.getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn) 
-  let item1 = Director.gui.getButton('Option 1', nrm, hov, prs, false, undefined,'1'); //List items have there own function
-  let item2 = Director.gui.getButton('Option 2', nrm, hov, prs, false, undefined,'2'); //that overwrites whatever is passed
-  let item3 = Director.gui.getButton('Option 3', nrm, hov, prs, false, undefined,'3'); //in the constructor.  It just calls back to the list.
-  let listItems = [item1, item2, item3];
-  Director.gui.addList('left', 'Choose:', nrm, hov, prs, 'testlist', listItems,'2');
-  Director.gui.addText('bottom', 'Bottom Text 1', nrm);
-  Director.gui.addText('bottom', 'Bottom Text 2', nrm);
+  GUI.addText('top', 'Top Text 1', nrm, shd);
+  GUI.addText('top', 'Top Text 2', nrm, shd);
+  GUI.addText('left', 'Left Text 1', nrm, shd);
+  GUI.addText('left', 'Left Text 2', nrm, shd);
+  GUI.addButton('left', 'Click Me', nrm, shd, hov, prs, false, (response) => { console.log(response); alert(`${response.owner} says ${response.value}`) }, 'Hello');
+  GUI.addButton('left', 'Click Me 2', nrm, shd, hov, prs, false, (response) => { console.log(response); alert(`${response.owner} says ${response.value}`)}, 'World');
+  GUI.addText('left', 'Left Text 3', nrm, shd);
+ 
+  /* Test once buttons work..
+    //make buttons for list items..
+    // gui.getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn) 
+    let item1 = Director.gui.getButton('Option 1', nrm, hov, prs, false, undefined,'1'); //List items have there own function
+    let item2 = Director.gui.getButton('Option 2', nrm, hov, prs, false, undefined,'2'); //that overwrites whatever is passed
+    let item3 = Director.gui.getButton('Option 3', nrm, hov, prs, false, undefined,'3'); //in the constructor.  It just calls back to the list.
+    let listItems = [item1, item2, item3];
+    Director.gui.addList('left', 'Choose:', nrm, hov, prs, 'testlist', listItems,'2');
+    Director.gui.addText('bottom', 'Bottom Text 1', nrm);
+    Director.gui.addText('bottom', 'Bottom Text 2', nrm);
+    */
 }
 
 function makeData() {
@@ -56,8 +58,8 @@ function makeData() {
     Director.addActorType(actorType);
   }
   //Make some actors.
-  let boundry = new Boundry(-5000, -5000, 5000, 5000);
-  for (let i = 0; i < 3000; i++) {
+  let boundry = new Boundry(-1000, -1000, 1000, 1000);
+  for (let i = 0; i < 500; i++) {
     let actorType = Director.getActorType(`acttype${Rnd.int(0, 9)}`);
     let appearance = Director.getAppearance(`app${Rnd.int(0, 10)}`);
     let actor = actorType.createActorInstance(`actor${i}`,

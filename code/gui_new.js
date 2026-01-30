@@ -26,8 +26,8 @@ export default class GUI {
     GUI.panels.set('right', new GUIPanel('right'));
     GUI.elements = [];
   }
-  static isMouseIn(GUIElement, mouse) {
-    return GUIElement.drawnBounds.isPointInside(mouse.x, mouse.y);
+  static isMouseIn(element, mouse) {
+    return element.drawnBounds.isPointInside(mouse.x, mouse.y);
   }
   static isControl(element) {
     return Check.obj(element, GUIElement);
