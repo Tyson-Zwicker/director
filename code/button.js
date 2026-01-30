@@ -1,6 +1,8 @@
 import Point from './point.js';
 import GUI from './gui.js';
 import Appearance from './appearance.js';
+import Check from './check.js';
+
 export default class Button {
   actor = undefined;
   guiControl = undefined;
@@ -65,16 +67,19 @@ export default class Button {
     if (typeof this.actor !== 'undefined' && this.actor instanceof Actor) buttonOwner = this.actor;
     else if (typeof this.guiControl !== 'undefined') buttonOwner = this.guiControl;
     else throw new Error('Button.#click:  This button has been clicked but it has no owner.');
-    
+    let r = {"owner":buttonOwner, "value":this.value}
     if (!this.toggle) {
       if (typeof this.clickFn === 'function') {
-        this.clickFn({"owner":buttonOwner, "value":this.value});
+        let r = 
+        this.clickFn(r);
+        if (this.originalFn) this.originalFn (r)
       }
     } else {
       this.clicked = !this.clicked;
       if (this.clicked) {
         if (typeof this.clickFn === 'function') {
-          this.clickFn({"owner":buttonOwner, "value":this.value});
+          this.clickFn(r);//check for 'original function too.'
+          if (this.originalFn) this.originalFn (r);
         }
       }
     }

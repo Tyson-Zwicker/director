@@ -13,7 +13,7 @@ import ParticleEffect from './particleeffect.js';
 import RadialEffect from './radialeffect.js';
 
 import Keyboard from './keyboard.js';
-import GUI from './gui.js';
+import GUI from './gui_new.js';
 
 export default class Director {
   static initialize() {
@@ -36,9 +36,8 @@ export default class Director {
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
     Director.keyboard = new Keyboard();
-    Director.gui = new GUI(160, 40, 5, 5, view);//TODO: figure out good values (or better a function) to set these to..    
+    GUI.initialize(160, 40, 5, 5,15,'monospace');
   }
-
   static addPolygon(polygon) {
     if (Director.polygonBank.has(polygon.name)) throw new Error(`Director.addPolygon: Polygon [${polygon.name} already exists.`);
     Director.polygonBank.set(polygon.name, polygon);
@@ -161,10 +160,11 @@ export default class Director {
     return actorMouseInteraction;
   }
   static checkMouseGuiInteraction() {
+
     let guiInteraction = false;
-    for (let guiControl of Director.gui.controls) {
+    for (let guiControl of GUI.controls) {
       if ((guiControl.type === 'button' || guiControl.type === 'list')) {
-        if (guiControl.visible && guiControl.button.checkForMouse(Director.view.mouse)) {
+        if (guiControl.active && guiControl.button.checkForMouse(Director.view.mouse)) {
           guiInteraction = true;
           //Note: Do not break out of the loop here. Testing the other controls is necessary to let them de-hover themselves.
         }
@@ -192,8 +192,7 @@ export default class Director {
       }
     }
     Director.#draw_foregroundEffects(delta);
-
-    Director.gui.draw();
+    GUI.draw();
     this.#drawMillisInTheCorner(delta);
   }
   static #drawMillisInTheCorner(delta) {
