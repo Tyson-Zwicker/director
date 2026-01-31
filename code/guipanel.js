@@ -15,18 +15,49 @@ export default class GUIPanel {
     if (!Check.str(location) || !GUI.locations.includes(location)) throw new Error(`GUIPanel.constructor: location is invalid [${location}]`);
     this.location = location;
     this.activeList = undefined;
-    if (location === 'float') this.calculateFloat(parentElement);//DO NOT calc normal panes yet..the view isn't ready..
+    if (location === 'float') {
+      let direction;
+      if (parentElement.panel.location === 'top') direction = 'down';
+      if (parentElement.panel.location === 'bottom') direction = 'up';
+      if (parentElement.panel.location === 'left') direction = 'right';
+      if (parentElement.panel.location === 'right') direction = 'left';
+      console.log(`GUIPANEL CONSTRUCTOR PARENT's PANEL ${parentElement.panel.location} so my direction = ${direction}`);
+      let { offset, boundry } = this.calculateFloat(parentElement, direction);
+      this.offset = offset;
+      this.boundry = boundry;
+      //1. Make the buttonElement for the list item..
+      for (item in parentElement.listItemData) {
+        let itemElement = new GUIElement(direction, item.text, parentElement.appearance, parentElement.shadowAppearance);
+        itemElement.type = 'button';
+        itemElement.callbackPanel = parentElement.panel;
+        let callbackFn = function (result) {
+          result.owner.callbackPanel.hideList(result.value);
+        }
+        let button = new Button(
+          parentElement.button.hoveredAppearance,
+          parentElement.button.pressedAppearance,
+          callbackFn, false, item.value);
+        button.guiElement = itemElement;
+        itemElement.button = button;
+        this.elements.push(itemElement);
+      }
+    }
   }
 
   drawPanel() {
+    if (this.location === 'float') {
+      console.log(this);
+    }
     if (this.elements.length > 0) {
       let drawer = new Draw(Director.view.context);
       drawer.fillBox(this.boundry.x1, this.boundry.y1, this.boundry.x2, this.boundry.y2, '#022');
       let cursor = Point.from(this.offset);
       for (let element of this.elements) {
-        if (element.type === 'list' && element.listName === this.activeList) {
-          this.drawElement(drawer, element, cursor, this.activeList !== undefined);
-          this.listPanel.draw(); ////TODO: this iscalling itself to draw the list's floating panel..List panel is managed by show/hide List..
+        if (element.type === 'list' && element === this.activeList) {
+          this.drawElement(drawer, element, cursor, true); //So..draw the list button and now..
+          //1. Create a floating pane. Its provide the listElement that spawned it, and the location of the spawning panel.
+          this.listPanel.drawPanel();
+
         } else {
           this.drawElement(drawer, element, cursor, this.activeList !== undefined);//passing where to start drawing and if it should look "shadowed" or not.
         }
@@ -51,65 +82,125 @@ export default class GUIPanel {
       element.bounds.x2 + cursor.x, element.bounds.y2 + cursor.y,
       element.text,
       GUI.fontSize, GUI.fontName, appearance);
-      element.drawnBounds = new Boundry (
-        element.bounds.x1 + cursor.x, element.bounds.y1 + cursor.y,
-        element.bounds.x2 + cursor.x, element.bounds.y2 + cursor.y);
+    element.drawnBounds = new Boundry(
+      element.bounds.x1 + cursor.x, element.bounds.y1 + cursor.y,
+      element.bounds.x2 + cursor.x, element.bounds.y2 + cursor.y);
   }
   showList(listElement) {
-    let floatingPanel = new Panel('float', listElement);
+    console.log(`ONLY LIST HERE CALLS SHOWLIST PANEL's LOCATION:${listElement.panel.location}`);
+    let floatingPanel = new GUIPanel('float', listElement); //floating panel just needs items..
+    console.log('new floating panel:');
+    console.log(floatingPanel);
+    Director.continueAnimationLoop = false;
     this.listPanel = floatingPanel;
     this.activeList = listElement;
-    for (let element of this.elements) element.active = true; //reactive the panels items..
-    this.calculateFloat();
-    this.recalculate();
-
+    for (let element of this.elements) element.active = false; //deactive everything so list is only active elemenet..    
   }
 
-  hideList() {
+  hideList(selectedValue) {
+    this.activeList.value = selectedValue;
     this.activeList = undefined;
-    for (let element of this.elements) element.active = false; //deactive everything- floating list panel is active now..
+    for (let element of this.elements) element.active = true; //Re-active everything- floating panel is gone..
     this.floatingPanel = undefined;
     this.recalculate;
   }
 
-  calculateFloat(items, direction, listElement) {
-    let itemsWidth = this.#getFloatElementsCollectiveWidth(direction, listElements);
-    let itemsHeight = this.#getFloatElementsCollectiveHeight(direction.listElements);
-    let elementBounds = listElement.bounds;
-    if (direction === 'up') {
+  addText(text, appearance, shadowAppearance) {
+    let direction = 'left'; //Not the same as the point vector "this.direction"
+    if (location === 'right' || this.location === 'left') direction = 'down';
+    let textElement = new GUIElement(direction, text, appearance, shadowAppearance);
+    textElement.type = 'text';
+    this.elements.push(textElement);
+    return textElement;
+  }
+  addButton(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value) {
+    let direction = 'left'; //Not the same as the point vector "this.direction"
+    if (location === 'right' || this.location === 'left') direction = 'down';
+    let buttonElement = new GUIElement(direction, text, appearance, shadowAppearance);
+    buttonElement.type = 'button';
+    this.elements.push(buttonElement);
+    //extra button stuff..
+    let button = new Button(hoveredAppearance, pressedAppearance, fn, toggle, value);
+    button.guiElement = buttonElement;
+    buttonElement.button = button;
+    return buttonElement;
+  }
+  addList(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, listItems, defaultValue) {
+    let direction = 'left'; //Not the same as the point vector "this.direction"
+    if (location === 'right' || this.location === 'left') direction = 'down';
+    let listElement = new GUIElement(direction, text, appearance, shadowAppearance);
+    listElement.listItemsData = listItems;//{text, value}
+    listElement.type = "list"
+    listElement.panel = this;
+    console.log(`ONLY LIST HERE HAS A PANEL LOCATION:${listElement.panel.location}`);
+    this.elements.push(listElement);
+    let listCallback = (e) => {
+      e.owner.panel.showList(e.owner);
+    }
+    let listButton = new Button(hoveredAppearance, pressedAppearance, listCallback, false, defaultValue);
+    listButton.guiElement = listElement;;
+    listElement.button = listButton;
+    return listElement;
+  }
+  calculateFloat(listElement, dir) {
+    let itemsWidth = this.#getFloatElementsCollectiveWidth(dir, listElement);
+    let itemsHeight = this.#getFloatElementsCollectiveHeight(dir, listElement);
+    console.log('listElement= ');
+    console.log(listElement);
+    console.log('itemsWidth calculated:' + itemsWidth);
+    console.log('itemsHeight calculated:' + itemsHeight);
+    console.log('direction given: ' + dir);
+    let direction = undefined;
+    let boundry = undefined;
+    let offset = undefined;
+    if (dir === 'up') {
       direction = new Point(0, 1);
-      this.boundry = new Boundry(
-        elementBounds.x1, elementBounds.y1 - itemsHeight,
-        elementBounds.x1 + itemsWidth, elementBounds.y1
-      );
-      this.offset = new Point(elementBounds.x1, elementBounds.y1);
-
+        let x1 = listElement.drawnBounds.x1 - itemsWidth;
+      let y1 = listElement.drawnBounds.y1;
+      let x2 = listElement.drawnBounds.x1;
+      let y2 = listElement.drawnBounds.y1 + GUI.columnHeight;
+      boundry = new Boundry(x1,y1,x2,y2);
+      offset = new Point(listElement.drawnBounds.x1, listElement.drawnBounds.y1);
     }
-    if (direction === 'down') {
+    if (dir === 'down') {
       direction = new Point(0, -1);
-      this.boundry = new Boundry(
-        elementBounds.x1, elementBounds.y2,
-        elementBounds.x1 + itemsWidth, elementBounds.y2 + itemsHeight
-      );
-      this.offset = new Point(elementBounds.x1, elementBounds.y2);
-    }
-    if (direction === 'left') {
-      direction = new Point(1, 0);
-      this.boundry = new Boundry(
-        elementBounds.x1 - itemsWidth, elementBounds.y1,
-        elementBounds.x1, elementBounds.y1 + GUI.columnHeight,
+      let x1 = listElement.drawnBounds.x1 - itemsWidth;
+      let y1 = listElement.drawnBounds.y1;
+      let x2 = listElement.drawnBounds.x1;
+      let y2 = listElement.drawnBounds.y1 + GUI.columnHeight;
+      boundry = new Boundry(x1, y1, x2, y2);
 
-      );
-      this.offset = new Point(elementBounds.x1, elementBounds.y1);
+      offset = new Point(listElement.drawnBounds.x1, listElement.drawnBounds.y2);
     }
-    if (direction === 'right') {
+    if (dir === 'left') {
+      direction = new Point(1, 0);
+      let x1 = listElement.drawnBounds.x1 - itemsWidth;
+      let y1 = listElement.drawnBounds.y1;
+      let x2 = listElement.drawnBounds.x1;
+      let y2 = listElement.drawnBounds.y1 + GUI.columnHeight;
+      boundry = new Boundry(x1, y1, x2, y2);
+      offset = new Point(listElement.drawnBounds.x1, listElement.drawnBounds.y1);
+    }
+    if (dir === 'right') {
       direction = new Point(-1, 0);
-      this.boundry = new Boundry(
-        elementBounds.x2, elementBounds.y1,
-        elementBounds.x2 + itemsWidth, elementBounds.y1 + GUI.columnHeight,
-      );
-      this.offset = new Point(elementBounds.x2, elementBounds.y1);
+      let x1 = listElement.drawnBounds.x2;
+      let y1 = listElement.drawnBounds.y1;
+      let x2 = listElement.drawnBounds.x2 + itemsWidth;
+      let y2 = listElement.drawnBounds.y1 + GUI.columnHeight;
+      console.log(x1, y1, x2, y2);
+      boundry = new Boundry(x1, y1, x2, y2)
+      offset = new Point(listElement.drawnBounds.x2, listElement.drawnBounds.y1);
+      console.log('SETTING :');
+      console.log(listElement);
+      console.log(offset);
+      console.log(boundry);
+      console.log(direction);
     }
+    console.log('calculateFloat calculated: (offset&boundry&direction)');
+    console.log(offset);
+    console.log(boundry);
+    console.log(direction);
+    return { offset: offset, boundry: boundry, direction: direction };
   }
 
   recalculate() {
@@ -161,10 +252,10 @@ export default class GUIPanel {
     let width = 0;
     if (direction === 'up' || direction === 'down') {
       //They're going up and down so width is based on width of spawner..
-      return listElement.bounds.width;
+      return listElement.drawnBounds.width;
     } else {
       //They're going go to be based on column Width x items.;
-      return GUI.columnWidth * listElement.items.length;
+      return GUI.columnWidth * listElement.listItemsData.length;
     }
   }
 
@@ -172,10 +263,10 @@ export default class GUIPanel {
     let hieght = 0;
     if (direction === 'up' || direction === 'down') {
       //They're going up and down so height is row Height x number of items..
-      return GUI.rowHeight * listElement.items.length;
+      return GUI.rowHeight * listElement.listItemsData.length;
     } else {
       //Its going left to right so height if based on a single spawners height
-      return listElement.bounds.height;
+      return listElement.drawnBounds.height;
     }
   }
 
@@ -197,32 +288,4 @@ export default class GUIPanel {
       for (let element of this.elements) h += element.bounds.height;
     }
   }
-
-  //constructor (direction, text, appearance, shadowAppearance, hoverAppearance, pressedAppearance){
-  addText(text, appearance, shadowAppearance) {
-    let direction = 'left'; //Not the same as the point vector "this.direction"
-    if (location === 'right' || this.location === 'left') direction = 'down';
-    let textElement = new GUIElement(direction, text, appearance, shadowAppearance);
-    textElement.type = 'text';
-    this.elements.push(textElement);
-    return textElement;
-  }
-  addButton(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value) {
-    let direction = 'left'; //Not the same as the point vector "this.direction"
-    if (location === 'right' || this.location === 'left') direction = 'down';
-    let buttonElement = new GUIElement(direction, text, appearance, shadowAppearance);
-    buttonElement.type = 'button';
-    this.elements.push (buttonElement);
-    //extra button stuff..
-    let button = new Button(hoveredAppearance, pressedAppearance, fn, toggle, value);
-    button.guiElement = buttonElement;
-    buttonElement.button = button;
-    return buttonElement;
-  }
-  //TODO: add lists..
-  addList(text, appearance, shadowAppearance) {
-
-  }
-  getListItem() { }
-
 }

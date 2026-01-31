@@ -55,5 +55,8 @@ export default class GUI {
     let panel = GUI.panels.get(location);
     GUI.elements.push(panel.addButton(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value));
   }
-  addList() { }
+  static addList(location, text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, listItems, defaultValue) { 
+    let panel = GUI.panels.get (location);
+    GUI.elements.push(panel.addList(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, listItems, defaultValue));
+  }
 }
