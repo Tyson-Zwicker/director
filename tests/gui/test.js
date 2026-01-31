@@ -24,20 +24,15 @@ function makeGUI() {
   GUI.addText('left', 'Left Text 1', nrm, shd);
   GUI.addText('left', 'Left Text 2', nrm, shd);
   GUI.addButton('left', 'Click Me', nrm, shd, hov, prs, false, (response) => { console.log(response); alert(`${response.owner} says ${response.value}`) }, 'Hello');
-  GUI.addButton('left', 'Click Me 2', nrm, shd, hov, prs, false, (response) => { console.log(response); alert(`${response.owner} says ${response.value}`)}, 'World');
+  GUI.addButton('left', 'Click Me 2', nrm, shd, hov, prs, false, (response) => { console.log(response); alert(`${response.owner} says ${response.value}`) }, 'World');
   GUI.addText('left', 'Left Text 3', nrm, shd);
- 
-  /* Test once buttons work..
-    //make buttons for list items..
-    // gui.getButton(label, normalAppearance, hoveredAppearance, pressedAppearance, toggle, fn) 
-    let item1 = Director.gui.getButton('Option 1', nrm, hov, prs, false, undefined,'1'); //List items have there own function
-    let item2 = Director.gui.getButton('Option 2', nrm, hov, prs, false, undefined,'2'); //that overwrites whatever is passed
-    let item3 = Director.gui.getButton('Option 3', nrm, hov, prs, false, undefined,'3'); //in the constructor.  It just calls back to the list.
-    let listItems = [item1, item2, item3];
-    Director.gui.addList('left', 'Choose:', nrm, hov, prs, 'testlist', listItems,'2');
-    Director.gui.addText('bottom', 'Bottom Text 1', nrm);
-    Director.gui.addText('bottom', 'Bottom Text 2', nrm);
-    */
+  let listOptions = [
+    {text:'Option A', value:'A'},
+    {text:'Option B', value:'B'},
+    {text:'Option C', value:'C'},
+    {text:'Option D', value:'D'}
+  ]
+  GUI.addList ('left','Choose',nrm,shd,hov,prs,listOptions,'C');
 }
 
 function makeData() {
