@@ -76,18 +76,15 @@ export default class Rnd {
     if (typeof min !== 'number') throw new Error(`Rnd.color: min [${min}] is not a number.`);
     let m = parseInt(min);
     if (m > 14 || m < 0) throw new Error(`Rnd.color: min [${min} must be between 0 and 1 (inclusive)`);
-    let r = Rnd.int(m, 15);
-    let g = Rnd.int(m, 15);
-    let b = Rnd.int(m, 15);
-    if (Rnd.int(0, 3) === 0) r = 0;
-    if (Rnd.int(0, 3) === 0) g = 0;
-    if (Rnd.int(0, 3) === 0) b = 0;
-    if (r + g + b ===0) {
-      let r = Rnd.int(m, 15);
-      let g = Rnd.int(m, 15);
-      let b = Rnd.int(m, 15);
-    }
-    return new Color(r, g, b);
+    let i = Rnd.int (6);
+    let a= Rnd.int (m,15);
+    let b =Rnd.int (m,15);
+    if (i===0) return new Color (a,0,0);
+    if (i===1) return new Color (0,a,0);
+    if (i===2) return new Color (0,0,a);
+    if (i===3) return new Color (a,0,b);
+    if (i===4) return new Color (b,a,0);
+    if (i===5) return new Color (0,b,a);
   }
   static colorAsHex(min) {
     return Rnd.color(min).asHex();
