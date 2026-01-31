@@ -21,12 +21,15 @@ export default class GUIPanel {
       if (parentElement.panel.location === 'bottom') direction = 'up';
       if (parentElement.panel.location === 'left') direction = 'right';
       if (parentElement.panel.location === 'right') direction = 'left';
-      console.log(`GUIPANEL CONSTRUCTOR PARENT's PANEL ${parentElement.panel.location} so my direction = ${direction}`);
       let { offset, boundry } = this.calculateFloat(parentElement, direction);
       this.offset = offset;
       this.boundry = boundry;
-      //1. Make the buttonElement for the list item..
-      for (item in parentElement.listItemData) {
+      console.log('listItemsData!');
+      console.log(parentElement.listItemsData);
+      console.log(parentElement);
+      for (let item of parentElement.listItemsData) {
+        console.log('the item is ');
+        console.log(item);
         let itemElement = new GUIElement(direction, item.text, parentElement.appearance, parentElement.shadowAppearance);
         itemElement.type = 'button';
         itemElement.callbackPanel = parentElement.panel;
@@ -41,11 +44,12 @@ export default class GUIPanel {
         itemElement.button = button;
         this.elements.push(itemElement);
       }
+      console.log('newly created with' + this.elements.length + " new items!");
     }
   }
 
   drawPanel() {
-    if (this.location === 'float') {
+    if (this.location === 'drawing float') {
       console.log(this);
     }
     if (this.elements.length > 0) {
@@ -54,8 +58,9 @@ export default class GUIPanel {
       let cursor = Point.from(this.offset);
       for (let element of this.elements) {
         if (element.type === 'list' && element === this.activeList) {
-          this.drawElement(drawer, element, cursor, true); //So..draw the list button and now..
-          //1. Create a floating pane. Its provide the listElement that spawned it, and the location of the spawning panel.
+          this.drawElement(drawer, element, cursor, true);
+          console.log('drawing list panel :');
+          console.log(this.listPanel);
           this.listPanel.drawPanel();
 
         } else {
@@ -87,12 +92,8 @@ export default class GUIPanel {
       element.bounds.x2 + cursor.x, element.bounds.y2 + cursor.y);
   }
   showList(listElement) {
-    console.log(`ONLY LIST HERE CALLS SHOWLIST PANEL's LOCATION:${listElement.panel.location}`);
-    let floatingPanel = new GUIPanel('float', listElement); //floating panel just needs items..
-    console.log('new floating panel:');
-    console.log(floatingPanel);
-    Director.continueAnimationLoop = false;
-    this.listPanel = floatingPanel;
+    let floatingPanel = new GUIPanel('float', listElement); //floating panel just needs items..    
+    this.listPanel = floatingPanel;    
     this.activeList = listElement;
     for (let element of this.elements) element.active = false; //deactive everything so list is only active elemenet..    
   }
@@ -132,7 +133,6 @@ export default class GUIPanel {
     listElement.listItemsData = listItems;//{text, value}
     listElement.type = "list"
     listElement.panel = this;
-    console.log(`ONLY LIST HERE HAS A PANEL LOCATION:${listElement.panel.location}`);
     this.elements.push(listElement);
     let listCallback = (e) => {
       e.owner.panel.showList(e.owner);
@@ -145,56 +145,44 @@ export default class GUIPanel {
   calculateFloat(listElement, dir) {
     let itemsWidth = this.#getFloatElementsCollectiveWidth(dir, listElement);
     let itemsHeight = this.#getFloatElementsCollectiveHeight(dir, listElement);
-    console.log('listElement= ');
-    console.log(listElement);
-    console.log('itemsWidth calculated:' + itemsWidth);
-    console.log('itemsHeight calculated:' + itemsHeight);
-    console.log('direction given: ' + dir);
     let direction = undefined;
     let boundry = undefined;
     let offset = undefined;
     if (dir === 'up') {
-      direction = new Point(0, 1);
-        let x1 = listElement.drawnBounds.x1 - itemsWidth;
-      let y1 = listElement.drawnBounds.y1;
-      let x2 = listElement.drawnBounds.x1;
-      let y2 = listElement.drawnBounds.y1 + GUI.columnHeight;
-      boundry = new Boundry(x1,y1,x2,y2);
+      direction = new Point(0, -1);
+      let x1 = listElement.drawnBounds.x1;
+      let y1 = listElement.drawnBounds.y1 - itemsHeight;
+      let x2 = x1 + itemsWidth;
+      let y2 = listElement.drawnBounds.y1;
+      boundry = new Boundry(x1, y1, x2, y2);
       offset = new Point(listElement.drawnBounds.x1, listElement.drawnBounds.y1);
     }
     if (dir === 'down') {
-      direction = new Point(0, -1);
-      let x1 = listElement.drawnBounds.x1 - itemsWidth;
-      let y1 = listElement.drawnBounds.y1;
-      let x2 = listElement.drawnBounds.x1;
-      let y2 = listElement.drawnBounds.y1 + GUI.columnHeight;
+      direction = new Point(0, 1);
+      let x1 = listElement.drawnBounds.x1;
+      let y1 = listElement.drawnBounds.y2;
+      let x2 = x1 + itemsWidth;
+      let y2 = listElement.drawnBounds.y2 + itemsHeight;
       boundry = new Boundry(x1, y1, x2, y2);
-
       offset = new Point(listElement.drawnBounds.x1, listElement.drawnBounds.y2);
     }
     if (dir === 'left') {
-      direction = new Point(1, 0);
+      direction = new Point(-1, 0);
       let x1 = listElement.drawnBounds.x1 - itemsWidth;
       let y1 = listElement.drawnBounds.y1;
       let x2 = listElement.drawnBounds.x1;
-      let y2 = listElement.drawnBounds.y1 + GUI.columnHeight;
+      let y2 = listElement.drawnBounds.y2;
       boundry = new Boundry(x1, y1, x2, y2);
       offset = new Point(listElement.drawnBounds.x1, listElement.drawnBounds.y1);
     }
     if (dir === 'right') {
-      direction = new Point(-1, 0);
+      direction = new Point(1, 0);
       let x1 = listElement.drawnBounds.x2;
       let y1 = listElement.drawnBounds.y1;
       let x2 = listElement.drawnBounds.x2 + itemsWidth;
-      let y2 = listElement.drawnBounds.y1 + GUI.columnHeight;
-      console.log(x1, y1, x2, y2);
+      let y2 = listElement.drawnBounds.y2;
       boundry = new Boundry(x1, y1, x2, y2)
       offset = new Point(listElement.drawnBounds.x2, listElement.drawnBounds.y1);
-      console.log('SETTING :');
-      console.log(listElement);
-      console.log(offset);
-      console.log(boundry);
-      console.log(direction);
     }
     console.log('calculateFloat calculated: (offset&boundry&direction)');
     console.log(offset);
