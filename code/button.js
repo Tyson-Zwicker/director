@@ -26,7 +26,7 @@ export default class Button {
     this.value = value;
   }
   checkForMouseOnActor(mouse) {
-    let insideBounds = insideBounds = this.actor.polygon.isPointIn(Point.from(mouse));
+    let insideBounds = this.actor.polygon.isPointIn(Point.from(mouse));
     return this.#doButton(insideBounds, mouse);//Do this even if NOT in bounds to allow others to de-hover..
   }
   checkForMouseOnGUI(mouse) {
