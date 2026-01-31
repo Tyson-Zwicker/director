@@ -1,9 +1,12 @@
 import Draw from '../../code/draw.js';
 import Color from '../../code/color.js';
 import Appearance from '../../code/appearance.js';
+import Boundry from '../../code/boundry.js';
 // ----------> PRIME MOVER <-------------
 init();
 export default function init() {
+  let b = new Boundry (-100,-100,100,100);
+  console.log (b);
   let canvas = document.getElementById('canvas');
   canvas.width = 800;
   canvas.height = 800;
