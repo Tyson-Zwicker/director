@@ -2,35 +2,34 @@ import Point from './point.js';
 export default class Boundry {
   constructor(x1, y1, x2, y2) {
     //Ensure (this.x1,this.y1) is upper right and (this.x2, this.y2) is lower left
-    if (!(typeof x1 ==='number' &&
-      typeof y1 ==='number' &&
-      typeof x2 ==='number' &&
-      typeof y2 ==='number')){
-        throw new Error (`One of the parameters is not a number x1 ${x1}, y1 ${y1}, x2 ${x2}, y2 ${y2}`);
-      }
+    if (!(typeof x1 === 'number' &&
+      typeof y1 === 'number' &&
+      typeof x2 === 'number' &&
+      typeof y2 === 'number')) {
+      throw new Error(`One of the parameters is not a number x1 ${x1}, y1 ${y1}, x2 ${x2}, y2 ${y2}`);
+    }
     if (x2 - x1 > 0 && y2 - y1 > 0) { //x1,y1 = upper left, and x2,y2 = bottom right..
       this.x1 = x1;
       this.x2 = x2;
       this.y1 = y1;
       this.y2 = y2;
-    }
-    if (x2 - x1 < 0 && y2 - y1 > 0) {  //x1,y1 = upper right, and x2,y2 = bottom left
+    } else if (x2 - x1 < 0 && y2 - y1 > 0) {  //x1,y1 = upper right, and x2,y2 = bottom left
       this.x1 = x2;
       this.x2 = x1;
       this.y1 = y1;
       this.y2 = y2;
-    }
-    if (x2 - x1 > 0 && y2 - y1 < 0) { //x1,y1 = bottom left, x2,y2 == upper right
+    } else if (x2 - x1 > 0 && y2 - y1 < 0) { //x1,y1 = bottom left, x2,y2 == upper right
       this.x1 = x1;
       this.x2 = x2;
       this.y1 = y2;
       this.y2 = y1;
-    }
-    if (x2 - x1 < 0 && y2 - y1 < 0) {// x1,y1 = bottom right, x2,y2 = upper left}
+    } else if (x2 - x1 < 0 && y2 - y1 < 0) {// x1,y1 = bottom right, x2,y2 = upper left}
       this.x1 = x2;
       this.x2 = x1;
       this.y1 = y2;
       this.y2 = y1;
+    } else {
+      throw new Error(`Invalid boundry (${x1},${y1},${x2},${y2})`);
     }
   }
 
@@ -55,7 +54,7 @@ export default class Boundry {
     if (y === this.y2 && x > this.x1 && x < this.x2) return true //top edge
     return false;
   }
-  isOverlapping(boundry){
+  isOverlapping(boundry) {
     //return true If BOTH of the boundry's x are OUTSIDE but BOTH of the y's ARE INSIDE. 
     //OR IF y's are BOTH outside and x's are BOTH inside
     return false;
