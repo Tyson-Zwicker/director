@@ -3,33 +3,34 @@ import Director from './director.js';
 import ParticleEffect from "./particleeffect.js";
 import Point from './point.js';
 import Rnd from './rnd.js';
-
+import Check from './check.js';
 export default class ParticleGenertor {
   constructor(name, position, angleMin, angleMax, velMin, velMax, color, batchSize, size, durMin, durMax, periodMillis, foreground) {
-    if (typeof name !== 'string') throw new Error(`ParticleGenerator.constructor ParticleGenerators must be named ${name}`);
-    this.name = name;
+    if (!Check.str( name)) throw new Error(`ParticleGenerator.constructor ParticleGenerators must be named ${name}`);
     if (!Point.isPointy(position)) throw new Error(`ParticleGenerator.constructor origin must be a point ${position}`);
+    if (!(Check.num (angleMin)&&Check.num(angleMax))) throw new Error(`ParticleGenerator.constructor: angles be degreest ${angleMin}, ${angleMax}`);
+    if (!(Check.num (velMin) && Check.num(velMax))) throw new Error(`ParticleGenerator.constructor: velocities be numbers ${velMin}, ${velMax}`);
+    if (!(Check.obj (color, Color))) throw new Error(`ParticleGenerator.constructor: color must be a Color, ${color}`);
+    if (!Check.num(batchSize,1)) throw new Error(`ParticleGenerator.constructor: batch size must be a number and >0 ${batchSize}`);
+    if (!Check.num( size,0)) new Error(`ParticleGenerator.constructor: size must be a number and >0 ${size}`);
+    if (!(Check.num(durMin,0) && Check.num (durMax, 0))) throw new Error(`ParticleGenerator.constructor: durations be numbers (in seconds)${velMin}, ${velMax}`);
+    if (!Check.bool(foreground)) throw new Error(`ParticleGenerator.constructor: foreground must be true, or false (for background) [${foreground}].`)
+    if (!Check.num(periodMillis,1)) new Error(`ParticleGenerator.constructor: period must be a number and >0 (inMilliseconds) ${periodMillis}`);
+    
+    this.name = name;    
     this.position = position;
-    if (typeof angleMin !== 'number' || typeof angleMax !== 'number') throw new Error(`ParticleGenerator.constructor: angles be degreest ${angleMin}, ${angleMax}`);
     this.angleMin = angleMin;
     this.angleMax = angleMax;
     this.anglePartOffset = 0;
-    if (typeof velMin !== 'number' || typeof velMax !== 'number') throw new Error(`ParticleGenerator.constructor: velocities be numbers ${velMin}, ${velMax}`);
     this.velMin = velMin;
     this.velMax = velMin;
-    if (!(color instanceof Color)) throw new Error(`ParticleGenerator.constructor: color must be a Color, ${color}`);
     this.color = color;
-    if (typeof batchSize !== 'number' || size <= 0) new Error(`ParticleGenerator.constructor: batch size must be a number and >0 ${batchSize}`);
     this.batchSize = batchSize;
-    if (typeof size !== 'number' || size <= 0) new Error(`ParticleGenerator.constructor: size must be a number and >0 ${size}`);
     this.size = size;
-    if (typeof durMin !== 'number' || typeof durMax !== 'number' || durMin <= 0) throw new Error(`ParticleGenerator.constructor: durations be numbers (in seconds)${velMin}, ${velMax}`);
     this.durMin = durMin;   //in seconds.
     this.durMax = durMax;   //in seconds.
-    if (typeof foreground !== 'boolean') throw new Error(`ParticleGenerator.constructor: foreground must be true, or false (for background) [${foreground}].`)
     this.foreground = foreground;
     this.lastGeneratedMillis = 0;
-    if (typeof periodMillis !== 'number' || size <= 0) new Error(`ParticleGenerator.constructor: period must be a number and >0 (inMilliseconds) ${periodMillis}`);
     this.periodMillis = periodMillis;
     this.particlePool = [];
     this.poolSize = this.durMax * 1000 / this.periodMillis;
@@ -102,9 +103,7 @@ export default class ParticleGenertor {
   setPosition(newPosition) {
     this.position = Point.from(newPosition);
   }
-
-  setFacing(angleInDegrees) {
-    // Store rotation if you need it for particle generation
-    this.anglePartOffset = angleInDegrees;
+  setFacing(angleInDegrees) {   
+    this.anglePartOffset = angleInDegrees; // Store rotation if you need it for particle generation
   }
 }

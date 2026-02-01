@@ -10,7 +10,7 @@ export default class ActorField {
     actor = undefined;
     strength = undefined;    
     constructor(actor, strength) {        
-        if (!Check.num(strength,0)) throw new Error(`Field.constructor: strength is not a number [${strength}]`);
+        if (!Check.num(strength)) throw new Error(`Field.constructor: strength is not a number [${strength}]`);
         if (!Check.obj (actor, Actor)) throw new Error(`Field.constructor:  Actor is not an actor [${actor}]`)
         this.strength = strength;
         this.actor = actor;
