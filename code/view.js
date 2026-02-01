@@ -1,5 +1,5 @@
 import Point from './point.js';
-import GUI from '././gui_new.js';
+import GUI from './gui.js';
 export default class View {
   backgroundPressed = false;
   backgroundPressedCoordinate = null;

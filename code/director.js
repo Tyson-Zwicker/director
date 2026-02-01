@@ -6,14 +6,12 @@ import Boundry from './boundry.js';
 import ActorField from './actorfields.js';
 import Actor from './actor.js';
 import EventTracker from './eventtracker.js';
-import KeyBoard from './keyboard.js';
 import LineEffect from './lineeffect.js';
 import CircleEffect from './circleeffect.js';
 import ParticleEffect from './particleeffect.js';
 import RadialEffect from './radialeffect.js';
-
 import Keyboard from './keyboard.js';
-import GUI from './gui_new.js';
+import GUI from './gui.js';
 
 export default class Director {
   static initialize() {

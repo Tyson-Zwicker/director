@@ -2,14 +2,17 @@
 
 import Boundry from './boundry.js';
 import Director from './director.js';
-import Point from './point.js';
-import Check from './check.js';
-import GUI from './gui_new.js';
+import GUI from './gui.js';
 import Draw from './draw.js';
+import Check from './check.js';
+
 export default class GUIElement {
-  constructor (direction, text, appearance, shadowAppearance){
-    let bounds =  this.measureItem(direction, text);
-    this.bounds = bounds;
+  constructor (direction, text, appearance, shadowAppearance, forceWidth, forceHeight){    
+    if (Check.num (forceWidth) && Check.num (forceHeight)){
+      this.bounds = new Boundry(0,0,forceWidth, forceHeight);
+    }else{
+      this.bounds =  this.measureItem(direction, text);
+    }
     this.active = true;
     this.text = text;
     this.drawnBounds = undefined;
@@ -19,6 +22,7 @@ export default class GUIElement {
     //require additional properties assigned in the get control methods..        
   }
   measureItem(direction,text) {
+    return new Boundry (0,0,GUI.columnWidth, GUI.rowHeight);
     //This is the items personal bounds.  They are not screen coordinates,
     //they describe the shape of this one item, regardless of its position in the panel.
     let drawer = new Draw (Director.view.context);

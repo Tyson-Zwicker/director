@@ -2,11 +2,11 @@ import Boundry from './boundry.js';
 import Button from './button.js';
 import Point from './point.js';
 import Check from './check.js';
-import GUI from './gui_new.js';
+import GUI from './gui.js';
 import GUIElement from './guielement.js';
 import Director from './director.js';
 import Draw from './draw.js';
-import Appearance from './appearance.js';
+
 export default class GUIPanel {
   elements = [];
   listElements = new Map();
@@ -15,6 +15,7 @@ export default class GUIPanel {
     if (!Check.str(location) || !GUI.locations.includes(location)) throw new Error(`GUIPanel.constructor: location is invalid [${location}]`);
     this.location = location;
     this.activeList = undefined;
+
     if (location === 'float') {
       let direction;
       if (parentElement.panel.location === 'top') direction = 'down';
@@ -25,14 +26,14 @@ export default class GUIPanel {
       this.offset = calcs.offset;
       this.boundry = calcs.boundry;
       this.direction = calcs.direction; //The vector direction for the panel.
-      GUI.activeListItemElements.length=0;
-      for (let item of parentElement.listItemsData) {      
+      GUI.activeListItemElements.length = 0;
+      for (let item of parentElement.listItemsData) {
         let itemElement = new GUIElement(direction, item.text, parentElement.appearance, parentElement.shadowAppearance);
         itemElement.type = 'button';
         itemElement.callbackPanel = parentElement.panel;
         let callbackFn = function (result) {
-          console.log ('list item callback');
-          console.log (result);
+          console.log('list item callback');
+          console.log(result);
           result.owner.callbackPanel.hideList(result.value);
         }
         let button = new Button(
@@ -41,100 +42,10 @@ export default class GUIPanel {
           callbackFn, false, item.value);
         button.guiElement = itemElement;
         itemElement.button = button;
-        GUI.activeListItemElements.push (itemElement);
+        GUI.activeListItemElements.push(itemElement);
         this.elements.push(itemElement);
-      }      
-    }
-  }
-
-  drawPanel() {    
-    if (this.elements.length > 0) {
-      let drawer = new Draw(Director.view.context);
-      drawer.fillBox(this.boundry.x1, this.boundry.y1, this.boundry.x2, this.boundry.y2, '#022');
-      let cursor = Point.from(this.offset);
-      for (let element of this.elements) {
-        if (element.type === 'list' && element === this.activeList) {
-          this.drawElement(drawer, element, cursor, true);          
-          this.listPanel.drawPanel();
-        } else {
-          this.drawElement(drawer, element, cursor, this.activeList !== undefined);//passing where to start drawing and if it should look "shadowed" or not.
-        }
-        cursor.x += this.direction.x * (GUI.gap + element.bounds.width);
-        cursor.y += this.direction.y * (GUI.gap + element.bounds.height);
       }
     }
-  }
-  drawElement(draw, element, cursor, shadow) {
-    let appearance = element.appearance;
-    if (shadow) {
-      appearance = element.shadowAppearance;
-    } else if (element.type === 'button') {
-      if (element.button.pressed) {
-        appearance = element.button.pressedAppearance;
-      } else if (element.button.hovered) {
-        appearance = element.button.hoveredAppearance;
-      }
-    }
-    draw.textBox(
-      element.bounds.x1 + cursor.x, element.bounds.y1 + cursor.y,
-      element.bounds.x2 + cursor.x, element.bounds.y2 + cursor.y,
-      element.text,
-      GUI.fontSize, GUI.fontName, appearance);
-    element.drawnBounds = new Boundry(
-      element.bounds.x1 + cursor.x, element.bounds.y1 + cursor.y,
-      element.bounds.x2 + cursor.x, element.bounds.y2 + cursor.y);
-  }
-  showList(listElement) {
-    let floatingPanel = new GUIPanel('float', listElement); //floating panel just needs items..    
-    this.listPanel = floatingPanel;    
-    this.activeList = listElement;
-    for (let element of this.elements) element.active = false; //deactive everything so list is only active elemenet..    
-  }
-
-  hideList(selectedValue) {
-    this.activeList.value = selectedValue;
-    this.activeList = undefined;
-    for (let element of this.elements) element.active = true; //Re-active everything- floating panel is gone..
-    this.floatingPanel = undefined;
-    GUI.activeListItemElements.length=0;
-    this.recalculate;
-  }
-
-  addText(text, appearance, shadowAppearance) {
-    let direction = 'left'; //Not the same as the point vector "this.direction"
-    if (location === 'right' || this.location === 'left') direction = 'down';
-    let textElement = new GUIElement(direction, text, appearance, shadowAppearance);
-    textElement.type = 'text';
-    this.elements.push(textElement);
-    return textElement;
-  }
-  addButton(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value) {
-    let direction = 'left'; //Not the same as the point vector "this.direction"
-    if (location === 'right' || this.location === 'left') direction = 'down';
-    let buttonElement = new GUIElement(direction, text, appearance, shadowAppearance);
-    buttonElement.type = 'button';
-    this.elements.push(buttonElement);
-    //extra button stuff..
-    let button = new Button(hoveredAppearance, pressedAppearance, fn, toggle, value);
-    button.guiElement = buttonElement;
-    buttonElement.button = button;
-    return buttonElement;
-  }
-  addList(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, listItems, defaultValue) {
-    let direction = 'left'; //Not the same as the point vector "this.direction"
-    if (location === 'right' || this.location === 'left') direction = 'down';
-    let listElement = new GUIElement(direction, text, appearance, shadowAppearance);
-    listElement.listItemsData = listItems;//{text, value}
-    listElement.type = "list"
-    listElement.panel = this;
-    this.elements.push(listElement);
-    let listCallback = (e) => {
-      e.owner.panel.showList(e.owner);
-    }
-    let listButton = new Button(hoveredAppearance, pressedAppearance, listCallback, false, defaultValue);
-    listButton.guiElement = listElement;;
-    listElement.button = listButton;
-    return listElement;
   }
   calculateFloat(listElement, dir) {
     let itemsWidth = this.#getFloatElementsCollectiveWidth(dir, listElement);
@@ -179,6 +90,98 @@ export default class GUIPanel {
       offset = new Point(listElement.drawnBounds.x2, listElement.drawnBounds.y1);
     }
     return { offset: offset, boundry: boundry, direction: direction };
+  }
+
+  drawPanel() {
+    if (this.elements.length > 0) {
+      let drawer = new Draw(Director.view.context);
+      drawer.fillBox(this.boundry.x1, this.boundry.y1, this.boundry.x2, this.boundry.y2, '#022');
+      let cursor = Point.from(this.offset);
+      for (let element of this.elements) {
+        if (element.type === 'list' && element === this.activeList) {
+          this.drawElement(drawer, element, cursor, true);
+          this.listPanel.drawPanel();
+        } else {
+          this.drawElement(drawer, element, cursor, this.activeList !== undefined);//passing where to start drawing and if it should look "shadowed" or not.
+        }
+        cursor.x += this.direction.x * (GUI.gap + element.bounds.width);
+        cursor.y += this.direction.y * (GUI.gap + element.bounds.height);
+      }
+    }
+  }
+  drawElement(draw, element, cursor, shadow) {
+    let appearance = element.appearance;
+    if (shadow) {
+      appearance = element.shadowAppearance;
+    } else if (element.type === 'button') {
+      if (element.button.pressed) {
+        appearance = element.button.pressedAppearance;
+      } else if (element.button.hovered) {
+        appearance = element.button.hoveredAppearance;
+      }
+    }
+    draw.textBox(
+      element.bounds.x1 + cursor.x, element.bounds.y1 + cursor.y,
+      element.bounds.x2 + cursor.x, element.bounds.y2 + cursor.y,
+      element.text,
+      GUI.fontSize, GUI.fontName, appearance);
+    element.drawnBounds = new Boundry(
+      element.bounds.x1 + cursor.x, element.bounds.y1 + cursor.y,
+      element.bounds.x2 + cursor.x, element.bounds.y2 + cursor.y);
+  }
+  showList(listElement) {
+    if (GUI.activeListItemElements.length === 0) {//Do not allow other lists to be shown when one is already shown.
+      let floatingPanel = new GUIPanel('float', listElement); //floating panel just needs items..    
+      this.listPanel = floatingPanel;
+      this.activeList = listElement;
+      for (let element of this.elements) element.active = false; //deactive everything so list is only active elemenet..    
+    }
+  }
+
+  hideList(selectedValue) {
+    this.activeList.value = selectedValue;
+    this.activeList = undefined;
+    for (let element of this.elements) element.active = true; //Re-active everything- floating panel is gone..
+    this.floatingPanel = undefined;
+    GUI.activeListItemElements.length = 0;
+    this.recalculate;
+  }
+
+  addText(text, appearance, shadowAppearance) {
+    let direction = 'left'; //Not the same as the point vector "this.direction"
+    if (location === 'right' || this.location === 'left') direction = 'down';
+    let textElement = new GUIElement(direction, text, appearance, shadowAppearance);
+    textElement.type = 'text';
+    this.elements.push(textElement);
+    return textElement;
+  }
+  addButton(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value) {
+    let direction = 'left'; //Not the same as the point vector "this.direction"
+    if (location === 'right' || this.location === 'left') direction = 'down';
+    let buttonElement = new GUIElement(direction, text, appearance, shadowAppearance);
+    buttonElement.type = 'button';
+    this.elements.push(buttonElement);
+    //extra button stuff..
+    let button = new Button(hoveredAppearance, pressedAppearance, fn, toggle, value);
+    button.guiElement = buttonElement;
+    buttonElement.button = button;
+    return buttonElement;
+  }
+  addList(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, listItems, defaultValue) {
+    let direction = 'left'; //Not the same as the point vector "this.direction"
+    if (location === 'right' || this.location === 'left') direction = 'down';
+    let listElement = new GUIElement(direction, text, appearance, shadowAppearance);
+    listElement.listItemsData = listItems;//{text, value}
+    listElement.type = "list"
+    listElement.panel = this;
+    this.elements.push(listElement);
+    let listCallback = (e) => {
+      e.owner.panel.showList(e.owner);
+    }
+    let listButton = new Button(hoveredAppearance, pressedAppearance, listCallback, false, defaultValue);
+    listButton.guiElement = listElement;;
+    listElement.button = listButton;
+    return listElement;
   }
 
   recalculate() {
@@ -227,12 +230,15 @@ export default class GUIPanel {
 
 
   #getFloatElementsCollectiveWidth(direction, listElement) {
+    console.log(direction);
+    console.log(listElement);
     let width = 0;
     if (direction === 'up' || direction === 'down') {
       //They're going up and down so width is based on width of spawner..
       return listElement.drawnBounds.width;
     } else {
       //They're going go to be based on column Width x items.;
+      console.log(GUI.columnWidth);
       return GUI.columnWidth * listElement.listItemsData.length;
     }
   }

@@ -1,5 +1,5 @@
 import Point from './point.js';
-import GUI from './gui_new.js';
+import GUI from './gui.js';
 import GUIElement from './guielement.js';
 import Appearance from './appearance.js';
 import Check from './check.js';
