@@ -30,8 +30,8 @@ function makeData() {
   //Make some actors.
 
 
-  for (let x = -2000; x < 2000; x += 200) {
-    for (let y = -2000; y < 2000; y += 200) {
+  for (let x = -2500; x < 2500; x += 200) {
+    for (let y = -2500; y < 2500; y += 200) {
       let actorType = Director.getActorType(`acttype${Rnd.int(0, 9)}`);
       let appearance = Director.getAppearance(`app${Rnd.int(0, 10)}`);
       let actor = actorType.createActorInstance(`actor${x + '|' + y}`, appearance, new Point(x, y), Rnd.vect (0,360,0,100), Rnd.int(360), 0);
