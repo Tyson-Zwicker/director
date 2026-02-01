@@ -1,9 +1,12 @@
 import Draw from '../../code/draw.js';
 import Color from '../../code/color.js';
 import Appearance from '../../code/appearance.js';
+import Boundry from '../../code/boundry.js';
 // ----------> PRIME MOVER <-------------
 init();
 export default function init() {
+  let b = new Boundry (-100,-100,100,100);
+  console.log (b);
   let canvas = document.getElementById('canvas');
   canvas.width = 800;
   canvas.height = 800;
@@ -90,16 +93,12 @@ export default function init() {
   let text = '`_ABC_123` _'
   let ts = 16;
   let size = draw.getTextSize(text, ts, 'monospace');
-  console.log(size);
   draw.textBox(400, 5, 400 + size.width, 45, text, ts, 'monospace', appearance);
-
   draw.fillBox (400,200,450,250,'#ff0');
-  
   let appearance2 = new Appearance('test2', '#000', '#fff', '#f0f', 2);
    text = 'asdkl_';
   ts = 20;
   size = draw.getTextSize(text, ts, 'Arial');
-  console.log(size);
   draw.textBox(600, 5, 600 + size.width, 45, text, ts, 'monospace', appearance2);
 }
 

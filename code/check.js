@@ -1,7 +1,7 @@
 export default class Check {
   static num(value, min, max, inclusive) {
-    if (typeof value !== number) return false;
-    if ((typeof min === number) && (typeof max === 'number')) {
+    if (typeof value !== 'number') return false;
+    if ((typeof min === 'number') && (typeof max === 'number')) {
       if (typeof inclusive === 'boolean' && inclusive) {
         return (value >= min) && (value <= max);
       } else {
@@ -21,7 +21,10 @@ export default class Check {
   static bool(value) {
     return (typeof value === 'boolean');
   }
-  static Arr (value){
+  static fn (value){
+    return (typeof value ==='function');
+  }
+  static arrary (value){
     return (typeof value ==='function' && Array.isArray (value))
   }
 }

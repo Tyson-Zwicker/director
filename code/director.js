@@ -13,10 +13,11 @@ import ParticleEffect from './particleeffect.js';
 import RadialEffect from './radialeffect.js';
 
 import Keyboard from './keyboard.js';
-import GUI from './gui.js';
+import GUI from './gui_new.js';
 
 export default class Director {
   static initialize() {
+    Director.continueAnimationLoop =false;
     Director.MILLISECONDS = 1000;
     Director.continueAnimationLoop = false;
     Director.appearanceBank = new Map();
@@ -36,9 +37,9 @@ export default class Director {
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
     Director.keyboard = new Keyboard();
-    Director.gui = new GUI(160, 40, 5, 5, view);//TODO: figure out good values (or better a function) to set these to..    
+    GUI.initialize(160, 40, 2, 20 ,15,'monospace');
+    GUI.resize();
   }
-
   static addPolygon(polygon) {
     if (Director.polygonBank.has(polygon.name)) throw new Error(`Director.addPolygon: Polygon [${polygon.name} already exists.`);
     Director.polygonBank.set(polygon.name, polygon);
@@ -152,7 +153,7 @@ export default class Director {
       if (
         typeof actor.button === 'object' &&
         Director.view.canSee(actor.position) &&
-        actor.button.checkForMouse(Director.view.mouse)
+        actor.button.checkForMouseonActor(Director.view.mouse)
       ) {
         actorMouseInteraction = true;
         break;
@@ -161,10 +162,12 @@ export default class Director {
     return actorMouseInteraction;
   }
   static checkMouseGuiInteraction() {
+
     let guiInteraction = false;
-    for (let guiControl of Director.gui.controls) {
-      if ((guiControl.type === 'button' || guiControl.type === 'list')) {
-        if (guiControl.visible && guiControl.button.checkForMouse(Director.view.mouse)) {
+    let elementsToCheck = [...GUI.elements,...GUI.activeListItemElements];          
+    for (let element of elementsToCheck) {
+      if ((element.type === 'button' || element.type === 'list')) {      
+        if (element.active && element.button.checkForMouseOnGUI(Director.view.mouse)) {
           guiInteraction = true;
           //Note: Do not break out of the loop here. Testing the other controls is necessary to let them de-hover themselves.
         }
@@ -192,8 +195,7 @@ export default class Director {
       }
     }
     Director.#draw_foregroundEffects(delta);
-
-    Director.gui.draw();
+    GUI.draw();
     this.#drawMillisInTheCorner(delta);
   }
   static #drawMillisInTheCorner(delta) {
@@ -320,7 +322,7 @@ export default class Director {
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }
   //------------------------- runners
-  static run() {
+  static run() {    
     Director.continueAnimationLoop = true;
     requestAnimationFrame(Director.loop.bind(Director));
   }
