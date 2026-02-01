@@ -15,25 +15,17 @@ export default class GUIPanel {
     if (!Check.str(location) || !GUI.locations.includes(location)) throw new Error(`GUIPanel.constructor: location is invalid [${location}]`);
     this.location = location;
     this.activeList = undefined;
-
     if (location === 'float') {
-      let direction;
-      if (parentElement.panel.location === 'top') direction = 'down';
-      if (parentElement.panel.location === 'bottom') direction = 'up';
-      if (parentElement.panel.location === 'left') direction = 'right';
-      if (parentElement.panel.location === 'right') direction = 'left';
-      let calcs = this.calculateFloat(parentElement, direction);
+      let calcs = this.calculateFloat(parentElement);
       this.offset = calcs.offset;
       this.boundry = calcs.boundry;
       this.direction = calcs.direction; //The vector direction for the panel.
       GUI.activeListItemElements.length = 0;
       for (let item of parentElement.listItemsData) {
-        let itemElement = new GUIElement(direction, item.text, parentElement.appearance, parentElement.shadowAppearance);
+        let itemElement = new GUIElement(item.text, parentElement.appearance, parentElement.shadowAppearance);
         itemElement.type = 'button';
         itemElement.callbackPanel = parentElement.panel;
-        let callbackFn = function (result) {
-          console.log('list item callback');
-          console.log(result);
+        let callbackFn = function (result) {          
           result.owner.callbackPanel.hideList(result.value);
         }
         let button = new Button(
@@ -47,49 +39,39 @@ export default class GUIPanel {
       }
     }
   }
-  calculateFloat(listElement, dir) {
-    let itemsWidth = this.#getFloatElementsCollectiveWidth(dir, listElement);
-    let itemsHeight = this.#getFloatElementsCollectiveHeight(dir, listElement);
-    let direction = undefined;
-    let boundry = undefined;
-    let offset = undefined;
-    if (dir === 'up') {
-      direction = new Point(0, -1);
-      let x1 = listElement.drawnBounds.x1;
-      let y1 = listElement.drawnBounds.y1 - itemsHeight;
-      let x2 = x1 + itemsWidth;
-      let y2 = listElement.drawnBounds.y1;
-      boundry = new Boundry(x1, y1, x2, y2);
-      offset = new Point(listElement.drawnBounds.x1, listElement.drawnBounds.y1);
-    }
-    if (dir === 'down') {
+  calculateFloat(listElement) {
+    let itemsWidth = this.#getFloatElementsCollectiveWidth( listElement);
+    let itemsHeight = this.#getFloatElementsCollectiveHeight( listElement);
+    let x1,y1,x2,y2,direction;
+    if (listElement.panel.location === 'bottom') {
       direction = new Point(0, 1);
-      let x1 = listElement.drawnBounds.x1;
-      let y1 = listElement.drawnBounds.y2;
-      let x2 = x1 + itemsWidth;
-      let y2 = listElement.drawnBounds.y2 + itemsHeight;
-      boundry = new Boundry(x1, y1, x2, y2);
-      offset = new Point(listElement.drawnBounds.x1, listElement.drawnBounds.y2);
+      x1 = listElement.drawnBounds.x1;
+      y1 = listElement.drawnBounds.y1 - itemsHeight;
+      x2 = x1 + itemsWidth;
+      y2 = listElement.drawnBounds.y1;
     }
-    if (dir === 'left') {
-      direction = new Point(-1, 0);
-      let x1 = listElement.drawnBounds.x1 - itemsWidth;
-      let y1 = listElement.drawnBounds.y1;
-      let x2 = listElement.drawnBounds.x1;
-      let y2 = listElement.drawnBounds.y2;
-      boundry = new Boundry(x1, y1, x2, y2);
-      offset = new Point(listElement.drawnBounds.x1, listElement.drawnBounds.y1);
+    if (listElement.panel.location === 'top') {
+      direction = new Point(0, 1);
+      x1 = listElement.drawnBounds.x1;
+      y1 = listElement.drawnBounds.y2;
+      x2 = x1 + itemsWidth;
+      y2 = listElement.drawnBounds.y2 + itemsHeight;
     }
-    if (dir === 'right') {
+    if (listElement.panel.location === 'right') {
       direction = new Point(1, 0);
-      let x1 = listElement.drawnBounds.x2;
-      let y1 = listElement.drawnBounds.y1;
-      let x2 = listElement.drawnBounds.x2 + itemsWidth;
-      let y2 = listElement.drawnBounds.y2;
-      boundry = new Boundry(x1, y1, x2, y2)
-      offset = new Point(listElement.drawnBounds.x2, listElement.drawnBounds.y1);
+      x1 = listElement.drawnBounds.x1 - itemsWidth;
+      y1 = listElement.drawnBounds.y1;
+      x2 = listElement.drawnBounds.x1;
+      y2 = listElement.drawnBounds.y2;      
     }
-    return { offset: offset, boundry: boundry, direction: direction };
+    if (listElement.panel.location === 'left') {
+      direction = new Point(1, 0);
+      x1 = listElement.drawnBounds.x2;
+      y1 = listElement.drawnBounds.y1;
+      x2 = listElement.drawnBounds.x2 + itemsWidth;
+      y2 = listElement.drawnBounds.y2;  
+    }
+    return { offset: new Point(x1, y1), boundry: new Boundry(x1, y1, x2, y2), direction: direction };
   }
 
   drawPanel() {
@@ -148,17 +130,14 @@ export default class GUIPanel {
   }
 
   addText(text, appearance, shadowAppearance) {
-    let direction = 'left'; //Not the same as the point vector "this.direction"
-    if (location === 'right' || this.location === 'left') direction = 'down';
-    let textElement = new GUIElement(direction, text, appearance, shadowAppearance);
+
+    let textElement = new GUIElement(text, appearance, shadowAppearance);
     textElement.type = 'text';
     this.elements.push(textElement);
     return textElement;
   }
   addButton(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, toggle, fn, value) {
-    let direction = 'left'; //Not the same as the point vector "this.direction"
-    if (location === 'right' || this.location === 'left') direction = 'down';
-    let buttonElement = new GUIElement(direction, text, appearance, shadowAppearance);
+    let buttonElement = new GUIElement(text, appearance, shadowAppearance);
     buttonElement.type = 'button';
     this.elements.push(buttonElement);
     //extra button stuff..
@@ -168,9 +147,7 @@ export default class GUIPanel {
     return buttonElement;
   }
   addList(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, listItems, defaultValue) {
-    let direction = 'left'; //Not the same as the point vector "this.direction"
-    if (location === 'right' || this.location === 'left') direction = 'down';
-    let listElement = new GUIElement(direction, text, appearance, shadowAppearance);
+    let listElement = new GUIElement(text, appearance, shadowAppearance);
     listElement.listItemsData = listItems;//{text, value}
     listElement.type = "list"
     listElement.panel = this;
@@ -188,8 +165,6 @@ export default class GUIPanel {
     this.activeList = undefined; //If a list was opened, close it when they start fiddling with the window..
     let width = Director.view.canvas.width;
     let height = Director.view.canvas.height;
-    let itemsWidth = this.#getElementsCollectiveWidth();
-    let itemsHeight = this.#getElementsCollectiveHeight();
     switch (this.location) {
       case 'top':
         this.direction = new Point(1, 0);
@@ -227,49 +202,20 @@ export default class GUIPanel {
         throw new Error('GUIPanel:calculate(): unknown location :' + this.location);
     }//end switch
   }
-
-
-  #getFloatElementsCollectiveWidth(direction, listElement) {
-    console.log(direction);
-    console.log(listElement);
+  #getFloatElementsCollectiveWidth( listElement) {
     let width = 0;
-    if (direction === 'up' || direction === 'down') {
-      //They're going up and down so width is based on width of spawner..
+    if (listElement.panel.location === 'top' || listElement.panel.location === 'bottom') {
       return listElement.drawnBounds.width;
     } else {
-      //They're going go to be based on column Width x items.;
-      console.log(GUI.columnWidth);
       return GUI.columnWidth * listElement.listItemsData.length;
     }
   }
-
-  #getFloatElementsCollectiveHeight(direction, listElement) {
+  #getFloatElementsCollectiveHeight( listElement) {
     let hieght = 0;
-    if (direction === 'up' || direction === 'down') {
-      //They're going up and down so height is row Height x number of items..
+    if (listElement.panel.location === 'top' || listElement.panel.location === 'bottom') {
       return GUI.rowHeight * listElement.listItemsData.length;
     } else {
-      //Its going left to right so height if based on a single spawners height
       return listElement.drawnBounds.height;
-    }
-  }
-
-  #getElementsCollectiveWidth() {
-    if (this.location === 'top' || this.location === 'bottom') {
-      let w = 0;
-      for (let element of this.elements) w += element.bounds.width;
-      return w;
-    } else if (this.location === 'left' || this.location === 'right') {
-      return GUI.columnWidth;
-    }
-  }
-
-  #getElementsCollectiveHeight() {
-    if (this.location === 'top' || this.location === 'bottom') {
-      return GUI.columnWidth;
-    } else if (this.location === 'left' || this.location === 'right') {
-      let h = 0;
-      for (let element of this.elements) h += element.bounds.height;
     }
   }
 }
