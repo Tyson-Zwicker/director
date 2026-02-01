@@ -1,13 +1,15 @@
 import Point from './point.js';
+import Check from './check.js';
 export default class Line {
   constructor(point0, point1) {
     this.p0 = point0; 
     this.p1 = point1;
   }
-
   //returns a point if they intersect and "false" if they do not.
   static getPointOfInterception(line0, line1) {
     //Based on Andrre LeMothe's "Tricks of the Windows Game Programming Gurus""
+    if (!Check.obj (line0,Line)) throw new Error (`Line.getPointOfInterception: invalid line0 ${line0}`);
+    if (!Check.obj (line1,Line)) throw new Error (`Line.getPointOfInterception: invalid line1 ${line1}`);
     let p0 = line0.p0;
     let p1 = line0.p1;
     let q0 = line1.p0;
@@ -25,6 +27,7 @@ export default class Line {
   //returns a line prependicular to the line parameter, with the given length.
   //The Mid-Point of the returned line will be p1 of the line.
   static getPerpendicular(line, origin, desiredLength) {
+    if (!Check.obj (line, Line)) throw new Error(`line.getPerpendilcuar: bad line parameter ${line}.`);
     //calculate then angle
     let dx = line.p0.x - line.p1.x;
     let dy = line.p0.y - line.p1.y;

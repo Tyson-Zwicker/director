@@ -160,7 +160,6 @@ export default class Director {
     return actorMouseInteraction;
   }
   static checkMouseGuiInteraction() {
-
     let guiInteraction = false;
     let elementsToCheck = [...GUI.elements,...GUI.activeListItemElements];          
     for (let element of elementsToCheck) {
