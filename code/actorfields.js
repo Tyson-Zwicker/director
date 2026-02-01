@@ -4,12 +4,14 @@ F=ma, a= `v/t, d = 1 pixel, v= 1 pixel/second, and t is time in milliseconds (de
 */
 import Actor from './actor.js';
 import Point from './point.js';
+import Check from './check.js';
+
 export default class ActorField {
     actor = undefined;
     strength = undefined;    
-    constructor(actor, strength) {
-        if (typeof strength !== 'number') throw new Error(`Field.constructor: strength is not a number [${strength}]`);
-        if (!(actor instanceof Actor)) throw new Error(`Field.constructor:  Actor is not an actor [${actor}]`)
+    constructor(actor, strength) {        
+        if (!Check.num(strength,0)) throw new Error(`Field.constructor: strength is not a number [${strength}]`);
+        if (!Check.obj (actor, Actor)) throw new Error(`Field.constructor:  Actor is not an actor [${actor}]`)
         this.strength = strength;
         this.actor = actor;
     }
@@ -18,8 +20,7 @@ export default class ActorField {
             let distance = Point.distance(this.actor.position, otherActor.position);
             if (distance === 0) {
                 throw new Error(`Director.applyActorField: Actor ${actor} and other actor ${otherActor} BOTH exist at (${actor.position.x},${actor.position.y}).`);
-            }
-          
+            }          
             let force = this.strength / distance;
             let otherActorAcceleration = -force / otherActor.mass;
             let actorAcceleration = force / this.actor.mass;
@@ -31,8 +32,7 @@ export default class ActorField {
             Point.scale(a1, actorAcceleration);
             Point.scale(a2, otherActorAcceleration);
             Point.add(this.actor.velocity, a1);  //Then add it to the actors' velocities.
-            Point.add(otherActor.velocity, a2);
-            
+            Point.add(otherActor.velocity, a2);            
         }
     }   
     toString (){

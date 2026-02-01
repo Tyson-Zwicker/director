@@ -5,6 +5,7 @@ import Boundry from './boundry.js';
 import Transpose from './transpose.js';
 import Appearance from './appearance.js'
 import Polygon from './polygon.js';
+import Check from './check.js';
 
 export default class Actor {
   name = undefined;
@@ -29,13 +30,13 @@ export default class Actor {
   sensorBoundry = undefined;
   maxSensorRange = 0;
   constructor(name, polygon, appearance, mass, bounceCoefficient = 0.5, collides = true, moves = true) {
-    if (typeof name !== 'string') throw new Error(`Actor.constructor: Name must be defined as string.  [${name}]`);
-    if (!(polygon instanceof Polygon)) throw new Error(`Actor.constructor: Polygon must be defined [${polygon}]`);
-    if (!(appearance instanceof Appearance)) throw new Error(`Actor.constructor: Polygon must be defined [${polygon}]`);
-    if (typeof mass !== 'number') throw new Error(`Actor.constructor: mass is not a number ${mass}`);
-    if (typeof bounceCoefficient !== 'number') throw new Error(`Actor.constructor: mass is not a number ${bounceCoefficient}`);
-    if (typeof collides !== 'boolean') throw new Error(`Actor.constructor: collides must be boolean  ${collides}`);
-    if (typeof moves != 'boolean') throw new Error(`Actor.construcor: Moves must be boolean [${moves}]`);
+    if (!Check.str(name)) throw new Error(`Actor.constructor: Name must be defined as string.  [${name}]`);
+    if (!Check.obj (polygon, Polygon)) throw new Error(`Actor.constructor: Polygon must be defined [${polygon}]`);
+    if (!Check.obj(appearance, Appearance)) throw new Error(`Actor.constructor: Polygon must be defined [${polygon}]`);
+    if (!Check.num (mass,1)) throw new Error(`Actor.constructor: mass is not a number ${mass}`);
+    if (!Check.num (bounceCoefficient,0,1, true)) throw new Error(`Actor.constructor: mass is not a number ${bounceCoefficient}`);
+    if (!Check.bool ( collides)) throw new Error(`Actor.constructor: collides must be boolean  ${collides}`);
+    if (!Check.bool ( moves)) throw new Error(`Actor.construcor: Moves must be boolean [${moves}]`);
     this.name = name;
     this.polygon = polygon;
     this.appearance = appearance;

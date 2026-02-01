@@ -14,9 +14,13 @@ export default class Check {
     return (typeof value === 'string');
   }
   static obj(value, type) {
-    return (typeof value !== 'undefined') &&
+    if (typeof type!=='undefined'){
+     return (typeof value !== 'undefined') &&
       ((value !== null) &&
         value instanceof type);
+    }else{
+      return  (typeof value === 'object') &&  (value !== null) ;
+    }
   }
   static bool(value) {
     return (typeof value === 'boolean');

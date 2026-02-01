@@ -1,19 +1,18 @@
 import Color from './color.js';
+import Check from './check.js';
 export default class Draw {
   constructor(context2d) {
     this.g = context2d;
   }
   boxHex(x1, y1, x2, y2, hexColor) {
-    if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
-
+    if (!(Check.num(x1) && Check.num(x2) &&Check.num(y1) && Check.num (y2))) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
     this.g.strokeStyle = hexColor;
     this.g.beginPath();
     this.g.rect(x1, y1, x2 - x1, y2 - y1);
     this.g.stroke();
   }
   fillBoxHex(x1, y1, x2, y2, hexColor) {
-    if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
-
+    if (!(Check.num(x1) && Check.num(x2) &&Check.num(y1) && Check.num (y2))) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
     this.g.fillStyle = hexColor;
     this.g.beginPath();
     this.g.fillRect(x1, y1, x2 - x1, y2 - y1);
@@ -33,8 +32,8 @@ export default class Draw {
     this.g.fill();
   }
   box(x1, y1, x2, y2, colorOrGradient, lineWidth) {
-    if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
-    if (colorOrGradient instanceof Color) {
+    if (!(Check.num(x1) && Check.num(x2) &&Check.num(y1) && Check.num (y2))) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
+    if (Check.obj (colorOrGradient, Color)) {
       this.g.strokeStyle = colorOrGradient.asHex();
     } else {
       this.g.strokeStyle = colorOrGradient;
@@ -45,8 +44,8 @@ export default class Draw {
     this.g.stroke();
   }
   fillBox(x1, y1, x2, y2, colorOrGradient) {
-    if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
-    if (colorOrGradient instanceof Color) {
+    if (!(Check.num(x1) && Check.num(x2) &&Check.num(y1) && Check.num (y2))) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
+    if (Check.obj (colorOrGradient, Color)) {
       this.g.fillStyle = colorOrGradient.asHex();
     } else {
       this.g.fillStyle = colorOrGradient;
@@ -56,9 +55,9 @@ export default class Draw {
     this.g.fill();
   }
   line(x1, y1, x2, y2, w, colorOrGradient) {
-    if (isNaN(w)) throw new Error('no width defined.');
-    if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
-    if (colorOrGradient instanceof Color) {
+    if (Check.num(w)) throw new Error('no width defined.');
+    if (!(Check.num(x1) && Check.num(x2) &&Check.num(y1) && Check.num (y2))) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
+    if (Check.obj (colorOrGradient, Color)) {
       this.g.strokeStyle = colorOrGradient.asHex();
     } else {
       this.g.strokeStyle = colorOrGradient;
@@ -78,10 +77,9 @@ export default class Draw {
     return { "width": metrics.width, "height": (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) ?? fontSize };
   }
   textBox(x1, y1, x2, y2, text, fontSize, fontName, appearance) {
-    //console.log (appearance);
+    if (!(Check.num(x1) && Check.num(x2) &&Check.num(y1) && Check.num (y2))) throw new Error (`Draw.textBox: invalid bounds ${x1},${y2},${x2},${y2}`);
     this.fillBox(x1, y1, x2, y2, appearance.fillHex);
     this.box(x1, y1, x2, y2, appearance.strokeHex, appearance.lineWidth);
-
     this.g.fillStyle = appearance.textHex;
     this.g.textBaseline = 'top';
     this.g.textAlign = 'left';

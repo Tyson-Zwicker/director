@@ -1,13 +1,9 @@
 import Point from './point.js';
+import Check from './check.js';
 export default class Boundry {
   constructor(x1, y1, x2, y2) {
     //Ensure (this.x1,this.y1) is upper right and (this.x2, this.y2) is lower left
-    if (!(typeof x1 === 'number' &&
-      typeof y1 === 'number' &&
-      typeof x2 === 'number' &&
-      typeof y2 === 'number')) {
-      throw new Error(`One of the parameters is not a number x1 ${x1}, y1 ${y1}, x2 ${x2}, y2 ${y2}`);
-    }
+    if (!(Check.num(x1) && Check.num(y1) && Check.num(x2) && Check.num(y2))) throw new Error(`One of the parameters is not a number x1 ${x1}, y1 ${y1}, x2 ${x2}, y2 ${y2}`);
     if (x2 - x1 > 0 && y2 - y1 > 0) { //x1,y1 = upper left, and x2,y2 = bottom right..
       this.x1 = x1;
       this.x2 = x2;
@@ -32,15 +28,12 @@ export default class Boundry {
       throw new Error(`Invalid boundry (${x1},${y1},${x2},${y2})`);
     }
   }
-
   get width() {
     return this.x2 - this.x1;
   }
-
   get height() {
     return this.y2 - this.y1;
   }
-
   isBoundry() {
     return (this.x2 > this.x1) && (this.y2 > this.y1) && (!isNaN(this.x1 + this.x2 + this.y1 + this.y2));
   }
@@ -61,7 +54,6 @@ export default class Boundry {
   }
   static touches(boundry1, boundry2) {
     let x = []; let y = [];
-
     x[0] = boundry1.x1; y[0] = boundry1.y1;//top left
     x[1] = boundry1.x2; y[1] = boundry1.y1;//top right
     x[2] = boundry1.x1; y[2] = boundry1.y2//bottom left
