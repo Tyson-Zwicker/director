@@ -1,24 +1,15 @@
 //The whole point of this class is to eleminating garbage collection when using vectors, whenever possible,
 //which is all the time.  The "persistent" object doesn't get thrown away, and never needs to be re-created.
 //It makes the math look a little wierd, but it elimantes a lot of stuttering.
+import Check from './check.js';
 export default class Point {
   x = 0;
   y = 0;
   static toRad = Math.PI / 180;
   static toDeg = 1 / (Math.PI / 180);
   constructor(x, y) {
-    if (x === undefined || y === undefined) {
-      throw new Error(`Point constructor: x or y is undefined ${x},${y}`);
-    }
-    if (typeof x !== 'number' || typeof y !== 'number') {
-      throw new Error(`Point constructor: x or y is not a number ${x},${y}`);
-    }
-    if (x === null || y === null) {
-      throw new Error(`Point constructor: x or y is null ${x},${y}`);
-    }
-    if (isNaN(x) || isNaN(y)) {
-      throw new Error(`Point constructor: x or y is NaN ${x},${y}`);
-    }
+    if (!Check.num(x))throw new Error(`Point constructor: x must a number: [${x}]`);
+    if (!Check.num(y)) throw new Error(`Point constructor: y must a number: [${y}]`);    
     this.x = x;
     this.y = y;
   }
@@ -80,12 +71,14 @@ export default class Point {
   }
   //Angle should be in Degrees.
   static fromPolar(angle, magnitude) {
+    if (!Check.num(angle)) throw new Error (`Point.fromPolar: angle must be a number: [${angle}`);
+    if (!Check.num(magnitude))throw new Error (`Point.fromPolar: magnitude must be a number: [${magnitude}`);
     return new Point(
       Math.cos(angle * this.toRad) * magnitude,
       Math.sin(angle * this.toRad) * magnitude);
   }
   static isPointy(p) {
-    return p && typeof p.x === 'number' && typeof p.y === 'number' && !isNaN(p.x) && !isNaN(p.y);
+    return Check.num (p.x) && Check.num (p.y);
   }
   static normalize(persistent) {
     if (!this.isPointy(persistent)) {
@@ -103,7 +96,7 @@ export default class Point {
     if (!this.isPointy(persistent)) {
       throw new Error(`Point.rotate: persistent is not a point [${persistent}]`);
     }
-    if (isNaN(degrees)) {
+    if (!Check.num(degrees)) {
       throw new Error(`Point.rotate: degrees is NaN ${degrees}`);
     }
     let radians = degrees * this.toRad;
@@ -119,7 +112,7 @@ export default class Point {
     if (!this.isPointy(persistent)) {
       throw new Error(`Point.scale: persistent is not a point [${persistent}]`);
     }
-    if (isNaN(s)) {
+    if (!Check.num(s)) {
       throw new Error(`Point.scale: s is NaN[${s}]`);
     }
     persistent.x *= s;

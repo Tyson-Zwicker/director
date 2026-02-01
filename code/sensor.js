@@ -46,23 +46,14 @@ export default class Sensor {
   }
 
   #canSee(candidate, rayLine) {
-    //Form an imaginary line from this.owner to candidate.
     let imgLine = new Line(this.owner.position, candidate.position);
-    //Form a line tangent to this line, at the candidates position
     let tanLine = Line.getPerpendicular(imgLine, candidate.position, candidate.radius * 2);
-    //If the rayLine intersects this tangent line, it is detected    
-    let seenPosition = Line.getPointOfInterception(tanLine, rayLine);
-    /*
-    DEBUG:  DRAW THE PERPLINE, DRAW THE INTERCEPTION IF ANY..
-    let taneffect = new LineEffect(tanLine.p0, tanLine.p1, 2, '#fff', 5);
-    Director.addBackgroundEffect(taneffect);
-    */
+    let seenPosition = Line.getPointOfInterception(tanLine, rayLine);    
     return seenPosition; //false if no interception found.
   }
   #drawPingReturned(seenPosition,candidate) {
     let ray = new LineEffect(this.owner.position, seenPosition, 2, new Color(0, 15, 0, 1), 1.5);
     Director.addBackgroundEffect(ray);
-   // Director.addBackgroundEffect(new CircleEffect(candidate.position, candidate.radius * 1.2, new Color(0, 5, 0), 0.5));
   }
   #drawPingToEdge(rayEndPoint) {
     let ray = new LineEffect(this.owner.position, rayEndPoint, 1, new Color(15, 0, 0, 1), 1);
