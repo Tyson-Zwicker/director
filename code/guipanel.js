@@ -21,19 +21,18 @@ export default class GUIPanel {
       if (parentElement.panel.location === 'bottom') direction = 'up';
       if (parentElement.panel.location === 'left') direction = 'right';
       if (parentElement.panel.location === 'right') direction = 'left';
-      let { offset, boundry } = this.calculateFloat(parentElement, direction);
-      this.offset = offset;
-      this.boundry = boundry;
-      console.log('listItemsData!');
-      console.log(parentElement.listItemsData);
-      console.log(parentElement);
-      for (let item of parentElement.listItemsData) {
-        console.log('the item is ');
-        console.log(item);
+      let calcs = this.calculateFloat(parentElement, direction);
+      this.offset = calcs.offset;
+      this.boundry = calcs.boundry;
+      this.direction = calcs.direction; //The vector direction for the panel.
+      GUI.activeListItemElements.length=0;
+      for (let item of parentElement.listItemsData) {      
         let itemElement = new GUIElement(direction, item.text, parentElement.appearance, parentElement.shadowAppearance);
         itemElement.type = 'button';
         itemElement.callbackPanel = parentElement.panel;
         let callbackFn = function (result) {
+          console.log ('list item callback');
+          console.log (result);
           result.owner.callbackPanel.hideList(result.value);
         }
         let button = new Button(
@@ -42,27 +41,21 @@ export default class GUIPanel {
           callbackFn, false, item.value);
         button.guiElement = itemElement;
         itemElement.button = button;
+        GUI.activeListItemElements.push (itemElement);
         this.elements.push(itemElement);
-      }
-      console.log('newly created with' + this.elements.length + " new items!");
+      }      
     }
   }
 
-  drawPanel() {
-    if (this.location === 'drawing float') {
-      console.log(this);
-    }
+  drawPanel() {    
     if (this.elements.length > 0) {
       let drawer = new Draw(Director.view.context);
       drawer.fillBox(this.boundry.x1, this.boundry.y1, this.boundry.x2, this.boundry.y2, '#022');
       let cursor = Point.from(this.offset);
       for (let element of this.elements) {
         if (element.type === 'list' && element === this.activeList) {
-          this.drawElement(drawer, element, cursor, true);
-          console.log('drawing list panel :');
-          console.log(this.listPanel);
+          this.drawElement(drawer, element, cursor, true);          
           this.listPanel.drawPanel();
-
         } else {
           this.drawElement(drawer, element, cursor, this.activeList !== undefined);//passing where to start drawing and if it should look "shadowed" or not.
         }
@@ -103,6 +96,7 @@ export default class GUIPanel {
     this.activeList = undefined;
     for (let element of this.elements) element.active = true; //Re-active everything- floating panel is gone..
     this.floatingPanel = undefined;
+    GUI.activeListItemElements.length=0;
     this.recalculate;
   }
 
@@ -184,10 +178,6 @@ export default class GUIPanel {
       boundry = new Boundry(x1, y1, x2, y2)
       offset = new Point(listElement.drawnBounds.x2, listElement.drawnBounds.y1);
     }
-    console.log('calculateFloat calculated: (offset&boundry&direction)');
-    console.log(offset);
-    console.log(boundry);
-    console.log(direction);
     return { offset: offset, boundry: boundry, direction: direction };
   }
 

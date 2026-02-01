@@ -9,7 +9,7 @@ export default class GUI {
   static listElements = new Map();
   static elements = [];
   static panels = new Map();
-
+  static activeListItemElements = [];
   static initialize(columnWidth, rowHeight, gap, padding, fontSize, fontName) {
     if (!Check.num(columnWidth) || !Check.num(rowHeight)) throw new Error(`GUI.constructor colWidth and rowHeight should be numbers [${colWidth},${rowHeight}].`);
     if (!Check.num(padding)) throw new Error(`GUI.constructor(): padding is not a number: ${padding}`);

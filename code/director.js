@@ -17,6 +17,7 @@ import GUI from './gui_new.js';
 
 export default class Director {
   static initialize() {
+    Director.continueAnimationLoop =false;
     Director.MILLISECONDS = 1000;
     Director.continueAnimationLoop = false;
     Director.appearanceBank = new Map();
@@ -163,7 +164,8 @@ export default class Director {
   static checkMouseGuiInteraction() {
 
     let guiInteraction = false;
-    for (let element of GUI.elements) {
+    let elementsToCheck = [...GUI.elements,...GUI.activeListItemElements];          
+    for (let element of elementsToCheck) {
       if ((element.type === 'button' || element.type === 'list')) {      
         if (element.active && element.button.checkForMouseOnGUI(Director.view.mouse)) {
           guiInteraction = true;
@@ -320,7 +322,7 @@ export default class Director {
     if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
   }
   //------------------------- runners
-  static run() {
+  static run() {    
     Director.continueAnimationLoop = true;
     requestAnimationFrame(Director.loop.bind(Director));
   }
