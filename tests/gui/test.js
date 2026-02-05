@@ -32,10 +32,10 @@ function makeGUI() {
     {text:'Selection C', value:'C'},
     {text:'D!', value:'D'}
   ]
-  GUI.addList ('left','Choose',nrm,shd,hov,prs,listOptions,'A');
-  GUI.addList ('right','Choose',nrm,shd,hov,prs,listOptions,'B');
-  GUI.addList ('top','Choose',nrm,shd,hov,prs,listOptions,'C');
-  GUI.addList ('bottom','Choose',nrm,shd,hov,prs,listOptions,'D');
+  GUI.addList ('left','Choose',nrm,shd,hov,prs,listOptions,(newValue)=>{alert ('left = '+newValue);},'A');
+  GUI.addList ('right','Choose',nrm,shd,hov,prs,listOptions,(newValue)=>{alert ('right = '+newValue);},'B');
+  GUI.addList ('top','Choose',nrm,shd,hov,prs,listOptions,(newValue)=>{alert ('top = '+newValue);},'C');
+  GUI.addList ('bottom','Choose',nrm,shd,hov,prs,listOptions,(newValue)=>{alert ('bottom = '+newValue);},'D');
 }
 
 function makeData() {
