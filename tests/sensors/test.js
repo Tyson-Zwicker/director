@@ -66,14 +66,14 @@ function w_key(e, delta) {
   if (e.action === 'press' || e.action === 'hold') {
     let thrustMagnitude = 1000; // Adjust this for more/less thrust
     let thrustVector = Point.fromPolar(player1.facing, thrustMagnitude);
-    player1.applyForce(thrustVector, delta);
+    player1.recieveForce(thrustVector, delta);
   }
 }
 function s_key(e, delta) {
   if (e.action === 'press' || e.action === 'hold') {
     let thrustMagnitude = -2000; // Adjust this for more/less thrust
     let thrustVector = Point.fromPolar(player1.facing, thrustMagnitude);
-    player1.applyForce(thrustVector, delta);
+    player1.recieveForce(thrustVector, delta);
   }
 }
 function a_key(e, delta) {

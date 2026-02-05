@@ -5,11 +5,7 @@ import Polygon from '../../code/polygon.js';
 import Rnd from '../../code/rnd.js';
 import Boundry from '../../code/boundry.js';
 import GUI from '../../code/gui.js';
-//TODO: The bounds for floaters from the top are not narrow (use widest item to calc width..) and are accounting for gap twice vertically?
-//TODO: The iterms for floaters from the right are starting to far right (by 1 item) and the panel is not using items size?
-//TODO: Bottom items are too far down
-//TODO: left items are to tall.
-//TODO: right items are to tall
+
 document.addEventListener('DOMContentLoaded', function () {
   Director.initialize();
   makeData();
@@ -36,10 +32,10 @@ function makeGUI() {
     {text:'Selection C', value:'C'},
     {text:'D!', value:'D'}
   ]
-  GUI.addList ('left','Choose',nrm,shd,hov,prs,listOptions,'A');
-  GUI.addList ('right','Choose',nrm,shd,hov,prs,listOptions,'B');
-  GUI.addList ('top','Choose',nrm,shd,hov,prs,listOptions,'C');
-  GUI.addList ('bottom','Choose',nrm,shd,hov,prs,listOptions,'D');
+  GUI.addList ('left','Choose',nrm,shd,hov,prs,listOptions,(newValue)=>{alert ('left = '+newValue);},'A');
+  GUI.addList ('right','Choose',nrm,shd,hov,prs,listOptions,(newValue)=>{alert ('right = '+newValue);},'B');
+  GUI.addList ('top','Choose',nrm,shd,hov,prs,listOptions,(newValue)=>{alert ('top = '+newValue);},'C');
+  GUI.addList ('bottom','Choose',nrm,shd,hov,prs,listOptions,(newValue)=>{alert ('bottom = '+newValue);},'D');
 }
 
 function makeData() {

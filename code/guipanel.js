@@ -122,11 +122,13 @@ export default class GUIPanel {
 
   hideList(selectedValue) {
     this.activeList.value = selectedValue;
+    this.activeList.changeFn (this.activeList.value);
     this.activeList = undefined;
     for (let element of this.elements) element.active = true; //Re-active everything- floating panel is gone..
     this.floatingPanel = undefined;
     GUI.activeListItemElements.length = 0;
     this.recalculate;
+
   }
 
   addText(text, appearance, shadowAppearance) {
@@ -146,11 +148,12 @@ export default class GUIPanel {
     buttonElement.button = button;
     return buttonElement;
   }
-  addList(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, listItems, defaultValue) {
+  addList(text, appearance, shadowAppearance, hoveredAppearance, pressedAppearance, listItems, fn,defaultValue) {
     let listElement = new GUIElement(text, appearance, shadowAppearance);
     listElement.listItemsData = listItems;//{text, value}
     listElement.type = "list"
     listElement.panel = this;
+    listElement.changeFn = fn;
     this.elements.push(listElement);
     let listCallback = (e) => {
       e.owner.panel.showList(e.owner);
