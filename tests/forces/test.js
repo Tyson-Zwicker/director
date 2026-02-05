@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function makeData() {
   //First some polygons..
   for (let i = 0; i < 10; i++) {
-    let p = Polygon.makeIrregular(`poly${i}`, 11, 20, 25);
+    let p = Polygon.makeIrregular(`poly${i}`, 5, 20, 25);
     Director.addPolygon(p);
   }
   //Make some colors too.
@@ -24,18 +24,18 @@ function makeData() {
   //Make some actorTypes
   for (let i = 0; i < 10; i++) {
     let polygon = Director.getPolygon(`poly${Rnd.int(0, 10)}`);
-    let actorType = new ActorType(`acttype${i}`, polygon, 10, Rnd.float(0.8,1), true, true);
+    let actorType = new ActorType(`acttype${i}`, polygon, 10, .998, true, true);
     Director.addActorType(actorType);
   }
   //Make some actors.
 
 
-  for (let x = -2500; x < 2500; x += 200) {
-    for (let y = -2500; y < 2500; y += 200) {
+  for (let x = -1500; x < 1500; x += 150) {
+    for (let y = -1500; y < 1500; y += 150) {
       let actorType = Director.getActorType(`acttype${Rnd.int(0, 9)}`);
       let appearance = Director.getAppearance(`app${Rnd.int(0, 10)}`);
       let actor = actorType.createActorInstance(`actor${x + '|' + y}`, appearance, new Point(x, y), Rnd.vect (0,360,0,100), Rnd.int(360), 0);
-      let forceStrength = -1;
+      let forceStrength = -10;
       Director.addFieldToActor (actor, forceStrength);
       Director.addActor(actor);
     };

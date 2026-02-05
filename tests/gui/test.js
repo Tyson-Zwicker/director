@@ -5,11 +5,7 @@ import Polygon from '../../code/polygon.js';
 import Rnd from '../../code/rnd.js';
 import Boundry from '../../code/boundry.js';
 import GUI from '../../code/gui.js';
-//TODO: The bounds for floaters from the top are not narrow (use widest item to calc width..) and are accounting for gap twice vertically?
-//TODO: The iterms for floaters from the right are starting to far right (by 1 item) and the panel is not using items size?
-//TODO: Bottom items are too far down
-//TODO: left items are to tall.
-//TODO: right items are to tall
+
 document.addEventListener('DOMContentLoaded', function () {
   Director.initialize();
   makeData();
