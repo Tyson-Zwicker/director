@@ -1,6 +1,7 @@
 import Director from "./director.js";
 import Point from "./point.js";
 import Boundry from './boundry.js';
+
 class Collision {
   constructor(actor, otherActor, overlap) {
     this.actor = actor;
@@ -33,8 +34,8 @@ export default class Collisions {
           if (actor !== otherActor) {
             let overlap = (actor.radius + otherActor.radius) - Point.distance(actor.position, otherActor.position);
             if (overlap >= 0) {
-              let collisionID = this.#makeCollisionID(actor, otherActor);
-              let altCollisionID = this.#makeAltCollisionID(actor, otherActor);
+              let collisionID = Collisions.makeCollisionID(actor, otherActor);
+              let altCollisionID = Collisions.makeAltCollisionID(actor, otherActor);
               if (!collisions.has(collisionID) && !collisions.has(altCollisionID)) {
                 collisions.set(collisionID, new Collision(actor, otherActor, overlap));
               }
@@ -60,30 +61,37 @@ export default class Collisions {
     let partialOverlap = overlap / 2;
     let moveA = Point.from(normalAxis);
     Point.scale(moveA, partialOverlap);
-    Point.add(collision.actor.position, moveA);//TODO: return this...
+    //Point.add(collision.actor.position, moveA);//TODO: returning  this instead...
     let moveB = Point.from(normalAxis);
     Point.scale(moveB, partialOverlap);
-    Point.sub(collision.otherActor.position, moveB);//TODO:return this..
+    //Point.sub(collision.otherActor.position, moveB);//TODO:returning this instead...
     //Transfer momentum and change velocities.
     let tangentAxis = new Point(-normalAxis.y, normalAxis.x);
-    let v1n = Point.dot(collision.actor.velocity, normalAxis);        //Get scalar velocity along each axis..
-    let v1t = Point.dot(collision.actor.velocity, tangentAxis);
-    let v2n = Point.dot(collision.otherActor.velocity, normalAxis);   //For both objects..
-    let v2t = Point.dot(collision.otherActor.velocity, tangentAxis);
+    console.log (obj1.velocity);
+    console.log ( normalAxis);
+    let v1n = Point.dot(obj1.velocity, normalAxis);        //Get scalar velocity along each axis..
+    let v1t = Point.dot(obj1.velocity, tangentAxis);
+    let v2n = Point.dot(obj2.velocity, normalAxis);   //For both objects..
+    let v2t = Point.dot(obj2.velocity, tangentAxis);
     let v1nF = (v1n * (m1 - m2) + 2 * m2 * v2n) / (totalMass);           //1-d tranfer of momentum but only on normal axis..
     let v2nF = (v2n * (m2 - m1) + 2 * m1 * v1n) / (totalMass);
-    let v1nFV = Point.scale(Point.from(normalAxis), v1nF * collision.actor.bounceCoefficient);
-    let v2nFV = Point.scale(Point.from(normalAxis), v2nF * collision.otherActor.bounceCoefficient);
-    let v1tFV = Point.scale(Point.from(tangentAxis), v1t * collision.actor.bounceCoefficient);
-    let v2tFV = Point.scale(Point.from(tangentAxis), v2t * collision.otherActor.bounceCoefficient);
-    //TODO: return dv for each..
-    collision.actor.velocity = Point.add(v1nFV, v1tFV);              //final velocity is normal and tangent added back together.
-    collision.otherActor.velocity = Point.add(v2nFV, v2tFV);
+    let v1nFV = Point.scale(Point.from(normalAxis), v1nF * obj1.bounceCoefficient);
+    let v2nFV = Point.scale(Point.from(normalAxis), v2nF * obj2.bounceCoefficient);
+    let v1tFV = Point.scale(Point.from(tangentAxis), v1t * obj1.bounceCoefficient);
+    let v2tFV = Point.scale(Point.from(tangentAxis), v2t * obj2.bounceCoefficient);
+    //TODO: Returning instead of directly applying to actors..
+    //collision.actor.velocity = Point.add(v1nFV, v1tFV);              //final velocity is normal and tangent added back together.
+    //collision.otherActor.velocity = Point.add(v2nFV, v2tFV);
+    let result = {      
+      "obj1": {"move": moveA, "velocity" : Point.add(v1nFV, v1tFV)},
+      "obj2": {"move": moveB, "velocity" : Point.add(v2nFV, v2tFV)}
+    }
+    return result;
   }
-  static #makeAltCollisionID(actor, otherActor) {
+  static makeAltCollisionID(actor, otherActor) {
     return `${otherActor.name}|${actor.name}`;
   }
-  static #makeCollisionID(actor, otherActor) {
+  static makeCollisionID(actor, otherActor) {
     return `${actor.name}|${otherActor.name}`;
   }
 }

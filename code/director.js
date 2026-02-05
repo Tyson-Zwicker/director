@@ -12,10 +12,10 @@ import ParticleEffect from './particleeffect.js';
 import RadialEffect from './radialeffect.js';
 import Keyboard from './keyboard.js';
 import GUI from './gui.js';
-
+import Point from './point.js';
 export default class Director {
   static initialize() {
-    Director.continueAnimationLoop =false;
+    Director.continueAnimationLoop = false;
     Director.MILLISECONDS = 1000;
     Director.continueAnimationLoop = false;
     Director.appearanceBank = new Map();
@@ -36,7 +36,7 @@ export default class Director {
     Director.creatorFn = undefined;
     Director.quadtree = new Quadtree(new Boundry(- 1000000, - 1000000, 1000000, 1000000), 1, 50);  // Default capacity and minimum size for the quadtree
     Director.keyboard = new Keyboard();
-    GUI.initialize(160, 40, 2, 20 ,15,'monospace');
+    GUI.initialize(160, 40, 2, 20, 15, 'monospace');
     GUI.resize();
   }
   //TODO: add assembly
@@ -165,9 +165,9 @@ export default class Director {
   }
   static checkMouseGuiInteraction() {
     let guiInteraction = false;
-    let elementsToCheck = [...GUI.elements,...GUI.activeListItemElements];          
+    let elementsToCheck = [...GUI.elements, ...GUI.activeListItemElements];
     for (let element of elementsToCheck) {
-      if ((element.type === 'button' || element.type === 'list')) {      
+      if ((element.type === 'button' || element.type === 'list')) {
         if (element.active && element.button.checkForMouseOnGUI(Director.view.mouse)) {
           guiInteraction = true;
           //Note: Do not break out of the loop here. Testing the other controls is necessary to let them de-hover themselves.
@@ -184,9 +184,54 @@ export default class Director {
     let collisions = Collisions.getCollisions(Director.quadtree);
     for (let collision of collisions.values()) {
       Collisions.callActorCollisionEvents(collision);
-      Collisions.handleCollisionPhysics(collision);//TODO: Assemblies change this
+      let obj1 = undefined;
+      let obj2 = undefined;
+      if (collision.actor.assembly) {
+        obj1 = {};//TODO: Assemblies..
+      } else {
+        obj1 = {
+          "mass": collision.actor.mass,
+          "position": collision.actor.position,
+          "velocity": collision.actor.velocity,
+          "bounceCoefficient": collision.actor.bounceCoefficient
+        };
+      }
+      if (collision.otherActor.assembly) {
+        obj2 = {}; //TODO: Assemblies..
+      } else {
+        obj2 = {
+          "mass": collision.otherActor.mass,
+          "position": collision.otherActor.position,
+          "velocity": collision.otherActor.velocity,
+          "bounceCoefficient": collision.otherActor.bounceCoefficient
+        };
+      }
+      let collisionID = Collisions.makeCollisionID(collision.actor, collision.otherActor);
+      console.log('collision:' + collisionID);
+      let result = Collisions.handleCollisionPhysics(obj1, obj2, collision.overlap);
+      /*
+       //Point.add(collision.actor.position, moveA);
+       //Point.sub(collision.otherActor.position, moveB);
+       //collision.actor.velocity = Point.add(v1nFV, v1tFV);              //final velocity is normal and tangent added back together.
+       //collision.otherActor.velocity = Point.add(v2nFV, v2tFV);
+       let result = {      
+            "obj1": {"move": moveA, "velocity" : Point.add(v1nFV, v1tFV)},
+            "obj2": {"move": moveB, "velocity" : Point.add(v2nFV, v2tFV)}
+          }
+      */
+      //TODO: Apply the returned forces and the position adjustment for overlap to the actors
+      //or assemblies..
+      //Lets just get the actors working first.. so assume to assemblies:
+      ////And add assemblies after tests works..
+      Point.add(collision.actor.position, result.obj1.move);
+      Point.sub(collision.otherActor.position, result.obj2.move);
+      collision.actor.velocity = result.obj1.velocity;              //final velocity is normal and tangent added back together.
+      collision.otherActor.velocity = result.obj2.velocity;
+
+
+
     }
-  } 
+  }
   static draw(delta) {
     Director.#draw_backgroundEffects(delta);
     for (let actor of Director.actors.values()) {
@@ -207,6 +252,62 @@ export default class Director {
     Director.view.context.fillText('Δ' + (String(Math.trunc(delta * 1000)).padStart(4, '0')), 5, 5);
     Director.view.context.font = oldfont;
   }
+
+  static kinematics(delta) {//TODO: Assemblies change this.
+    for (let actor of Director.actors.values()) {
+      actor.move(delta);
+      for (let part of actor.parts.values()) {
+        part.updateParticleGenerator();
+      }
+      Director.quadtree.insert(actor);
+    }
+  }
+  static sensing(delta, currentTime) {
+    for (let actor of Director.actors.values()) {
+      if (actor.sensors) {
+        for (let sensor of actor.sensors) {
+          let result = sensor.detect(delta);
+          if (result) {
+            //TODO:  Store the results with the sensor owner.    
+            //TODO: Use event tracker to store data on active sensors
+          }
+        }
+      }
+    }
+  }
+
+  //------------------------- loop
+
+  static loop(currentTime) {
+    const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
+    Director.delta = delta; //Need to be able to see this from external JS sometimes..
+    Director.lastFrameTime = currentTime;
+    Director.kinematics(delta); //This redraws the entire quadtree.
+    Director.applyActorField(delta);
+    Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.        
+    Director.sensing(delta, currentTime); //<- do this before draw, because it adds effects..
+    Director.runParticleGenerators(currentTime);
+    Director.draw(delta);
+    Director.collisions(delta);
+    if (Director.creatorFn) Director.creatorFn(delta);
+    Director.checkMouseInteractions();
+    Director.keyboard.callKeyFunctions(delta);
+    Director.quadtree.clear();
+    if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
+  }
+
+  //------------------------- runners
+  static run() {
+    Director.continueAnimationLoop = true;
+    requestAnimationFrame(Director.loop.bind(Director));
+  }
+  static runOnce(canvas, canvasContainer) {
+    Director.continueAnimationLoop = false;
+    requestAnimationFrame(Director.loop.bind(Director));
+  }
+
+  //------------------------ helpers
+
   static #draw_foregroundEffects(delta) {
     let survivingForegroundEffects = [];
     for (let effect of Director.fgEffects) {
@@ -279,55 +380,5 @@ export default class Director {
       }
     }
     Director.bgEffects = survivingBackgroundEffects;
-  }
-  static kinematics(delta) {//TODO: Assemblies change this.
-    for (let actor of Director.actors.values()) {
-      actor.move(delta);
-      for (let part of actor.parts.values()) {
-        part.updateParticleGenerator();
-      }
-      Director.quadtree.insert(actor);
-    }
-  }
-  static sensing(delta, currentTime) {
-    for (let actor of Director.actors.values()) {
-      if (actor.sensors) {
-        for (let sensor of actor.sensors) {
-          let result = sensor.detect(delta);
-          if (result) {
-            //TODO:  Store the results with the sensor owner.    
-            //TODO: Use event tracker to store data on active sensors
-          }
-        }
-      }
-    }
-  }
-
-  //------------------------- loop
-  static loop(currentTime) {
-    const delta = (currentTime - Director.lastFrameTime) / Director.MILLISECONDS;
-    Director.delta = delta; //Need to be able to see this from external JS sometimes..
-    Director.lastFrameTime = currentTime;
-    Director.kinematics(delta); //This redraws the entire quadtree.
-    Director.applyActorField(delta);
-    Director.view.clear(); //<-- Only here. Do not clear the screen anywhere else.        
-    Director.sensing(delta, currentTime); //<- do this before draw, because it adds effects..
-    Director.runParticleGenerators(currentTime);
-    Director.draw(delta);
-    Director.collisions(delta);
-    if (Director.creatorFn) Director.creatorFn(delta);
-    Director.checkMouseInteractions();
-    Director.keyboard.callKeyFunctions(delta);
-    Director.quadtree.clear();
-    if (Director.continueAnimationLoop) requestAnimationFrame(Director.loop.bind(Director));
-  }
-  //------------------------- runners
-  static run() {    
-    Director.continueAnimationLoop = true;
-    requestAnimationFrame(Director.loop.bind(Director));
-  }
-  static runOnce(canvas, canvasContainer) {
-    Director.continueAnimationLoop = false;
-    requestAnimationFrame(Director.loop.bind(Director));
   }
 }
