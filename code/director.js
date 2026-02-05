@@ -21,6 +21,7 @@ export default class Director {
     Director.appearanceBank = new Map();
     Director.polygonBank = new Map();
     Director.actorTypeBank = new Map();
+    Director.assemblies = new Map(); //TODO: This is new..
     Director.actors = new Map();
     Director.actorFields = new Map();
     Director.partTypes = new Map();
@@ -38,6 +39,9 @@ export default class Director {
     GUI.initialize(160, 40, 2, 20 ,15,'monospace');
     GUI.resize();
   }
+  //TODO: add assembly
+  //TODO: add addActor to assembly
+
   static addPolygon(polygon) {
     if (Director.polygonBank.has(polygon.name)) throw new Error(`Director.addPolygon: Polygon [${polygon.name} already exists.`);
     Director.polygonBank.set(polygon.name, polygon);
@@ -180,14 +184,13 @@ export default class Director {
     let collisions = Collisions.getCollisions(Director.quadtree);
     for (let collision of collisions.values()) {
       Collisions.callActorCollisionEvents(collision);
-      Collisions.handleCollisionPhysics(collision);
+      Collisions.handleCollisionPhysics(collision);//TODO: Assemblies change this
     }
-  }
+  } 
   static draw(delta) {
     Director.#draw_backgroundEffects(delta);
     for (let actor of Director.actors.values()) {
       if (Director.view.canSee(actor.position, actor.radius)) {
-
         actor.draw(Director.view);
       }
     }
@@ -277,7 +280,7 @@ export default class Director {
     }
     Director.bgEffects = survivingBackgroundEffects;
   }
-  static kinematics(delta) {
+  static kinematics(delta) {//TODO: Assemblies change this.
     for (let actor of Director.actors.values()) {
       actor.move(delta);
       for (let part of actor.parts.values()) {

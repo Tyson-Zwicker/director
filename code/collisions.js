@@ -45,25 +45,25 @@ export default class Collisions {
     }
     return collisions;
   }
-  static handleCollisionPhysics(collision) {
-    let m1 = collision.actor.mass;
-    let m2 = collision.otherActor.mass;
+  static handleCollisionPhysics(obj1, obj2, overlap) {
+    let m1 = obj1.mass;
+    let m2 = obj2.mass;
     let totalMass = m1 + m2;
     if (totalMass <= 0) return;
     //calculate the normal vector
-    let p1 = Point.from(collision.actor.position);
-    let p2 = Point.from(collision.otherActor.position);
+    let p1 = Point.from(obj1.position);
+    let p2 = Point.from(obj2.position);
     let normalAxis = Point.from(p1);
     Point.sub(normalAxis, p2);
     Point.normalize(normalAxis);
     //move the objects back along the normal axis by 1/2 of the offset.
-    let partialOverlap = collision.overlap / 2;
+    let partialOverlap = overlap / 2;
     let moveA = Point.from(normalAxis);
     Point.scale(moveA, partialOverlap);
-    Point.add(collision.actor.position, moveA);
+    Point.add(collision.actor.position, moveA);//TODO: return this...
     let moveB = Point.from(normalAxis);
     Point.scale(moveB, partialOverlap);
-    Point.sub(collision.otherActor.position, moveB);
+    Point.sub(collision.otherActor.position, moveB);//TODO:return this..
     //Transfer momentum and change velocities.
     let tangentAxis = new Point(-normalAxis.y, normalAxis.x);
     let v1n = Point.dot(collision.actor.velocity, normalAxis);        //Get scalar velocity along each axis..
@@ -76,6 +76,7 @@ export default class Collisions {
     let v2nFV = Point.scale(Point.from(normalAxis), v2nF * collision.otherActor.bounceCoefficient);
     let v1tFV = Point.scale(Point.from(tangentAxis), v1t * collision.actor.bounceCoefficient);
     let v2tFV = Point.scale(Point.from(tangentAxis), v2t * collision.otherActor.bounceCoefficient);
+    //TODO: return dv for each..
     collision.actor.velocity = Point.add(v1nFV, v1tFV);              //final velocity is normal and tangent added back together.
     collision.otherActor.velocity = Point.add(v2nFV, v2tFV);
   }

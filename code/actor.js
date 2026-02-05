@@ -18,7 +18,7 @@ export default class Actor {
   collisionFn = undefined;
   moves = true;
   parts = new Map();
-
+ assembly = undefined; //bound by director, and is optional
   position = new Point(0, 0); // world coordinates, defined in pixels.
   facing = 0; // Defined in degrees
   spin = 0; // Defined in degrees per second.
@@ -118,7 +118,7 @@ export default class Actor {
     if (this.facing > 360) this.facing -= 360;
     if (this.facing < 0) this.facing += 360;
   }
-  applyForce(forceVector, delta) {
+  recieveForce(forceVector, delta) {//TODO:Assemblies
     let scaledForce = Point.from(forceVector);
     Point.scale(scaledForce, delta);
     Point.scale(scaledForce, 1 / this.mass);
