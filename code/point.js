@@ -50,13 +50,19 @@ export default class Point {
     if (this.isPointy(p1) && this.isPointy(p2)) {
       return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
     }
-    throw new Error(`Point.distance: p1 or p2 is not a point`);
+    throw new Error(`Point.distance:  p1 or p2 is not a point [${p1},${p2}]`);
   }
   static dot(p1, p2) {
     if (this.isPointy(p1) && this.isPointy(p2)) {
       return p1.x * p2.x + p1.y * p2.y;
     }
-    throw new Error(`Point.dot: p1 or p2 is not a point`);
+    throw new Error(`Point.dot:  p1 or p2 is not a point [${p1},${p2}]`);
+  }
+  static cross (p1,p2){
+    if (this.isPointy (p1) && this.isPointy(p2)){
+      return p1.x * p2.y - p1.y * p2.y;
+    }
+    throw new Error(`Point.cross: p1 or p2 is not a point [${p1},${p2}]`);
   }
   static equal(p1, p2) {
     if (!this.isPointy(p1) || !this.isPointy(p2)) throw new Error(`Point.equals p1[${p1}] p2[${p2}]`);
