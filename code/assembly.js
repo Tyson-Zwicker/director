@@ -19,6 +19,7 @@ export default class Assembly {
     if (!Point.isPointy(offset)) throw new Error(`Assembly.addActor: offset is not Pointy [${offset}]`);
     actor.assembly = this;
     actor.moves = true; //just in case.
+    actor.collides = true;
     actor.velocity = new Point.zero() //TODO: How do we want to set up initial velocities to account for Assembly spin and velocity 
     // ..neither of which are real... they're just the emergent effect of  spin/velocity of the group of actors as a whole...
     let role = {
