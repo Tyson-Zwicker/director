@@ -55,7 +55,7 @@ export default class Draw {
     this.g.fill();
   }
   line(x1, y1, x2, y2, w, colorOrGradient) {
-    if (Check.num(w)) throw new Error('no width defined.');
+    if (!Check.num(w,1)) throw new Error(`Draw.line: no width defined.[${w}]`);
     if (!(Check.num(x1) && Check.num(x2) &&Check.num(y1) && Check.num (y2))) throw new Error(`line.draw bad: coordinates (${x1},${y1}) (${x2},${y2})`);
     if (Check.obj (colorOrGradient, Color)) {
       this.g.strokeStyle = colorOrGradient.asHex();

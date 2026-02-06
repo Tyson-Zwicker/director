@@ -24,7 +24,7 @@ function makeData() {
   //Make some actorTypes
   for (let i = 0; i < 10; i++) {
     let polygon = Director.getPolygon(`poly${Rnd.int(0, 10)}`);
-    let actorType = new ActorType(`acttype${i}`, polygon, 10, .998, true, true);
+    let actorType = new ActorType(`acttype${i}`, polygon, 10, .996, true, true);
     Director.addActorType(actorType);
   }
   //Make some actors.
@@ -35,7 +35,7 @@ function makeData() {
       let actorType = Director.getActorType(`acttype${Rnd.int(0, 9)}`);
       let appearance = Director.getAppearance(`app${Rnd.int(0, 10)}`);
       let actor = actorType.createActorInstance(`actor${x + '|' + y}`, appearance, new Point(x, y), Rnd.vect (0,360,0,100), Rnd.int(360), 0);
-      let forceStrength = -10;
+      let forceStrength = -15;
       Director.addFieldToActor (actor, forceStrength);
       Director.addActor(actor);
     };

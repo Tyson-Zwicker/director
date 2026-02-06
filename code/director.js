@@ -223,10 +223,22 @@ export default class Director {
       //or assemblies..
       //Lets just get the actors working first.. so assume to assemblies:
       ////And add assemblies after tests works..
-      Point.add(collision.actor.position, result.obj1.move);
-      Point.sub(collision.otherActor.position, result.obj2.move);
-      collision.actor.velocity = result.obj1.velocity;              //final velocity is normal and tangent added back together.
-      collision.otherActor.velocity = result.obj2.velocity;
+      if (collision.actor.assembly){
+        collision.actor.assembly.velocity = result.obj1.velocity;             
+        Point.add (collision.actor.assembly.position, result.obj1.move);
+      }else{
+        collision.actor.velocity = result.obj1.velocity;             
+        Point.add(collision.actor.position, result.obj1.move);
+      }
+      if (collision.otherActor.assembly){
+        collision.otherActor.assembly.velocity = result.obj2.velocity;
+        Point.sub(collision.otherActor.assembly.position, result.obj2.move);
+      }else{
+        collision.otherActor.velocity = result.obj2.velocity;
+        Point.sub(collision.otherActor.position, result.obj2.move);
+      }
+      //collision.actor.velocity = result.obj1.velocity;              //final velocity is normal and tangent added back together.
+      //collision.otherActor.velocity = result.obj2.velocity;
 
 
 
