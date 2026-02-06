@@ -9,6 +9,7 @@ import Check from './check.js';
 
 export default class Actor {
   name = undefined;
+  assembly = undefined;
   mass = undefined;
   polygon = undefined;
   appearance = undefined;
